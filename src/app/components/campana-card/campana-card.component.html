@@ -1,0 +1,158 @@
+<div class="bg-white border rounded-lg shadow-sm hover:shadow-md transition" [class.opacity-80]="isPast()">
+
+  <!-- Header compacto (siempre visible) -->
+
+  <div class="flex items-stretch gap-4 p-5 cursor-pointer group" (click)="expanded.set(!expanded())">
+    @if (imagenProductoUrl) {
+      <div class="flex-shrink-0 w-24 h-24 rounded overflow-hidden border bg-gray-50 flex items-center justify-center">
+        <img [src]="imagenProductoUrl" alt="Imagen producto" class="object-cover w-full h-full" />
+      </div>
+    }
+    <div class="flex-1 flex flex-col justify-center">
+      <div class="flex items-center gap-2 mb-1">
+        <h3 class="text-xl font-bold" [class.text-gray-800]="!isPast()" [class.text-gray-600]="isPast()">{{ campana().titulo }}</h3>
+        @if (estadoNombre) {
+          <span class="text-xs px-2 py-0.5 rounded-full font-semibold" [class]="estadoColor">{{ estadoNombre }}</span>
+        }
+      </div>
+      <p class="text-sm line-clamp-1 mb-2" [class.text-gray-600]="!isPast()" [class.text-gray-500]="isPast()">{{ campana().descripcion }}</p>
+      <div class="flex flex-wrap gap-4 text-sm text-gray-500 items-center mb-2">
+        <span>{{ campana().plataforma?.nombrePlataforma }}</span>
+        <span>${{ campana().presupuesto }}</span>
+        <span>{{ campana().fechaInicio | date:'dd/MM/yyyy' }} - {{ campana().fechaFin | date:'dd/MM/yyyy' }}</span>
+        @if (campana().cantidadInfluencers) {
+          <span class="flex items-center gap-1">
+            <span class="font-semibold"
+              [class.text-green-600]="campana().cantidadInfluencersAceptados === campana().cantidadInfluencers"
+              [class.text-orange-500]="(campana().cantidadInfluencersAceptados ?? 0) > 0 && campana().cantidadInfluencersAceptados !== campana().cantidadInfluencers"
+              [class.text-gray-500]="(campana().cantidadInfluencersAceptados ?? 0) === 0">
+              {{ campana().cantidadInfluencersAceptados ?? 0 }}/{{ campana().cantidadInfluencers }}
+            </span>
+            influencers aceptados
+          </span>
+        }
+        @if (campana().categorias?.length) {
+          <span class="flex gap-1">
+            @for (cat of campana().categorias; track cat.idCategoria) {
+              <span class="text-xs px-1.5 py-0.5 rounded-full"
+                [class.bg-blue-50]="!isPast()" [class.text-blue-700]="!isPast()"
+                [class.bg-gray-100]="isPast()" [class.text-gray-600]="isPast()">
+                {{ cat.nombre }}
+              </span>
+            }
+          </span>
+        }
+      </div>
+    </div>
+    <div class="flex flex-col justify-between items-end ml-4">
+      <div class="flex items-center gap-2">
+        @if (showActions() && !isPast()) {
+          <div class="flex gap-2" (click)="$event.stopPropagation()">
+            <button (click)="editClicked.emit(campana())" class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">Editar</button>
+            <button (click)="deleteClicked.emit(campana().idCampana)" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">Cancelar</button>
+          </div>
+        }
+        <svg class="w-5 h-5 text-gray-400 transition-transform ml-2" [class.rotate-180]="expanded()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detalle expandido -->
+  @if (expanded()) {
+    <div class="px-5 pb-5 border-t pt-4 space-y-4">
+
+      <!-- Descripción completa -->
+      <div>
+        <p class="text-gray-500 text-sm">Descripción</p>
+        <p class="text-gray-800">{{ campana().descripcion }}</p>
+      </div>
+
+      <!-- Grid de info -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+        <div>
+          <p class="text-gray-500">Plataforma</p>
+          <p class="font-semibold">{{ campana().plataforma?.nombrePlataforma }}</p>
+        </div>
+        <div>
+          <p class="text-gray-500">Presupuesto</p>
+          <p class="font-semibold">${{ campana().presupuesto }}</p>
+        </div>
+        <div>
+          <p class="text-gray-500">Inicio</p>
+          <p class="font-semibold">{{ campana().fechaInicio | date:'dd/MM/yyyy' }}</p>
+        </div>
+        <div>
+          <p class="text-gray-500">Fin</p>
+          <p class="font-semibold">{{ campana().fechaFin | date:'dd/MM/yyyy' }}</p>
+        </div>
+        @if (campana().cantidadInfluencers) {
+          <div>
+            <p class="text-gray-500">Influencers</p>
+            <p class="font-semibold">{{ campana().cantidadInfluencers }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- Logística y modalidad -->
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full" [class.bg-green-500]="campana().esPresencial" [class.bg-gray-300]="!campana().esPresencial"></span>
+          <span>{{ campana().esPresencial ? 'Presencial' : 'Virtual' }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full" [class.bg-green-500]="campana().campanaPublica" [class.bg-gray-300]="!campana().campanaPublica"></span>
+          <span>{{ campana().campanaPublica ? 'Pública' : 'Privada' }}</span>
+        </div>
+        @if (campana().requiereProductoFisico) {
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+            <span>Producto físico</span>
+          </div>
+        }
+        @if (campana().requiereProductoVirtual) {
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+            <span>Producto virtual</span>
+          </div>
+        }
+        @if (campana().envioProductoIncluido) {
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+            <span>Envío incluido</span>
+          </div>
+        }
+      </div>
+
+      <!-- Ubicación (solo si es presencial) -->
+      @if (campana().esPresencial && (campana().direccion || campana().ciudad || campana().provincia)) {
+        <div class="text-sm">
+          <p class="text-gray-500 mb-1">Ubicación</p>
+          <p class="font-semibold">
+            @if (campana().direccion) { {{ campana().direccion }}, }
+            @if (campana().ciudad) { {{ campana().ciudad }}, }
+            @if (campana().provincia) { {{ campana().provincia }} }
+          </p>
+        </div>
+      }
+
+      <!-- Notas logísticas -->
+      @if (campana().notasLogisticas) {
+        <div class="text-sm">
+          <p class="text-gray-500 mb-1">Notas logísticas</p>
+          <p class="text-gray-700 bg-gray-50 p-2 rounded">{{ campana().notasLogisticas }}</p>
+        </div>
+      }
+
+      <!-- Postulaciones -->
+      <div class="pt-3 border-t">
+        <button (click)="togglePostulaciones.emit(campana().idCampana); $event.stopPropagation()" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+          <ng-content select="[toggleLabel]"></ng-content>
+        </button>
+      </div>
+
+      <ng-content></ng-content>
+    </div>
+  }
+</div>

@@ -1,0 +1,18 @@
+<div class="bg-white rounded-lg shadow-md p-6">
+  <h2 class="text-2xl font-bold mb-6">Mis Estadisticas</h2>
+  <form [formGroup]="estadisticasForm" (ngSubmit)="agregarEstadistica()" class="p-4 border rounded bg-gray-50">
+    <h3 class="text-lg font-semibold mb-4">Agregar/Actualizar Estadistica</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <select formControlName="idPlataforma" class="px-4 py-2 border rounded">
+        <option value="">Selecciona plataforma</option>
+        @for (p of plataformas(); track p.idPlataforma) {
+          <option [value]="p.idPlataforma">{{ p.nombrePlataforma }}</option>
+        }
+      </select>
+      <input type="number" formControlName="seguidores" placeholder="Seguidores" class="px-4 py-2 border rounded" />
+      <input type="number" step="0.01" formControlName="alcancePromedio" placeholder="Alcance Promedio" class="px-4 py-2 border rounded" />
+      <input type="number" step="0.01" formControlName="engagementRate" placeholder="Engagement Rate" class="px-4 py-2 border rounded" />
+    </div>
+    <button type="submit" class="mt-4 w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Guardar Estadistica</button>
+  </form>
+</div>

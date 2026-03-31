@@ -1,0 +1,27 @@
+<div class="bg-white rounded-lg shadow-md p-6">
+  <h2 class="text-2xl font-bold mb-6">Mis Postulaciones</h2>
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="px-4 py-2 text-left">Campana</th>
+          <th class="px-4 py-2 text-left">Fecha</th>
+          <th class="px-4 py-2 text-left">Estado</th>
+          <th class="px-4 py-2 text-left">Mensaje</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (post of postulaciones(); track post.idPostulacion) {
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-4 py-2">{{ post.campana?.titulo }}</td>
+            <td class="px-4 py-2">{{ post.fechaPostulacion }}</td>
+            <td class="px-4 py-2"><span class="px-2 py-1 rounded bg-gray-100">{{ post.estado?.nombre }}</span></td>
+            <td class="px-4 py-2">{{ post.mensaje }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="4" class="text-center py-8 text-gray-500">No tienes postulaciones</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

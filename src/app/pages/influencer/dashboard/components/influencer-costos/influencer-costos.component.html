@@ -1,0 +1,17 @@
+<div class="bg-white rounded-lg shadow-md p-6">
+  <h2 class="text-2xl font-bold mb-6">Mis Costos por Plataforma</h2>
+  <form [formGroup]="costForm" (ngSubmit)="agregarCosto()" class="p-4 border rounded bg-gray-50">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <select formControlName="idPlataforma" class="px-4 py-2 border rounded">
+        <option value="">Selecciona plataforma</option>
+        @for (p of plataformas(); track p.idPlataforma) {
+          <option [value]="p.idPlataforma">{{ p.nombrePlataforma }}</option>
+        }
+      </select>
+      <input type="number" formControlName="costoMin" placeholder="Costo Minimo" class="px-4 py-2 border rounded" />
+      <input type="number" formControlName="costoMax" placeholder="Costo Maximo" class="px-4 py-2 border rounded" />
+      <label class="flex items-center"><input type="checkbox" formControlName="canje" class="mr-2" /><span>Acepto canje</span></label>
+    </div>
+    <button type="submit" class="mt-4 w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Guardar Costo</button>
+  </form>
+</div>

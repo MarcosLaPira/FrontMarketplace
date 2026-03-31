@@ -1,0 +1,173 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-6 border rounded-lg bg-white shadow-md space-y-4"
+  [class.bg-blue-50]="isEditMode">
+  <h3 class="text-lg font-semibold">
+    @if (isEditMode) { Editando Campaña } @else { Crear Nueva Campaña }
+  </h3>
+
+  <!-- Info básica -->
+  <input type="text" formControlName="titulo" placeholder="Título" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-green-500" />
+  <textarea formControlName="descripcion" placeholder="Descripción" rows="3" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-green-500"></textarea>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <select formControlName="idPlataforma" class="px-4 py-2 border rounded">
+      <option value="">Selecciona plataforma</option>
+      @for (p of plataformas(); track p.idPlataforma) {
+        <option [value]="p.idPlataforma">{{ p.nombrePlataforma }}</option>
+      }
+    </select>
+    <input type="number" formControlName="presupuesto" placeholder="Presupuesto" class="px-4 py-2 border rounded" />
+    <input type="number" formControlName="cantidadInfluencers" placeholder="Cantidad de influencers" min="1" class="px-4 py-2 border rounded" />
+  </div>
+  <div>
+    <label class="block text-sm text-gray-600 mb-1">Categorías</label>
+    <app-category-selector
+      [categorias]="categorias()"
+      [selectedIds]="selectedCategorias()"
+      (toggled)="toggleCategoria($event)" />
+  </div>
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm text-gray-600 mb-1">Fecha Inicio</label>
+      <input type="date" formControlName="fechaInicio" class="w-full px-4 py-2 border rounded" />
+    </div>
+    <div>
+      <label class="block text-sm text-gray-600 mb-1">Fecha Fin</label>
+      <input type="date" formControlName="fechaFin" class="w-full px-4 py-2 border rounded" />
+    </div>
+  </div>
+
+  <!-- Separador -->
+  <div class="border-t pt-4">
+    <p class="text-sm font-semibold text-gray-700 mb-3">Modalidad y logística</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+      <div>
+        <p class="text-sm text-gray-600 mb-2">Modalidad</p>
+        <div class="flex items-center gap-6">
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              type="radio"
+              name="modalidad"
+              [checked]="esPresencial"
+              (change)="setModalidad(true)"
+              class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            Presencial
+          </label>
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              type="radio"
+              name="modalidad"
+              [checked]="esVirtual"
+              (change)="setModalidad(false)"
+              class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            Virtual
+          </label>
+        </div>
+      </div>
+      <label class="flex items-center gap-2 text-sm cursor-pointer">
+        <input type="checkbox" formControlName="campanaPublica" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+        Campaña pública
+      </label>
+    </div>
+
+    @if (esVirtual) {
+      <div class="mb-4">
+        <p class="text-sm text-gray-600 mb-2">Tipo de producto</p>
+        <div class="flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              type="radio"
+              name="tipoProducto"
+              [checked]="requiereProductoFisico"
+              (change)="setTipoProducto('fisico')"
+              class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            Producto físico
+          </label>
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              type="radio"
+              name="tipoProducto"
+              [checked]="requiereProductoVirtual"
+              (change)="setTipoProducto('virtual')"
+              class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            Producto virtual
+          </label>
+        </div>
+      </div>
+
+      @if (requiereProductoFisico) {
+        <label class="flex items-center gap-2 text-sm cursor-pointer mb-4">
+          <input type="checkbox" formControlName="envioProductoIncluido" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+          Envío incluido
+        </label>
+
+        <div class="mb-4">
+          <label class="block text-sm text-gray-600 mb-1">Imágenes del producto</label>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            [disabled]="imagenesProducto().length >= 3"
+            (change)="onProductoImagenesSelected($event)"
+            class="w-full px-3 py-2 border rounded text-sm"
+          />
+          @if (imagenesProducto().length >= 3) {
+            <p class="text-xs text-orange-500 mt-1">Máximo 3 imágenes cargadas.</p>
+          }
+          <p class="mt-1 text-xs text-gray-500">Formatos permitidos: JPG, PNG, WEBP. Tamaño máximo por imagen: 5MB.</p>
+
+          @if (hasImagenesProductoErrors) {
+            <div class="mt-2 rounded border border-red-200 bg-red-50 p-2 text-xs text-red-700 space-y-1">
+              @for (error of imagenesProductoErrors(); track error) {
+                <p>{{ error }}</p>
+              }
+            </div>
+          }
+
+          @if (imagenesProductoPreview().length > 0) {
+            <div class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
+              @for (preview of imagenesProductoPreview(); let i = $index; track i) {
+                <div class="border rounded p-2 bg-gray-50 relative">
+                  <img [src]="preview.url" [alt]="preview.name" class="h-20 w-full object-cover rounded" />
+                  <button type="button" (click)="eliminarImagenProducto(i)" class="absolute top-1 right-1 bg-white border border-gray-300 rounded-full p-1 text-xs text-gray-600 hover:bg-red-100 hover:text-red-600" title="Eliminar imagen">
+                    ✕
+                  </button>
+                  <p class="mt-1 text-xs text-gray-700 truncate" [title]="preview.name">{{ preview.name }}</p>
+                  <p class="text-[11px] text-gray-500">{{ preview.size }}</p>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    }
+
+    <!-- Campos de ubicación (solo si es presencial) -->
+    @if (esPresencial) {
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <input type="text" formControlName="direccion" placeholder="Dirección" class="px-4 py-2 border rounded" />
+        <input type="text" formControlName="ciudad" placeholder="Ciudad" class="px-4 py-2 border rounded" />
+        <input type="text" formControlName="provincia" placeholder="Provincia" class="px-4 py-2 border rounded" />
+      </div>
+    }
+
+    <!-- Notas logísticas -->
+    <textarea formControlName="notasLogisticas" placeholder="Notas logísticas (opcional)" rows="2" class="w-full px-4 py-2 border rounded text-sm"></textarea>
+  </div>
+
+  <!-- Botones -->
+  <div class="flex gap-2 justify-end">
+    @if (isEditMode) {
+      <button type="button" (click)="onCancel()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancelar</button>
+    }
+    <button type="submit" [disabled]="form.invalid || hasImagenesProductoErrors"
+      class="px-4 py-2 text-white rounded disabled:opacity-50"
+      [class.bg-green-600]="!isEditMode" [class.hover:bg-green-700]="!isEditMode"
+      [class.bg-blue-600]="isEditMode" [class.hover:bg-blue-700]="isEditMode">
+      @if (isEditMode) { Guardar } @else { Crear Campaña }
+    </button>
+  </div>
+</form>

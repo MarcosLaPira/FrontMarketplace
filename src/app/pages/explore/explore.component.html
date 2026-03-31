@@ -1,0 +1,72 @@
+<div class="min-h-screen bg-gray-50">
+  <app-navbar [showExploreLink]="true" [showAuthLinks]="true" />
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex gap-4 mb-6">
+      <button (click)="activeTab.set('campanas')" [class.bg-blue-600]="activeTab() === 'campanas'" [class.text-white]="activeTab() === 'campanas'" [class.bg-gray-200]="activeTab() !== 'campanas'" class="px-6 py-2 rounded-lg font-semibold transition">Campanas</button>
+      <button (click)="activeTab.set('influencers')" [class.bg-blue-600]="activeTab() === 'influencers'" [class.text-white]="activeTab() === 'influencers'" [class.bg-gray-200]="activeTab() !== 'influencers'" class="px-6 py-2 rounded-lg font-semibold transition">Influencers</button>
+    </div>
+
+    @if (activeTab() === 'campanas') {
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">Filtros</h3>
+        <select [(ngModel)]="filtroPlataforma" (change)="onFilterChange()" class="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-lg">
+          <option value="">Todas las plataformas</option>
+          @for (p of plataformas(); track p.idPlataforma) {
+            <option [value]="p.idPlataforma">{{ p.nombrePlataforma }}</option>
+          }
+        </select>
+      </div>
+
+      @if (loading()) {
+        <p class="text-center py-8 text-gray-500">Cargando...</p>
+      } @else {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (campana of campanas(); track campana.idCampana) {
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+              <h3 class="text-xl font-bold text-gray-800 mb-2">{{ campana.titulo }}</h3>
+              <p class="text-gray-600 mb-3">{{ campana.descripcion }}</p>
+              <div class="space-y-2 mb-4 text-sm">
+                <p><strong>Plataforma:</strong> {{ campana.plataforma?.nombrePlataforma }}</p>
+                <p><strong>Presupuesto:</strong> ${{ campana.presupuesto }}</p>
+                @if (campana.categorias?.length) {
+                  <div class="flex flex-wrap gap-1">
+                    @for (cat of campana.categorias; track cat.idCategoria) {
+                      <span class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full">{{ cat.nombre }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          } @empty {
+            <p class="text-center py-8 text-gray-500 col-span-3">No hay campanas disponibles</p>
+          }
+        </div>
+      }
+    }
+
+    @if (activeTab() === 'influencers') {
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">Filtros</h3>
+        <select [(ngModel)]="filtroCategoria" (change)="onFilterChange()" class="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-lg">
+          <option value="">Todas las categorias</option>
+          @for (c of categories(); track c.idCategoria) {
+            <option [value]="c.idCategoria">{{ c.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      @if (loading()) {
+        <p class="text-center py-8 text-gray-500">Cargando...</p>
+      } @else {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (influencer of influencers(); track influencer.idInfluencer) {
+            <app-influencer-card [influencer]="influencer" />
+          } @empty {
+            <p class="text-center py-8 text-gray-500 col-span-3">No hay influencers disponibles</p>
+          }
+        </div>
+      }
+    }
+  </div>
+</div>

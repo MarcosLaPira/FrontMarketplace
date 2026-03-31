@@ -1,0 +1,39 @@
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+  <h3 class="text-lg font-semibold mb-4">Buscar Influencers</h3>
+  <div class="space-y-4">
+    <div class="flex gap-4">
+      <input type="text"
+        [ngModel]="searchName()"
+        (ngModelChange)="searchName.set($event)"
+        (keyup.enter)="onSearch()"
+        placeholder="Buscar por nombre..."
+        class="flex-1 px-4 py-2 border rounded-lg" />
+      <button (click)="onSearch()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Buscar</button>
+    </div>
+    <div>
+      <p class="text-sm text-gray-500 mb-2">Filtrar por categorías:</p>
+      <app-category-selector
+        [categorias]="categorias()"
+        [selectedIds]="filterCategorias()"
+        (toggled)="toggleFilterCategoria($event)" />
+    </div>
+  </div>
+</div>
+
+@if (loading()) {
+  <p class="text-center py-8 text-gray-500">Cargando influencers...</p>
+} @else {
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    @for (influencer of influencers(); track influencer.idInfluencer) {
+      <app-influencer-card [influencer]="influencer" />
+    } @empty {
+      <p class="text-center py-8 text-gray-500 col-span-3">No se encontraron influencers</p>
+    }
+  </div>
+}
+
+@if (selectedInfluencer()) {
+  <app-influencer-detail-modal
+    [influencer]="selectedInfluencer()!"
+    (closed)="selectedInfluencer.set(null)" />
+}

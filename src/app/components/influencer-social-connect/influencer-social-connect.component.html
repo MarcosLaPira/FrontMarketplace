@@ -1,0 +1,20 @@
+<div class="p-4 border rounded bg-white shadow">
+  <h2 class="text-lg font-bold mb-2">Conecta tus redes sociales</h2>
+  <p class="mb-4 text-sm text-gray-600">
+    Conecta tu cuenta de Instagram o TikTok para obtener prioridad en postulaciones y mostrar tus métricas verificadas. <span class="font-semibold text-blue-600">Los perfiles conectados tendrán mayor visibilidad.</span>
+  </p>
+  <div class="flex gap-4 mb-2">
+    <button (click)="connect('instagram')" class="bg-gradient-to-r from-pink-500 to-yellow-500 text-white px-4 py-2 rounded shadow hover:scale-105 transition" [disabled]="connecting() === 'instagram'">
+      {{ connecting() === 'instagram' ? 'Conectando...' : 'Conectar Instagram' }}
+    </button>
+    <button (click)="connect('tiktok')" class="bg-black text-white px-4 py-2 rounded shadow hover:scale-105 transition" [disabled]="connecting() === 'tiktok'">
+      {{ connecting() === 'tiktok' ? 'Conectando...' : 'Conectar TikTok' }}
+    </button>
+  </div>
+  @if (error(); as err) {
+    <div class="text-red-600 text-sm mt-2">{{ err }}</div>
+  }
+  @if (success()) {
+    <div class="text-green-600 text-sm mt-2">¡Red conectada correctamente!</div>
+  }
+</div>

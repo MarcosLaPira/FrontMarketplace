@@ -1,0 +1,12 @@
+<div class="flex flex-wrap gap-2">
+  @for (cat of categorias(); track cat.idCategoria) {
+    <button type="button" (click)="toggle(cat.idCategoria)"
+      [class.bg-blue-600]="color() === 'blue' && isSelected(cat.idCategoria)"
+      [class.bg-green-600]="color() === 'green' && isSelected(cat.idCategoria)"
+      [class.text-white]="isSelected(cat.idCategoria)"
+      [class.bg-gray-100]="!isSelected(cat.idCategoria)"
+      class="px-3 py-1 rounded-full border text-sm font-medium transition">
+      {{ cat.nombre }}
+    </button>
+  }
+</div>

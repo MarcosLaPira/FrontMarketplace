@@ -1,0 +1,31 @@
+<div class="min-h-screen bg-gray-50">
+  <app-navbar [displayName]="marca()?.nombreComercial" />
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Tabs -->
+    <div class="flex gap-2 mb-6">
+      <button (click)="onTabChange('campanas')" [class.bg-blue-600]="activeTab() === 'campanas'" [class.text-white]="activeTab() === 'campanas'" [class.bg-gray-200]="activeTab() !== 'campanas'" class="px-6 py-2 rounded-lg font-semibold transition">CAMPAÑAS</button>
+      <button (click)="onTabChange('mi-marca')" [class.bg-blue-600]="activeTab() === 'mi-marca'" [class.text-white]="activeTab() === 'mi-marca'" [class.bg-gray-200]="activeTab() !== 'mi-marca'" class="px-6 py-2 rounded-lg font-semibold transition">MI MARCA</button>
+      <button (click)="onTabChange('influencers')" [class.bg-blue-600]="activeTab() === 'influencers'" [class.text-white]="activeTab() === 'influencers'" [class.bg-gray-200]="activeTab() !== 'influencers'" class="px-6 py-2 rounded-lg font-semibold transition">INFLUENCERS</button>
+    </div>
+
+    @if (activeTab() === 'campanas') {
+      <app-marca-campanas
+        [categorias]="categorias()"
+        [plataformas]="plataformas()"
+        [campanas]="misCampanas()" />
+    }
+
+    @if (activeTab() === 'mi-marca') {
+      <app-marca-profile
+        [marca]="marca()"
+        [userProfile]="userProfile()"
+        [categorias]="categorias()"
+        (profileUpdated)="loadMarcaData()" />
+    }
+
+    @if (activeTab() === 'influencers') {
+      <app-marca-influencers [categorias]="categorias()" />
+    }
+  </div>
+</div>

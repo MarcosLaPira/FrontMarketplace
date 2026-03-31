@@ -1,0 +1,126 @@
+<div>
+  <!-- Header + Nueva Campaña -->
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold">Mis Campañas</h2>
+    <button (click)="showNewForm.set(!showNewForm())" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+      @if (showNewForm()) { Cancelar } @else { + Nueva Campaña }
+    </button>
+  </div>
+
+  <!-- Formulario crear campaña -->
+  @if (showNewForm()) {
+    <div class="mb-8">
+      <app-campana-form
+        [categorias]="categorias()"
+        [plataformas]="plataformas()"
+        (saved)="crearCampana($event)"
+        (cancelled)="showNewForm.set(false)" />
+    </div>
+  }
+
+  <!-- Sub-tabs: Activas / Pasadas -->
+  <div class="flex gap-2 mb-4">
+
+    <button (click)="subTab.set('activas')"
+      [class.bg-blue-100]="subTab() === 'activas'"
+      [class.text-blue-800]="subTab() === 'activas'"
+      [class.font-bold]="subTab() === 'activas'"
+      class="px-4 py-1 rounded-full text-sm transition border">
+      Activas ({{ campanasActivas().length }})
+    </button>
+
+    <button (click)="subTab.set('pasadas')"
+      [class.bg-gray-100]="subTab() === 'pasadas'"
+      [class.text-gray-800]="subTab() === 'pasadas'"
+      [class.font-bold]="subTab() === 'pasadas'"
+      class="px-4 py-1 rounded-full text-sm transition border">
+      Pasadas ({{ campanasPasadas().length }})
+    </button>
+
+  </div>
+
+  <!-- Lista de campañas ACTIVAS -->
+  @if (subTab() === 'activas') {
+
+    <div class="space-y-4">
+
+      @for (campana of campanasActivas(); track campana.idCampana) {
+
+        @if (editingCampana()?.idCampana === campana.idCampana) {
+          <app-campana-form
+            [categorias]="categorias()"
+            [plataformas]="plataformas()"
+            [campana]="campana"
+            (saved)="guardarEdit($event)"
+            (cancelled)="cancelEdit()" />
+        } @else {
+
+          <app-campana-card
+            [campana]="campana"
+            [showActions]="true"
+            (editClicked)="startEdit($event)"
+            (deleteClicked)="deleteCampana($event)"
+            (togglePostulaciones)="togglePostulaciones($event)">
+
+            <span toggleLabel>
+              @if (expandedCampanaId() === campana.idCampana) {
+                Ocultar Postulantes
+              } @else {
+                Ver Postulantes ({{ campana.postulaciones?.length || 0 }})
+              }
+            </span>
+            @if (expandedCampanaId() === campana.idCampana && campana.postulaciones) {
+
+              <app-postulacion-list
+                [postulaciones]="campana.postulaciones"
+                (accepted)="aceptarPostulacion($event)"
+                (rejected)="rechazarPostulacion($event)"
+                (influencerClicked)="openInfluencerDetail($event)" />
+            }
+          </app-campana-card>
+        }
+      } @empty {
+
+        <p class="text-center py-8 text-gray-500">No tienes campañas activas</p>
+
+      }
+    </div>
+
+  }
+
+  <!-- Lista de campañas PASADAS -->
+  @if (subTab() === 'pasadas') {
+    <div class="space-y-4">
+      @for (campana of campanasPasadas(); track campana.idCampana) {
+        <app-campana-card
+          [campana]="campana"
+          [isPast]="true"
+          (togglePostulaciones)="togglePostulaciones($event)">
+          <span toggleLabel>
+            @if (expandedCampanaId() === campana.idCampana) {
+              Ocultar Postulantes
+            } @else {
+              Ver Postulantes ({{ campana.postulaciones?.length || 0 }})
+            }
+          </span>
+          @if (expandedCampanaId() === campana.idCampana && campana.postulaciones) {
+            <app-postulacion-list
+              [postulaciones]="campana.postulaciones"
+              [showActions]="false"
+              [compact]="true"
+              (influencerClicked)="openInfluencerDetail($event)" />
+          }
+        </app-campana-card>
+      } @empty {
+        <p class="text-center py-8 text-gray-500">No tienes campañas pasadas</p>
+      }
+    </div>
+  }
+</div>
+
+<!-- Modal detalle influencer -->
+@if (selectedInfluencer()) {
+  <app-influencer-detail-modal
+    [influencer]="selectedInfluencer()!"
+    (closed)="selectedInfluencer.set(null)" />
+}

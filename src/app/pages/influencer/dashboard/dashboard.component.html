@@ -1,0 +1,34 @@
+<div class="min-h-screen bg-gray-50">
+  <app-navbar [displayName]="userProfile()?.nombre" [showExploreLink]="true" />
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <app-influencer-social-connect class="mb-6" />
+    <div class="flex gap-2 mb-6 overflow-x-auto">
+      <button (click)="activeTab.set('perfil')" [class.bg-blue-600]="activeTab() === 'perfil'" [class.text-white]="activeTab() === 'perfil'" [class.bg-gray-200]="activeTab() !== 'perfil'" class="px-4 py-2 rounded-lg font-semibold transition whitespace-nowrap">PERFIL</button>
+      <button (click)="activeTab.set('estadisticas')" [class.bg-blue-600]="activeTab() === 'estadisticas'" [class.text-white]="activeTab() === 'estadisticas'" [class.bg-gray-200]="activeTab() !== 'estadisticas'" class="px-4 py-2 rounded-lg font-semibold transition whitespace-nowrap">ESTADISTICAS</button>
+      <button (click)="activeTab.set('costos')" [class.bg-blue-600]="activeTab() === 'costos'" [class.text-white]="activeTab() === 'costos'" [class.bg-gray-200]="activeTab() !== 'costos'" class="px-4 py-2 rounded-lg font-semibold transition whitespace-nowrap">COSTOS</button>
+      <button (click)="activeTab.set('campanas')" [class.bg-blue-600]="activeTab() === 'campanas'" [class.text-white]="activeTab() === 'campanas'" [class.bg-gray-200]="activeTab() !== 'campanas'" class="px-4 py-2 rounded-lg font-semibold transition whitespace-nowrap">CAMPANAS</button>
+      <button (click)="activeTab.set('postulaciones')" [class.bg-blue-600]="activeTab() === 'postulaciones'" [class.text-white]="activeTab() === 'postulaciones'" [class.bg-gray-200]="activeTab() !== 'postulaciones'" class="px-4 py-2 rounded-lg font-semibold transition whitespace-nowrap">POSTULACIONES</button>
+    </div>
+
+    @if (activeTab() === 'perfil') {
+      <app-influencer-perfil [userProfile]="userProfile()" [categorias]="categorias()" />
+    }
+
+    @if (activeTab() === 'estadisticas') {
+      <app-influencer-estadisticas />
+    }
+
+    @if (activeTab() === 'costos') {
+      <app-influencer-costos />
+    }
+
+    @if (activeTab() === 'campanas') {
+      <app-influencer-campanas [campanas]="campanas()" (postular)="postularCampana($event)" />
+    }
+
+    @if (activeTab() === 'postulaciones') {
+      <app-influencer-postulaciones [postulaciones]="misPostulaciones()" />
+    }
+  </div>
+</div>

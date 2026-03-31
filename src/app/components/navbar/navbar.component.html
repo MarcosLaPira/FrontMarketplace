@@ -1,0 +1,24 @@
+<nav class="bg-white shadow">
+  <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-blue-600">Marketplace</h1>
+    <div class="flex gap-4 items-center">
+      @if (displayName()) {
+        <span class="text-gray-700">{{ displayName() }}</span>
+      }
+      @if (showExploreLink()) {
+        <a routerLink="/explore" class="text-gray-600 hover:text-blue-600">Explorar</a>
+      }
+      @if (showAuthLinks() && !isAuthenticated()) {
+        <a routerLink="/login" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Login</a>
+        <a routerLink="/register" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Registro</a>
+      }
+      @if (showAuthLinks() && isAuthenticated() && userRole() === 'Influencer') {
+        <a routerLink="/dashboard-influencer" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Mi Dashboard</a>
+      }
+      @if (showAuthLinks() && isAuthenticated() && userRole() === 'Marca') {
+        <a routerLink="/dashboard-marca" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Mi Dashboard</a>
+      }
+      <button (click)="logout()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Logout</button>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,149 @@
+<div class="min-h-screen bg-gray-100 py-12 px-4">
+  <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
+    <h1 class="text-4xl font-bold text-center text-blue-600 mb-8">Marketplace</h1>
+
+    @if (!registerType()) {
+      <div class="text-center">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Que tipo de cuenta deseas crear?</h2>
+        <div class="flex gap-6 justify-center">
+          <button (click)="registerType.set('influencer')" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition text-lg">
+            Soy Influencer
+          </button>
+          <button (click)="registerType.set('marca')" class="flex-1 bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition text-lg">
+            Soy una Marca
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (registerType() === 'influencer') {
+      <div class="space-y-4">
+        <button (click)="registerType.set(null)" class="text-blue-600 hover:underline mb-4">← Volver</button>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Registro de Influencer</h2>
+
+        <form [formGroup]="influencerForm" (ngSubmit)="onRegister()" class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Nombre</label>
+              <input type="text" formControlName="nombre" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 outline-none" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Apellido</label>
+              <input type="text" formControlName="apellido" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 outline-none" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Email</label>
+            <input type="email" formControlName="email" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Contrasena</label>
+            <input type="password" formControlName="password" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Nombre Social</label>
+            <input type="text" formControlName="nombreSocial" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Categorias</label>
+            <div class="mt-1">
+              <app-category-selector
+                [categorias]="categories()"
+                [selectedIds]="selectedCategorias()"
+                (toggled)="toggleCategoria($event)" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Descripcion</label>
+            <textarea formControlName="descripcion" rows="4" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 outline-none"></textarea>
+          </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="verified" formControlName="esCuentaVerificada" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+            <label for="verified" class="ml-2 block text-sm text-gray-700">Mi cuenta esta verificada en redes sociales</label>
+          </div>
+
+          @if (error()) {
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{{ error() }}</div>
+          }
+
+          @if (success(); as msg) {
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">{{ msg }}</div>
+            <app-influencer-social-connect />
+          }
+
+          <button type="submit" [disabled]="influencerForm.invalid || loading()"
+            class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+            @if (loading()) { Registrando... } @else { Registrar }
+          </button>
+        </form>
+      </div>
+    }
+
+    @if (registerType() === 'marca') {
+      <div class="space-y-4">
+        <button (click)="registerType.set(null)" class="text-blue-600 hover:underline mb-4">← Volver</button>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Registro de Marca</h2>
+
+        <form [formGroup]="marcaForm" (ngSubmit)="onRegister()" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Nombre Comercial</label>
+            <input type="text" formControlName="nombreComercial" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Email</label>
+            <input type="email" formControlName="email" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Contrasena</label>
+            <input type="password" formControlName="password" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Descripcion</label>
+            <textarea formControlName="descripcion" rows="3" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 outline-none"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Categorias</label>
+            <div class="mt-1">
+              <app-category-selector
+                [categorias]="categories()"
+                [selectedIds]="selectedCategorias()"
+                color="green"
+                (toggled)="toggleCategoria($event)" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Pais</label>
+              <input type="text" formControlName="ubicacionPais" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 outline-none" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Ciudad</label>
+              <input type="text" formControlName="ubicacionCiudad" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 outline-none" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Sitio Web (opcional)</label>
+            <input type="url" formControlName="webUrl" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 outline-none" />
+          </div>
+
+          @if (error()) {
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{{ error() }}</div>
+          }
+          @if (success()) {
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">{{ success() }}</div>
+          }
+
+          <button type="submit" [disabled]="marcaForm.invalid || loading()"
+            class="w-full bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+            @if (loading()) { Registrando... } @else { Registrar }
+          </button>
+        </form>
+      </div>
+    }
+
+    <p class="text-center text-gray-600 mt-6">
+      Ya tienes cuenta?
+      <a routerLink="/login" class="text-blue-600 hover:underline font-semibold">Inicia sesion aqui</a>
+    </p>
+  </div>
+</div>

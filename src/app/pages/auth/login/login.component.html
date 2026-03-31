@@ -1,0 +1,47 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-100">
+  <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8">
+    <h1 class="text-4xl font-bold text-center text-blue-600 mb-8">Marketplace</h1>
+    <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+        <input id="email" type="email" formControlName="email"
+          class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 outline-none"
+          placeholder="tu@email.com" />
+        @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+          <p class="text-red-500 text-sm mt-1">Ingresa un email valido</p>
+        }
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">Contrasena</label>
+        <input id="password" type="password" formControlName="password"
+          class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 outline-none"
+          placeholder="Ingresa tu contrasena" />
+        @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+          <p class="text-red-500 text-sm mt-1">La contrasena debe tener al menos 6 caracteres</p>
+        }
+      </div>
+
+      @if (error()) {
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {{ error() }}
+        </div>
+      }
+
+      <button type="submit" [disabled]="loginForm.invalid || loading()"
+        class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+        @if (loading()) { Cargando... } @else { Iniciar sesion }
+      </button>
+    </form>
+
+    <p class="text-center text-gray-600 mt-6">
+      No tienes cuenta?
+      <a routerLink="/register" class="text-blue-600 hover:underline font-semibold">Registrate aqui</a>
+    </p>
+    <p class="text-center text-gray-600 mt-4">
+      <a routerLink="/explore" class="text-green-600 hover:underline">O explora como invitado</a>
+    </p>
+  </div>
+</div>

@@ -1,0 +1,32 @@
+<div class="bg-white rounded-lg shadow-md p-6">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold">Mi Perfil</h2>
+    <button (click)="editMode.set(!editMode())" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+      @if (editMode()) { Cancelar } @else { Editar }
+    </button>
+  </div>
+
+  @if (!editMode()) {
+    <div class="grid grid-cols-2 gap-4">
+      <div><p class="text-gray-600">Nombre</p><p class="font-semibold">{{ userProfile()?.nombre }}</p></div>
+      <div><p class="text-gray-600">Email</p><p class="font-semibold">{{ userProfile()?.email }}</p></div>
+    </div>
+  } @else {
+    <form [formGroup]="editForm" (ngSubmit)="saveProfile()" class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <input type="text" formControlName="nombre" placeholder="Nombre" class="px-4 py-2 border rounded" />
+        <input type="text" formControlName="apellido" placeholder="Apellido" class="px-4 py-2 border rounded" />
+      </div>
+      <input type="text" formControlName="nombreSocial" placeholder="Nombre Social" class="w-full px-4 py-2 border rounded" />
+      <textarea formControlName="descripcionPresentacion" placeholder="Descripcion" rows="4" class="w-full px-4 py-2 border rounded"></textarea>
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">Categorías</label>
+        <app-category-selector
+          [categorias]="categorias()"
+          [selectedIds]="influencerCategorias()"
+          (toggled)="toggleCategoria($event)" />
+      </div>
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Guardar</button>
+    </form>
+  }
+</div>
