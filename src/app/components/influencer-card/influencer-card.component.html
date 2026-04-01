@@ -1,32 +1,78 @@
-<div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-  <div class="flex items-start justify-between mb-3">
-    <h3 class="text-xl font-bold text-gray-800">{{ influencer().nombreSocial }}</h3>
-    @if (influencer().esCuentaVerificada) {
-      <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-semibold">Verificada</span>
-    }
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden">
+  <!-- Header con avatar e info principal -->
+  <div class="p-5 pb-4">
+    <div class="flex items-start gap-3.5">
+      <!-- Avatar con iniciales -->
+      <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+        {{ initials }}
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2">
+          <h3 class="text-base font-semibold text-gray-900 truncate">{{ influencer().nombreSocial }}</h3>
+          @if (influencer().esCuentaVerificada) {
+            <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+          }
+        </div>
+        <p class="text-sm text-gray-500 mt-0.5 line-clamp-2">{{ influencer().descripcionPresentacion || 'Sin descripción' }}</p>
+      </div>
+    </div>
   </div>
-  <p class="text-gray-600 mb-3 line-clamp-2">{{ influencer().descripcionPresentacion || 'Sin descripción' }}</p>
-  <div class="space-y-2 text-sm">
-    <div>
-      <span class="text-gray-500">Categorías</span>
-      <div class="flex flex-wrap gap-1 mt-1">
-        @for (cat of influencer().categorias || []; track cat.idCategoria) {
-          <span class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full">{{ cat.nombre }}</span>
-        } @empty {
-          <span class="text-gray-400 text-xs">Sin categorías</span>
+
+  <!-- Métricas rápidas -->
+  <div class="px-5 pb-4">
+    <div class="flex items-center gap-4 text-sm">
+      <div class="flex items-center gap-1.5 text-gray-600">
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <span class="font-semibold text-gray-800">{{ formatFollowers(influencer().seguidoresTotales) }}</span>
+      </div>
+      @if (influencer().ratingPromedio > 0) {
+        <div class="flex items-center gap-1">
+          <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+          </svg>
+          <span class="font-semibold text-gray-800">{{ influencer().ratingPromedio | number:'1.1-1' }}</span>
+        </div>
+      }
+      @if (influencer().generoAudiencia) {
+        <span class="text-gray-400">·</span>
+        <span class="text-gray-500">{{ influencer().generoAudiencia }}</span>
+      }
+    </div>
+  </div>
+
+  <!-- Categorías -->
+  <div class="px-5 pb-4">
+    <div class="flex flex-wrap gap-1.5">
+      @for (cat of influencer().categorias || []; track cat.idCategoria) {
+        <span class="bg-blue-50 text-blue-700 text-xs font-medium px-2.5 py-0.5 rounded-full">{{ cat.nombre }}</span>
+      } @empty {
+        <span class="text-gray-400 text-xs">Sin categorías</span>
+      }
+    </div>
+  </div>
+
+  <!-- Plataformas y costos -->
+  @if (influencer().plataformas?.length) {
+    <div class="border-t border-gray-100 px-5 py-3.5 bg-gray-50/50">
+      <div class="space-y-2">
+        @for (plat of influencer().plataformas!; track plat.idPlataforma) {
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600 font-medium">{{ plat.nombrePlataforma }}</span>
+            <div class="flex items-center gap-2">
+              <span class="text-gray-800 font-semibold">${{ plat.costoMin | number:'1.0-0' }} - ${{ plat.costoMax | number:'1.0-0' }}</span>
+              @if (plat.canje) {
+                <span class="bg-green-50 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">Canje</span>
+              }
+            </div>
+          </div>
         }
       </div>
     </div>
-    <div class="flex justify-between">
-      <span class="text-gray-500">Seguidores</span>
-      <span class="font-semibold">{{ influencer().seguidoresTotales }}</span>
-    </div>
-    @if (influencer().ratingPromedio) {
-      <div class="flex justify-between">
-        <span class="text-gray-500">Rating</span>
-        <span class="font-semibold">{{ influencer().ratingPromedio }}/5</span>
-      </div>
-    }
-  </div>
+  }
+
   <ng-content></ng-content>
 </div>

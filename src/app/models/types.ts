@@ -44,16 +44,23 @@ export interface UserProfile {
 // Influencers
 export interface Influencer {
   idInfluencer: number;
-  idUsuario: string;
   nombreSocial: string;
   descripcionPresentacion?: string;
-  categorias?: Categoria[];
-  seguidoresTotales: number;
   esCuentaVerificada: boolean;
-  ratingPromedio?: number;
-  activo: boolean;
-  costos?: InfluencerCosto[];
-  estadisticas?: InfluencerEstadistica[];
+  seguidoresTotales: number;
+  ratingPromedio: number;
+  generoAudiencia?: string;
+  fechaAlta?: string;
+  categorias?: Categoria[];
+  plataformas?: InfluencerPlataforma[];
+}
+
+export interface InfluencerPlataforma {
+  idPlataforma: number;
+  nombrePlataforma: string;
+  costoMin: number;
+  costoMax: number;
+  canje: boolean;
 }
 
 export interface InfluencerCosto {
@@ -68,6 +75,78 @@ export interface InfluencerEstadistica {
   seguidores: number;
   alcancePromedio: number;
   engagementRate: number;
+}
+
+// Detalle completo de un influencer (endpoint ObtenerInfluencerById)
+export interface InfluencerDetalle {
+  idInfluencer: number;
+  nombreSocial: string;
+  descripcionPresentacion?: string;
+  esCuentaVerificada: boolean;
+  seguidoresTotales: number;
+  ratingPromedio: number;
+  generoAudiencia?: string;
+  fechaAlta?: string;
+  ultimaFechaActualizacion?: string;
+  activo: boolean;
+  instagramConnected: boolean;
+  tikTokConnected: boolean;
+  categorias?: Categoria[];
+  costos?: InfluencerDetalleCosto[];
+  estadisticas?: InfluencerDetalleEstadistica[];
+  historialCampanas?: InfluencerHistorialCampanas;
+  postulaciones?: InfluencerDetallePostulacion[];
+}
+
+export interface InfluencerDetalleCosto {
+  idPlataforma: number;
+  nombrePlataforma: string;
+  costoMin: number;
+  costoMax: number;
+  canje: boolean;
+  fechaAlta?: string;
+  fechaActualizacion?: string;
+}
+
+export interface InfluencerDetalleEstadistica {
+  idPlataforma: number;
+  nombrePlataforma: string;
+  seguidores: number;
+  alcancePromedio: number;
+  engagementRate: number;
+  cantidadPosts: number;
+  cantidadLikes: number;
+  cantidadComentarios: number;
+  cantidadCompartidos: number;
+  cantidadVideos: number;
+  cantidadViews: number;
+  cantidadStories: number;
+  cantidadGuardados: number;
+  cantidadReacciones: number;
+  cantidadMensajes: number;
+  fechaRegistro?: string;
+  fechaActualizacion?: string;
+}
+
+export interface InfluencerHistorialCampanas {
+  totalPostulaciones: number;
+  postulacionesAceptadas: number;
+  postulacionesRechazadas: number;
+  postulacionesPendientes: number;
+  campanasTikTok: number;
+  campanasInstagram: number;
+  campanasOtras: number;
+}
+
+export interface InfluencerDetallePostulacion {
+  idPostulacion: number;
+  idCampana: number;
+  tituloCampana: string;
+  nombreMarca: string;
+  nombrePlataforma: string;
+  estadoPostulacion: string;
+  fechaPostulacion: string;
+  mensaje: string;
 }
 
 // Marcas
@@ -164,6 +243,23 @@ export interface InfluencerResumen {
 export interface PostulacionCreateRequest {
   idCampana: number;
   mensaje: string;
+}
+
+// Filtros de búsqueda de influencers
+export interface InfluencerFilter {
+  idsCategorias?: number[];
+  plataformaId?: number;
+  seguidoresMin?: number;
+  seguidoresMax?: number;
+  costoMin?: number;
+  costoMax?: number;
+  soloCanje?: boolean;
+  soloVerificados?: boolean;
+  generoAudiencia?: string;
+  ratingMin?: number;
+  search?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 // Catálogos

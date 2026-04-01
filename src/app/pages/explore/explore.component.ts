@@ -2,7 +2,7 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CampanaService } from '../../services/campana.service';
 import { InfluencerService } from '../../services/influencer.service';
-import { Campana, Influencer, PaginatedResponse } from '../../models/types';
+import { Campana, Influencer } from '../../models/types';
 import { CatalogService } from '../../services/catalog.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { InfluencerCardComponent } from '../../components/influencer-card/influencer-card.component';
@@ -50,7 +50,7 @@ export class ExploreComponent implements OnInit {
     if (this.filtroCategoria) filters.idsCategorias = [parseInt(this.filtroCategoria)];
 
     this.influencerService.getInfluencers(filters).subscribe({
-      next: (data: PaginatedResponse<Influencer>) => { this.influencers.set(data.data || []); },
+      next: (data: Influencer[]) => { this.influencers.set(data || []); },
       error: () => {}
     });
   }

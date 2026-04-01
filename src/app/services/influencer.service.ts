@@ -3,9 +3,10 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import {
   Influencer,
+  InfluencerDetalle,
   InfluencerCosto,
   InfluencerEstadistica,
-  PaginatedResponse
+  InfluencerFilter
 } from '../models/types';
 import { API_BASE_URL } from '../shared/constants';
 
@@ -26,20 +27,14 @@ export class InfluencerService {
   }
 
   // Get influencer by ID
-  getInfluencerById(id: number): Observable<Influencer> {
-    return this.http.get<Influencer>(`${this.apiUrl}/ObtenerInfluencerById`, {
-      headers: { 'IdInfluencer': id.toString() }
+  getInfluencerById(id: number): Observable<InfluencerDetalle> {
+    return this.http.get<InfluencerDetalle>(`${this.apiUrl}/ObtenerInfluencerById`, {
+      headers: { 'idInfluencer': id.toString() }
     });
   }
 
   // Get all influencers with filters
-  getInfluencers(filters?: {
-    idsCategorias?: number[];
-    nombreSocial?: string;
-    esCuentaVerificada?: boolean;
-    page?: number;
-    pageSize?: number;
-  }): Observable<PaginatedResponse<Influencer>> {
+  getInfluencers(filters?: InfluencerFilter): Observable<Influencer[]> {
     let params = new HttpParams();
     if (filters) {
       if (filters.idsCategorias?.length) {
@@ -47,12 +42,20 @@ export class InfluencerService {
           params = params.append('idsCategorias', id.toString());
         }
       }
-      if (filters.nombreSocial) params = params.set('nombreSocial', filters.nombreSocial);
-      if (filters.esCuentaVerificada !== undefined) params = params.set('esCuentaVerificada', filters.esCuentaVerificada.toString());
+      if (filters.plataformaId) params = params.set('plataformaId', filters.plataformaId.toString());
+      if (filters.seguidoresMin != null) params = params.set('seguidoresMin', filters.seguidoresMin.toString());
+      if (filters.seguidoresMax != null) params = params.set('seguidoresMax', filters.seguidoresMax.toString());
+      if (filters.costoMin != null) params = params.set('costoMin', filters.costoMin.toString());
+      if (filters.costoMax != null) params = params.set('costoMax', filters.costoMax.toString());
+      if (filters.soloCanje != null) params = params.set('soloCanje', filters.soloCanje.toString());
+      if (filters.soloVerificados != null) params = params.set('soloVerificados', filters.soloVerificados.toString());
+      if (filters.generoAudiencia) params = params.set('generoAudiencia', filters.generoAudiencia);
+      if (filters.ratingMin != null) params = params.set('ratingMin', filters.ratingMin.toString());
+      if (filters.search) params = params.set('search', filters.search);
       if (filters.page) params = params.set('page', filters.page.toString());
       if (filters.pageSize) params = params.set('pageSize', filters.pageSize.toString());
     }
-    return this.http.get<PaginatedResponse<Influencer>>(`${this.apiUrl}/ObtenerInfluencers`, { params });
+    return this.http.get<Influencer[]>(`${this.apiUrl}/ObtenerInfluencers`, { params });
   }
 
   // Update statistics
