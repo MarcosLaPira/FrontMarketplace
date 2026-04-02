@@ -58,14 +58,8 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  postularCampana(idCampana: number): void {
-    const mensaje = prompt('Escribe un mensaje para la campana:');
-    if (mensaje) {
-      this.postulacionService.postular({ idCampana, mensaje }).subscribe({
-        next: () => { alert('Postulacion enviada exitosamente!'); this.loadMisPostulaciones(); },
-        error: () => alert('Error al enviar postulacion')
-      });
-    }
+  onPostulacionEnviada(): void {
+    this.loadMisPostulaciones();
   }
 
   logout(): void {

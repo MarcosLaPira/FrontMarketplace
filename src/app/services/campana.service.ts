@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Campana, CampanaCreateRequest } from '../models/types';
+import { Campana, CampanaCreateRequest, CampanaFilter } from '../models/types';
 import { API_BASE_URL } from '../shared/constants';
 
 @Injectable({
@@ -21,18 +21,14 @@ export class CampanaService {
   }
 
   // Get all campaigns with filters
-  getCampanas(filters?: {
-    idMarca?: number;
-    idPlataforma?: number;
-    idEstadoCampana?: number;
-    IdCategoria?: number;
-  }): Observable<Campana[]> {
+  getCampanas(filters?: CampanaFilter): Observable<Campana[]> {
     let params = new HttpParams();
     if (filters) {
-      if (filters.idMarca) params = params.set('idMarca', filters.idMarca.toString());
-      if (filters.idPlataforma) params = params.set('idPlataforma', filters.idPlataforma.toString());
-      if (filters.idEstadoCampana) params = params.set('idEstadoCampana', filters.idEstadoCampana.toString());
-      if (filters.IdCategoria) params = params.set('IdCategoria', filters.IdCategoria.toString());
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          params = params.set(key, String(value));
+        }
+      });
     }
     return this.http.get<Campana[]>(`${this.apiUrl}/`, { params });
   }

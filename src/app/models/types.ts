@@ -251,6 +251,21 @@ export interface PostulacionCreateRequest {
   mensaje: string;
 }
 
+// Filtros de búsqueda de campañas
+export interface CampanaFilter {
+  idMarca?: number;
+  idPlataforma?: number;
+  idEstadoCampana?: number;
+  idCategoria?: number;
+  esPresencial?: boolean;
+  requiereProductoFisico?: boolean;
+  requiereProductoVirtual?: boolean;
+  envioProductoIncluido?: boolean;
+  ciudad?: string;
+  provincia?: string;
+  campanaPublica?: boolean;
+}
+
 // Filtros de búsqueda de influencers
 export interface InfluencerFilter {
   idsCategorias?: number[];
