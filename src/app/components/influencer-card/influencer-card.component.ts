@@ -1,6 +1,7 @@
 import { Component, input } from '@angular/core';
 import { Influencer } from '../../models/types';
 import { DecimalPipe } from '@angular/common';
+import { API_BASE_URL } from '../../shared/constants';
 
 @Component({
   selector: 'app-influencer-card',
@@ -18,6 +19,13 @@ export class InfluencerCardComponent {
       .join('')
       .substring(0, 2)
       .toUpperCase();
+  }
+
+  get fotoPerfilUrl(): string | null {
+    const foto = this.influencer().fotoPerfil;
+    if (!foto) return null;
+    const baseUrl = API_BASE_URL.replace('/api/v1', '');
+    return `${baseUrl}${foto}`;
   }
 
   formatFollowers(count: number): string {

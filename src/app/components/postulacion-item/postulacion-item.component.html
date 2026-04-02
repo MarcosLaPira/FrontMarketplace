@@ -1,0 +1,68 @@
+@if (compact()) {
+  <!-- Vista compacta (campanas pasadas) -->
+  <div class="flex justify-between items-center p-3 rounded border mb-2 cursor-pointer hover:brightness-95 transition"
+    [class]="rowBg()"
+    (click)="openDetail()">
+    <div class="flex gap-3 items-center">
+      @if (getFotoUrl(postulacion().influencer?.fotoPerfil)) {
+        <img [src]="getFotoUrl(postulacion().influencer?.fotoPerfil)" [alt]="postulacion().influencer?.nombreSocial" class="w-8 h-8 rounded-full object-cover">
+      } @else {
+        <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+          <span class="text-gray-600 font-bold text-xs">{{ postulacion().influencer?.nombreSocial?.charAt(0)?.toUpperCase() }}</span>
+        </div>
+      }
+      <div>
+        <p class="font-semibold text-sm">{{ postulacion().influencer?.nombreSocial }}</p>
+        <p class="text-gray-500 text-xs">"{{ postulacion().mensaje }}"</p>
+      </div>
+    </div>
+    <span [class]="badgeClass()">{{ postulacion().estadoPostulacion }}</span>
+  </div>
+} @else {
+  <!-- Vista completa (campanas activas) -->
+  <div class="p-3 rounded border mb-3" [class]="rowBg()">
+    <div class="flex justify-between items-start">
+      <div class="flex gap-3 items-start flex-1 cursor-pointer group" (click)="openDetail()">
+        @if (getFotoUrl(postulacion().influencer?.fotoPerfil)) {
+          <img [src]="getFotoUrl(postulacion().influencer?.fotoPerfil)" [alt]="postulacion().influencer?.nombreSocial" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+        } @else {
+          <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 transition">
+            <span class="text-blue-700 font-bold text-sm">{{ postulacion().influencer?.nombreSocial?.charAt(0)?.toUpperCase() }}</span>
+          </div>
+        }
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <p class="font-semibold text-gray-800 group-hover:text-blue-600 transition">{{ postulacion().influencer?.nombreSocial }}</p>
+            @if (postulacion().influencer?.esCuentaVerificada) {
+              <span class="bg-blue-100 text-blue-700 text-xs px-1.5 py-0.5 rounded-full">Verificada</span>
+            }
+          </div>
+          <p class="text-gray-500 text-sm line-clamp-1">{{ postulacion().influencer?.descripcionPresentacion || 'Sin descripción' }}</p>
+          <div class="flex gap-3 mt-1 text-xs text-gray-400">
+            <span>{{ postulacion().influencer?.seguidoresTotales }} seguidores</span>
+            @if (postulacion().influencer?.ratingPromedio) {
+              <span>Rating: {{ postulacion().influencer?.ratingPromedio }}/5</span>
+            }
+          </div>
+          <p class="text-gray-600 text-sm mt-2 italic">"{{ postulacion().mensaje }}"</p>
+          <p class="text-gray-400 text-xs mt-1">{{ postulacion().fechaPostulacion | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+      </div>
+
+      <div class="flex gap-2 items-center flex-shrink-0 ml-3">
+        @if (postulacion().idEstadoPostulacion === 1 && showActions()) {
+          <button (click)="accepted.emit(postulacion().idPostulacion)" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">Aceptar</button>
+          <button (click)="rejected.emit(postulacion().idPostulacion)" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">Rechazar</button>
+        }
+        <span [class]="badgeClass()">{{ postulacion().estadoPostulacion }}</span>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Panel de detalle del influencer -->
+@if (showDetail() && postulacion().influencer?.idInfluencer) {
+  <app-influencer-detail-panel
+    [idInfluencer]="postulacion().influencer!.idInfluencer"
+    (closed)="closeDetail()" />
+}

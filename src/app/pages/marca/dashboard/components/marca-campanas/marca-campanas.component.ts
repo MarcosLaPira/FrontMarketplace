@@ -2,15 +2,14 @@ import { Component, inject, input, signal, computed } from '@angular/core';
 import { CampanaFormComponent } from '../../../../../components/campana-form/campana-form.component';
 import { CampanaCardComponent } from '../../../../../components/campana-card/campana-card.component';
 import { PostulacionListComponent } from '../../../../../components/postulacion-list/postulacion-list.component';
-import { InfluencerDetailModalComponent } from '../../../../../components/influencer-detail-modal/influencer-detail-modal.component';
-import { Campana, Categoria, Plataforma, CampanaCreateRequest, InfluencerResumen } from '../../../../../models/types';
+import { Campana, Categoria, Plataforma, CampanaCreateRequest } from '../../../../../models/types';
 import { CampanaService } from '../../../../../services/campana.service';
 import { PostulacionService } from '../../../../../services/postulacion.service';
 
 @Component({
   selector: 'app-marca-campanas',
   standalone: true,
-  imports: [CampanaFormComponent, CampanaCardComponent, PostulacionListComponent, InfluencerDetailModalComponent],
+  imports: [CampanaFormComponent, CampanaCardComponent, PostulacionListComponent],
   templateUrl: './marca-campanas.component.html'
 })
 export class MarcaCampanasComponent {
@@ -25,7 +24,6 @@ export class MarcaCampanasComponent {
   editingCampana = signal<Campana | null>(null);
   subTab = signal<'activas' | 'pasadas'>('activas');
   expandedCampanaId = signal<number | null>(null);
-  selectedInfluencer = signal<InfluencerResumen | null>(null);
 
   private estadosInactivos = [6, 7]; // 6 = Finalizada, 7 = Cancelada
 
@@ -107,10 +105,6 @@ export class MarcaCampanasComponent {
       next: () => this.reloadCampanas(),
       error: (err: any) => console.error('Error rejecting postulacion:', err)
     });
-  }
-
-  openInfluencerDetail(influencer: InfluencerResumen): void {
-    this.selectedInfluencer.set(influencer);
   }
 
   private buildRequest(data: { form: any; categorias: number[]; imagenesProducto: File[] }): CampanaCreateRequest {

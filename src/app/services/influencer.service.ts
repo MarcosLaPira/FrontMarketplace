@@ -26,6 +26,11 @@ export class InfluencerService {
     );
   }
 
+  // Get my influencer profile (authenticated)
+  getMiPerfil(): Observable<InfluencerDetalle> {
+    return this.http.get<InfluencerDetalle>(`${this.apiUrl}/mi-perfil`);
+  }
+
   // Get influencer by ID
   getInfluencerById(id: number): Observable<InfluencerDetalle> {
     return this.http.get<InfluencerDetalle>(`${this.apiUrl}/ObtenerInfluencerById`, {
@@ -68,9 +73,22 @@ export class InfluencerService {
     });
   }
 
-  // Update influencer profile
-  updateInfluencer(data: Partial<Influencer>): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/ActualizarInfluencer`, data);
+  // Update influencer profile (FormData for file upload)
+  updateInfluencer(data: { nombre?: string; apellido?: string; nombreSocial?: string; idsCategorias?: number[]; descripcion?: string; generoAudiencia?: string; esCuentaVerificada?: boolean; fotoPerfil?: File }): Observable<any> {
+    const formData = new FormData();
+    if (data.nombre) formData.append('Nombre', data.nombre);
+    if (data.apellido) formData.append('Apellido', data.apellido);
+    if (data.nombreSocial) formData.append('NombreSocial', data.nombreSocial);
+    if (data.descripcion != null) formData.append('Descripcion', data.descripcion);
+    if (data.generoAudiencia) formData.append('GeneroAudiencia', data.generoAudiencia);
+    if (data.esCuentaVerificada != null) formData.append('EsCuentaVerificada', String(data.esCuentaVerificada));
+    if (data.idsCategorias) {
+      for (const id of data.idsCategorias) {
+        formData.append('IdsCategorias', String(id));
+      }
+    }
+    if (data.fotoPerfil) formData.append('FotoPerfil', data.fotoPerfil);
+    return this.http.patch(`${this.apiUrl}/ActualizarInfluencer`, formData);
   }
 
   // Add cost per platform

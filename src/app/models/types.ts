@@ -16,9 +16,12 @@ export interface InfluencerRegisterRequest {
   nombre: string;
   apellido: string;
   nombreSocial: string;
-  idsCategorias: number[];
-  descripcion: string;
+  descripcion?: string;
+  generoAudiencia?: string;
+  seguidoresTotales?: number;
   esCuentaVerificada: boolean;
+  idsCategorias: number[];
+  fotoPerfil?: File;
 }
 
 export interface MarcaRegisterRequest {
@@ -50,6 +53,7 @@ export interface Influencer {
   seguidoresTotales: number;
   ratingPromedio: number;
   generoAudiencia?: string;
+  fotoPerfil?: string;
   fechaAlta?: string;
   categorias?: Categoria[];
   plataformas?: InfluencerPlataforma[];
@@ -86,6 +90,7 @@ export interface InfluencerDetalle {
   seguidoresTotales: number;
   ratingPromedio: number;
   generoAudiencia?: string;
+  fotoPerfil?: string;
   fechaAlta?: string;
   ultimaFechaActualizacion?: string;
   activo: boolean;
@@ -238,6 +243,7 @@ export interface InfluencerResumen {
   seguidoresTotales: number;
   esCuentaVerificada: boolean;
   ratingPromedio?: number;
+  fotoPerfil?: string;
 }
 
 export interface PostulacionCreateRequest {

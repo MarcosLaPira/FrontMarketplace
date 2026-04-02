@@ -54,8 +54,36 @@
             </div>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700">Descripcion</label>
+            <label class="block text-sm font-medium text-gray-700">Descripcion (opcional)</label>
             <textarea formControlName="descripcion" rows="4" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 outline-none"></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Genero de Audiencia (opcional)</label>
+              <select formControlName="generoAudiencia" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                <option value="">Sin especificar</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+                <option value="Mixto">Mixto</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Seguidores Totales (opcional)</label>
+              <input type="number" formControlName="seguidoresTotales" min="0" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 outline-none" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Foto de Perfil (opcional)</label>
+            <div class="mt-1 flex items-center gap-4">
+              @if (fotoPerfilPreview()) {
+                <img [src]="fotoPerfilPreview()" alt="Preview" class="h-16 w-16 rounded-full object-cover border-2 border-blue-300" />
+              } @else {
+                <div class="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-400">
+                  <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                </div>
+              }
+              <input type="file" accept="image/*" (change)="onFotoPerfilSelected($event)" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+            </div>
           </div>
           <div class="flex items-center">
             <input type="checkbox" id="verified" formControlName="esCuentaVerificada" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />

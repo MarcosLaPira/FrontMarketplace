@@ -70,7 +70,21 @@ export class AuthService {
 
 
   registerInfluencer(request: InfluencerRegisterRequest): Observable<any> {
-    return this.http.post(`${API_BASE_URL}/influencers/crear`, request);
+    const formData = new FormData();
+    formData.append('Email', request.email);
+    formData.append('Password', request.password);
+    formData.append('Nombre', request.nombre);
+    formData.append('Apellido', request.apellido);
+    formData.append('NombreSocial', request.nombreSocial);
+    formData.append('EsCuentaVerificada', String(request.esCuentaVerificada));
+    if (request.descripcion) formData.append('Descripcion', request.descripcion);
+    if (request.generoAudiencia) formData.append('GeneroAudiencia', request.generoAudiencia);
+    if (request.seguidoresTotales != null) formData.append('SeguidoresTotales', String(request.seguidoresTotales));
+    for (const id of request.idsCategorias) {
+      formData.append('IdsCategorias', String(id));
+    }
+    if (request.fotoPerfil) formData.append('FotoPerfil', request.fotoPerfil);
+    return this.http.post(`${API_BASE_URL}/influencers/crear`, formData);
   }
 
   registerMarca(request: MarcaRegisterRequest): Observable<any> {

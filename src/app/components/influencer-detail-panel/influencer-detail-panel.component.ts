@@ -2,6 +2,7 @@ import { Component, inject, input, output, signal, OnInit } from '@angular/core'
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { InfluencerDetalle } from '../../models/types';
 import { InfluencerService } from '../../services/influencer.service';
+import { API_BASE_URL } from '../../shared/constants';
 
 @Component({
   selector: 'app-influencer-detail-panel',
@@ -19,6 +20,7 @@ export class InfluencerDetailPanelComponent implements OnInit {
   loading = signal(true);
   error = signal('');
   activeTab = signal<'general' | 'estadisticas' | 'historial'>('general');
+  showImageZoom = signal(false);
 
   ngOnInit(): void {
     this.loadInfluencer();
@@ -52,6 +54,13 @@ export class InfluencerDetailPanelComponent implements OnInit {
   get initials(): string {
     const name = this.influencer()?.nombreSocial || '';
     return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+  }
+
+  get fotoPerfilUrl(): string | null {
+    const foto = this.influencer()?.fotoPerfil;
+    if (!foto) return null;
+    const baseUrl = API_BASE_URL.replace('/api/v1', '');
+    return `${baseUrl}${foto}`;
   }
 
   formatFollowers(count: number): string {

@@ -26,6 +26,8 @@ export class RegisterComponent {
 
   categories = this.catalogService.categorias;
   selectedCategorias = signal<number[]>([]);
+  fotoPerfilFile = signal<File | null>(null);
+  fotoPerfilPreview = signal<string | null>(null);
 
   influencerForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -33,7 +35,9 @@ export class RegisterComponent {
     nombre: ['', [Validators.required]],
     apellido: ['', [Validators.required]],
     nombreSocial: ['', [Validators.required]],
-    descripcion: ['', [Validators.required]],
+    descripcion: [''],
+    generoAudiencia: [''],
+    seguidoresTotales: [null as number | null],
     esCuentaVerificada: [false]
   });
 
@@ -53,6 +57,17 @@ export class RegisterComponent {
       this.selectedCategorias.set(current.filter(c => c !== id));
     } else {
       this.selectedCategorias.set([...current, id]);
+    }
+  }
+
+  onFotoPerfilSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file) {
+      this.fotoPerfilFile.set(file);
+      const reader = new FileReader();
+      reader.onload = () => this.fotoPerfilPreview.set(reader.result as string);
+      reader.readAsDataURL(file);
     }
   }
 
@@ -76,7 +91,9 @@ export class RegisterComponent {
     const val = this.influencerForm.getRawValue();
     const request: InfluencerRegisterRequest = {
       ...val,
-      idsCategorias: this.selectedCategorias()
+      seguidoresTotales: val.seguidoresTotales ?? undefined,
+      idsCategorias: this.selectedCategorias(),
+      fotoPerfil: this.fotoPerfilFile() ?? undefined
     };
     this.authService.registerInfluencer(request).subscribe({
       next: () => {
