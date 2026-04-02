@@ -45,12 +45,6 @@ export class InfluencerDetailPanelComponent implements OnInit {
     this.closed.emit();
   }
 
-  onBackdropClick(event: MouseEvent): void {
-    if (event.target === event.currentTarget) {
-      this.close();
-    }
-  }
-
   get initials(): string {
     const name = this.influencer()?.nombreSocial || '';
     return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
@@ -82,10 +76,10 @@ export class InfluencerDetailPanelComponent implements OnInit {
 
   estadoColor(estado: string): string {
     switch (estado.toLowerCase()) {
-      case 'aceptada': return 'bg-green-100 text-green-700';
-      case 'rechazada': return 'bg-red-100 text-red-700';
-      case 'pendiente': return 'bg-yellow-100 text-yellow-700';
-      default: return 'bg-gray-100 text-gray-700';
+      case 'aceptada': return 'bg-green-50 text-green-700 border border-green-100';
+      case 'rechazada': return 'bg-red-50 text-red-700 border border-red-100';
+      case 'pendiente': return 'bg-amber-50 text-amber-700 border border-amber-100';
+      default: return 'bg-gray-100 text-gray-600';
     }
   }
 }

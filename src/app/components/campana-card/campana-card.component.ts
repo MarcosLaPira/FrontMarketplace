@@ -33,6 +33,10 @@ export class CampanaCardComponent {
     }
   }
 
+  get influencersCompletos(): boolean {
+    return (this.campana().cantidadInfluencersAceptados ?? 0) >= (this.campana().cantidadInfluencers ?? 0);
+  }
+
   get imagenProductoUrl(): string | null {
     const imagenes = this.campana().imagenesProducto;
     if (imagenes && imagenes.length > 0 && imagenes[0].url) {
