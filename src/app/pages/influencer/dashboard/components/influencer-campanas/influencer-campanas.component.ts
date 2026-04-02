@@ -5,11 +5,12 @@ import { Campana, CampanaFilter } from '../../../../../models/types';
 import { CampanaService } from '../../../../../services/campana.service';
 import { CatalogService } from '../../../../../services/catalog.service';
 import { PostulacionService } from '../../../../../services/postulacion.service';
+import { CampanaDetailComponent } from '../../../../../components/campana-detail/campana-detail.component';
 
 @Component({
   selector: 'app-influencer-campanas',
   standalone: true,
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, DatePipe, CampanaDetailComponent],
   templateUrl: './influencer-campanas.component.html'
 })
 export class InfluencerCampanasComponent implements OnInit {
@@ -22,6 +23,9 @@ export class InfluencerCampanasComponent implements OnInit {
   showFilters = signal(false);
   viewMode = signal<'grid' | 'list'>('grid');
   expandedCampanaId = signal<number | null>(null);
+
+  // Vista detalle
+  selectedCampanaId = signal<number | null>(null);
 
   // Modal postulación
   postulacionModal = signal(false);
@@ -136,6 +140,14 @@ export class InfluencerCampanasComponent implements OnInit {
     if (!total) return 0;
     const aceptados = campana.cantidadInfluencersAceptados ?? 0;
     return Math.round((aceptados / total) * 100);
+  }
+
+  verDetalle(id: number): void {
+    this.selectedCampanaId.set(id);
+  }
+
+  volverAListado(): void {
+    this.selectedCampanaId.set(null);
   }
 
   abrirPostulacion(campana: Campana): void {

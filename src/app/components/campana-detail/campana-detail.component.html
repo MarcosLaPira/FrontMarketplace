@@ -1,0 +1,337 @@
+<!-- Loading -->
+@if (loading()) {
+  <div class="flex flex-col items-center justify-center py-24">
+    <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+    <p class="mt-4 text-gray-500">Cargando detalles de la campaña...</p>
+  </div>
+}
+
+<!-- Error -->
+@if (error()) {
+  <div class="flex flex-col items-center justify-center py-24 text-center">
+    <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
+      <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+    </div>
+    <h3 class="text-lg font-bold text-gray-800 mb-2">No pudimos cargar la campaña</h3>
+    <p class="text-gray-500 text-sm mb-5">Intentá de nuevo más tarde.</p>
+    <button (click)="volver.emit()" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 transition">
+      Volver a campañas
+    </button>
+  </div>
+}
+
+<!-- Detalle -->
+@if (campana(); as c) {
+  <div class="space-y-6">
+
+    <!-- Botón volver -->
+    <button (click)="volver.emit()" class="flex items-center gap-2 text-gray-500 hover:text-indigo-600 transition text-sm font-medium group">
+      <svg class="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Volver a campañas
+    </button>
+
+    <!-- Hero -->
+    <div class="relative rounded-2xl overflow-hidden">
+      @if (c.imagenesProducto?.length) {
+        <div class="h-56 md:h-72">
+          <img [src]="getImagenUrl(c.imagenesProducto![0].url)" alt="Imagen de campaña" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+        </div>
+      } @else {
+        <div class="h-48 md:h-64 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
+          <div class="absolute inset-0 opacity-10">
+            <svg class="w-full h-full" viewBox="0 0 400 300" fill="none">
+              <circle cx="50" cy="50" r="80" fill="white"/>
+              <circle cx="350" cy="250" r="120" fill="white"/>
+              <circle cx="200" cy="150" r="60" fill="white"/>
+            </svg>
+          </div>
+        </div>
+      }
+
+      <!-- Overlay content -->
+      <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          @if (c.plataforma) {
+            <span class="bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full border border-white/20">
+              {{ c.plataforma.nombrePlataforma }}
+            </span>
+          }
+          @if (c.estadoCampana) {
+            <span class="text-xs font-bold px-3 py-1 rounded-full backdrop-blur-md border border-white/20"
+              [class]="c.estadoCampana.idEstadoCampana === 1 ? 'bg-green-500/30 text-green-100' : 'bg-gray-500/30 text-gray-200'">
+              {{ c.estadoCampana.nombre }}
+            </span>
+          }
+          @if (getDaysLeft() <= 7 && getDaysLeft() > 0) {
+            <span class="bg-orange-500/30 backdrop-blur-md text-orange-100 text-xs font-bold px-3 py-1 rounded-full border border-orange-300/20">
+              ⏰ {{ getDaysLeft() }} días restantes
+            </span>
+          }
+        </div>
+        <h1 class="text-2xl md:text-3xl font-bold text-white mb-1">{{ c.titulo }}</h1>
+        @if (c.marca) {
+          <p class="text-white/80 text-sm">por <span class="font-semibold text-white">{{ c.marca }}</span></p>
+        }
+      </div>
+    </div>
+
+    <!-- Grid principal -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Columna izquierda: info detallada -->
+      <div class="lg:col-span-2 space-y-6">
+
+        <!-- Descripción -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+          <h2 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Sobre esta campaña
+          </h2>
+          <p class="text-gray-600 leading-relaxed whitespace-pre-line">{{ c.descripcion }}</p>
+        </div>
+
+        <!-- Requisitos y logística -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+          <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+            Requisitos y logística
+          </h2>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Modalidad -->
+            <div class="flex items-start gap-3 p-4 rounded-xl" [class]="c.esPresencial ? 'bg-amber-50' : 'bg-blue-50'">
+              <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" [class]="c.esPresencial ? 'bg-amber-100' : 'bg-blue-100'">
+                <span class="text-lg">{{ c.esPresencial ? '📍' : '💻' }}</span>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900 text-sm">{{ c.esPresencial ? 'Presencial' : 'Virtual / Remoto' }}</p>
+                <p class="text-xs text-gray-500 mt-0.5">{{ c.esPresencial ? 'Requiere asistencia física en ubicación' : 'Podés participar desde cualquier lugar' }}</p>
+              </div>
+            </div>
+
+            <!-- Producto físico -->
+            <div class="flex items-start gap-3 p-4 rounded-xl" [class]="c.requiereProductoFisico ? 'bg-emerald-50' : 'bg-gray-50'">
+              <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" [class]="c.requiereProductoFisico ? 'bg-emerald-100' : 'bg-gray-100'">
+                <span class="text-lg">📦</span>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900 text-sm">Producto físico</p>
+                <p class="text-xs text-gray-500 mt-0.5">{{ c.requiereProductoFisico ? 'Se requiere mostrar producto físico' : 'No se requiere producto físico' }}</p>
+              </div>
+            </div>
+
+            <!-- Producto virtual -->
+            <div class="flex items-start gap-3 p-4 rounded-xl" [class]="c.requiereProductoVirtual ? 'bg-purple-50' : 'bg-gray-50'">
+              <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" [class]="c.requiereProductoVirtual ? 'bg-purple-100' : 'bg-gray-100'">
+                <span class="text-lg">💿</span>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900 text-sm">Producto virtual</p>
+                <p class="text-xs text-gray-500 mt-0.5">{{ c.requiereProductoVirtual ? 'Se requiere producto digital/virtual' : 'No se requiere producto virtual' }}</p>
+              </div>
+            </div>
+
+            <!-- Envío -->
+            <div class="flex items-start gap-3 p-4 rounded-xl" [class]="c.envioProductoIncluido ? 'bg-green-50' : 'bg-gray-50'">
+              <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" [class]="c.envioProductoIncluido ? 'bg-green-100' : 'bg-gray-100'">
+                <span class="text-lg">🚚</span>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900 text-sm">Envío de producto</p>
+                <p class="text-xs text-gray-500 mt-0.5">{{ c.envioProductoIncluido ? 'La marca se encarga del envío' : 'No incluye envío de producto' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ubicación -->
+          @if (c.esPresencial && (c.direccion || c.ciudad || c.provincia)) {
+            <div class="mt-4 p-4 bg-amber-50 rounded-xl flex items-start gap-3">
+              <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900 text-sm">Ubicación del evento</p>
+                <p class="text-sm text-gray-600 mt-0.5">
+                  @if (c.direccion) { {{ c.direccion }}, }
+                  @if (c.ciudad) { {{ c.ciudad }} }
+                  @if (c.provincia) { — {{ c.provincia }} }
+                </p>
+              </div>
+            </div>
+          }
+
+          <!-- Notas logísticas -->
+          @if (c.notasLogisticas) {
+            <div class="mt-4 p-4 bg-indigo-50 rounded-xl">
+              <p class="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-1">Notas logísticas</p>
+              <p class="text-sm text-gray-700 leading-relaxed">{{ c.notasLogisticas }}</p>
+            </div>
+          }
+        </div>
+
+        <!-- Categorías -->
+        @if (c.categorias?.length) {
+          <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+            <h2 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+              </svg>
+              Categorías
+            </h2>
+            <div class="flex flex-wrap gap-2">
+              @for (cat of c.categorias; track cat.idCategoria) {
+                <span class="bg-indigo-50 text-indigo-700 px-3.5 py-1.5 rounded-full text-sm font-medium border border-indigo-100">
+                  {{ cat.nombre }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Galería de imágenes -->
+        @if (c.imagenesProducto && c.imagenesProducto.length > 1) {
+          <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+            <h2 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              Imágenes del producto
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              @for (img of c.imagenesProducto; track img.idImagenCampana) {
+                <div class="rounded-xl overflow-hidden border border-gray-100 aspect-square">
+                  <img [src]="getImagenUrl(img.url)" [alt]="img.nombreArchivo" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Columna derecha: sidebar sticky -->
+      <div class="space-y-5">
+
+        <!-- Card de postulación -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden sticky top-6">
+          <!-- Presupuesto destacado -->
+          <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-center">
+            <p class="text-indigo-200 text-xs uppercase tracking-widest mb-1">Presupuesto</p>
+            <p class="text-4xl font-bold text-white">${{ c.presupuesto }}</p>
+          </div>
+
+          <div class="p-5 space-y-4">
+            <!-- Timeline de la campaña -->
+            <div>
+              <div class="flex items-center justify-between text-xs text-gray-500 mb-2">
+                <span>{{ c.fechaInicio | date:'dd MMM yyyy' }}</span>
+                <span>{{ c.fechaFin | date:'dd MMM yyyy' }}</span>
+              </div>
+              <div class="w-full bg-gray-100 rounded-full h-2">
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all" [style.width.%]="getTimeProgress()"></div>
+              </div>
+              <p class="text-xs text-gray-500 mt-1.5 text-center">
+                @if (getDaysLeft() > 0) {
+                  <span class="font-semibold text-indigo-600">{{ getDaysLeft() }} días</span> restantes de {{ getDaysTotal() }}
+                } @else {
+                  Campaña finalizada
+                }
+              </p>
+            </div>
+
+            <!-- Spots -->
+            @if (c.cantidadInfluencers) {
+              <div class="bg-gray-50 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Spots disponibles</span>
+                  <span class="text-sm font-bold" [class]="getSpotsDisponibles() > 0 ? 'text-green-600' : 'text-red-500'">
+                    {{ getSpotsDisponibles() }} / {{ c.cantidadInfluencers }}
+                  </span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                  <div class="h-2.5 rounded-full transition-all"
+                    [class]="getSpotsDisponibles() > 0 ? 'bg-green-500' : 'bg-red-400'"
+                    [style.width.%]="getSpotsPercent()"></div>
+                </div>
+                @if (getSpotsDisponibles() === 0) {
+                  <p class="text-xs text-red-500 mt-1.5 font-medium">Todos los spots están ocupados</p>
+                } @else if (getSpotsDisponibles() <= 2) {
+                  <p class="text-xs text-orange-500 mt-1.5 font-medium">¡Quedan pocos spots, postulate ya!</p>
+                }
+              </div>
+            }
+
+            <!-- Postulaciones recibidas -->
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+              <span class="text-sm text-gray-600">Postulaciones recibidas</span>
+              <span class="text-sm font-bold text-gray-900">{{ getPostulacionesCount() }}</span>
+            </div>
+
+            <!-- Info extra -->
+            <div class="space-y-2.5">
+              <div class="flex items-center gap-2.5 text-sm">
+                <span class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                  <span>{{ c.esPresencial ? '📍' : '💻' }}</span>
+                </span>
+                <span class="text-gray-700">{{ c.esPresencial ? 'Campaña presencial' : 'Campaña remota' }}</span>
+              </div>
+              <div class="flex items-center gap-2.5 text-sm">
+                <span class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                  <span>{{ c.campanaPublica ? '🌐' : '🔒' }}</span>
+                </span>
+                <span class="text-gray-700">{{ c.campanaPublica ? 'Campaña pública' : 'Campaña privada' }}</span>
+              </div>
+              @if (c.plataforma) {
+                <div class="flex items-center gap-2.5 text-sm">
+                  <span class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">📱</span>
+                  <span class="text-gray-700">{{ c.plataforma.nombrePlataforma }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- CTA Postularme -->
+            @if (isCampanaActiva() && haySpotsDisponibles()) {
+              <button (click)="postularme.emit(c)"
+                class="w-full py-3.5 rounded-xl font-bold text-sm transition-all bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 active:scale-[0.98] shadow-lg shadow-indigo-200">
+                🚀 Postularme a esta campaña
+              </button>
+            } @else if (!haySpotsDisponibles()) {
+              <div class="w-full py-3.5 rounded-xl font-bold text-sm text-center bg-gray-100 text-gray-400 cursor-not-allowed">
+                Sin spots disponibles
+              </div>
+            } @else {
+              <div class="w-full py-3.5 rounded-xl font-bold text-sm text-center bg-gray-100 text-gray-400 cursor-not-allowed">
+                Campaña no disponible
+              </div>
+            }
+
+            <p class="text-xs text-gray-400 text-center">Al postularte, la marca recibirá tu perfil y mensaje</p>
+          </div>
+        </div>
+
+        <!-- Estado de la campaña -->
+        @if (c.estadoCampana) {
+          <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+            <h3 class="text-sm font-bold text-gray-900 mb-2">Estado de la campaña</h3>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="w-2.5 h-2.5 rounded-full" [class]="c.estadoCampana.idEstadoCampana === 1 ? 'bg-green-500' : 'bg-gray-400'"></span>
+              <span class="font-semibold text-sm" [class]="c.estadoCampana.idEstadoCampana === 1 ? 'text-green-700' : 'text-gray-600'">{{ c.estadoCampana.nombre }}</span>
+            </div>
+            <p class="text-xs text-gray-500 leading-relaxed">{{ c.estadoCampana.descripcion }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
