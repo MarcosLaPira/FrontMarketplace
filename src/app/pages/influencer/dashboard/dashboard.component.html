@@ -2,13 +2,22 @@
   <app-navbar [displayName]="userProfile()?.nombre" [showExploreLink]="true" />
 
   <div class="max-w-7xl mx-auto px-4 py-8">
-    <app-influencer-social-connect class="mb-6" />
-    <div class="flex gap-2 mb-6 overflow-x-auto">
-      <button (click)="activeTab.set('perfil')" [class.bg-blue-600]="activeTab() === 'perfil'" [class.text-white]="activeTab() === 'perfil'" [class.bg-gray-200]="activeTab() !== 'perfil'" class="px-4 py-2 rounded-lg font-semibold transition whitespace-nowrap">PERFIL</button>
-      <button (click)="activeTab.set('estadisticas')" [class.bg-blue-600]="activeTab() === 'estadisticas'" [class.text-white]="activeTab() === 'estadisticas'" [class.bg-gray-200]="activeTab() !== 'estadisticas'" class="px-4 py-2 rounded-lg font-semibold transition whitespace-nowrap">ESTADISTICAS</button>
-      <button (click)="activeTab.set('costos')" [class.bg-blue-600]="activeTab() === 'costos'" [class.text-white]="activeTab() === 'costos'" [class.bg-gray-200]="activeTab() !== 'costos'" class="px-4 py-2 rounded-lg font-semibold transition whitespace-nowrap">COSTOS</button>
-      <button (click)="activeTab.set('campanas')" [class.bg-blue-600]="activeTab() === 'campanas'" [class.text-white]="activeTab() === 'campanas'" [class.bg-gray-200]="activeTab() !== 'campanas'" class="px-4 py-2 rounded-lg font-semibold transition whitespace-nowrap">CAMPANAS</button>
-      <button (click)="activeTab.set('postulaciones')" [class.bg-blue-600]="activeTab() === 'postulaciones'" [class.text-white]="activeTab() === 'postulaciones'" [class.bg-gray-200]="activeTab() !== 'postulaciones'" class="px-4 py-2 rounded-lg font-semibold transition whitespace-nowrap">POSTULACIONES</button>
+    <app-influencer-social-connect class="block mb-6" />
+
+    <!-- Tabs con design system -->
+    <div class="flex gap-1 mb-6 overflow-x-auto bg-white border border-gray-200 rounded-xl p-1 w-fit">
+      @for (tab of tabs; track tab.id) {
+        <button (click)="activeTab.set(tab.id)"
+          class="flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition whitespace-nowrap"
+          [class]="activeTab() === tab.id
+            ? 'bg-indigo-600 text-white shadow-sm'
+            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="tab.icon"/>
+          </svg>
+          {{ tab.label }}
+        </button>
+      }
     </div>
 
     @if (activeTab() === 'perfil') {
@@ -28,7 +37,7 @@
     }
 
     @if (activeTab() === 'postulaciones') {
-      <app-influencer-postulaciones [postulaciones]="misPostulaciones()" />
+      <app-influencer-postulaciones />
     }
   </div>
 </div>

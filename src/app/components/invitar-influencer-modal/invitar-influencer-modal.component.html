@@ -1,0 +1,115 @@
+<!-- Backdrop -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+     (click)="onBackdropClick($event)">
+
+  <!-- Panel -->
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]">
+
+    <!-- Header -->
+    <div class="px-6 pt-6 pb-4 border-b border-gray-100 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        @if (fotoPerfilUrl) {
+          <img [src]="fotoPerfilUrl" [alt]="influencer().nombreSocial"
+               class="w-10 h-10 rounded-xl object-cover" />
+        } @else {
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+            {{ initials }}
+          </div>
+        }
+        <div>
+          <p class="text-xs text-gray-400 font-medium">Invitar a</p>
+          <h2 class="text-base font-bold text-gray-900">{{ influencer().nombreSocial }}</h2>
+        </div>
+      </div>
+      <button (click)="cerrar()"
+              class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+
+      <!-- Selección de campaña -->
+      <div>
+        <p class="text-sm font-semibold text-gray-700 mb-3">Elegí una campaña</p>
+        @if (campanas().length === 0) {
+          <p class="text-sm text-gray-400 text-center py-4">No tenés campañas activas para invitar.</p>
+        } @else {
+          <div class="space-y-2">
+            @for (campana of campanas(); track campana.idCampana) {
+              <button type="button"
+                      (click)="seleccionarCampana(campana.idCampana)"
+                      class="w-full text-left rounded-xl border-2 px-4 py-3 transition-all"
+                      [class.border-indigo-500]="campanaSeleccionadaId() === campana.idCampana"
+                      [class.bg-indigo-50]="campanaSeleccionadaId() === campana.idCampana"
+                      [class.border-gray-200]="campanaSeleccionadaId() !== campana.idCampana"
+                      [class.hover:border-gray-300]="campanaSeleccionadaId() !== campana.idCampana">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="text-sm font-semibold text-gray-900 truncate">{{ campana.titulo }}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ campana.plataforma?.nombrePlataforma }}</p>
+                  </div>
+                  @if (campanaSeleccionadaId() === campana.idCampana) {
+                    <div class="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center">
+                      <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                      </svg>
+                    </div>
+                  }
+                </div>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Mensaje -->
+      <div>
+        <label class="text-sm font-semibold text-gray-700">
+          Mensaje <span class="text-gray-400 font-normal">(opcional)</span>
+        </label>
+        <textarea
+          [value]="mensaje()"
+          (input)="mensaje.set($any($event.target).value)"
+          rows="3"
+          placeholder="Contale por qué lo elegiste para esta campaña..."
+          class="w-full mt-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-colors">
+        </textarea>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 pb-6 pt-4 border-t border-gray-100 flex gap-3">
+      <button type="button"
+              (click)="cerrar()"
+              class="flex-1 px-4 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+        Cancelar
+      </button>
+      <button type="button"
+              (click)="confirmar()"
+              [disabled]="!canConfirmar() || enviando()"
+              class="flex-1 px-4 py-2.5 text-sm font-semibold text-white rounded-xl transition-all"
+              [class.bg-indigo-600]="canConfirmar() && !enviando()"
+              [class.hover:bg-indigo-700]="canConfirmar() && !enviando()"
+              [class.bg-gray-300]="!canConfirmar() || enviando()"
+              [class.cursor-not-allowed]="!canConfirmar() || enviando()">
+        @if (enviando()) {
+          <span class="flex items-center justify-center gap-2">
+            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+            </svg>
+            Enviando...
+          </span>
+        } @else {
+          Enviar invitación
+        }
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -40,6 +40,7 @@
       <app-campana-form
         [categorias]="categorias()"
         [plataformas]="plataformas()"
+        [tiposContenido]="tiposContenido()"
         (saved)="crearCampana($event)"
         (cancelled)="showNewForm.set(false)" />
     </div>
@@ -77,6 +78,7 @@
             <app-campana-form
               [categorias]="categorias()"
               [plataformas]="plataformas()"
+              [tiposContenido]="tiposContenido()"
               [campana]="campana"
               (saved)="guardarEdit($event)"
               (cancelled)="cancelEdit()" />

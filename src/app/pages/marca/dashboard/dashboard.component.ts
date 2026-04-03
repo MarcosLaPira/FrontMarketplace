@@ -24,6 +24,7 @@ export class DashboardComponent implements OnInit {
   userProfile = this.authService.userProfile;
   plataformas = this.catalogService.plataformas;
   categorias = this.catalogService.categorias;
+  tiposContenido = this.catalogService.tiposContenido;
 
   activeTab = signal<'campanas' | 'mi-marca' | 'influencers'>('campanas');
   marca = signal<Marca | null>(null);

@@ -61,7 +61,10 @@
       } @else {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           @for (influencer of influencers(); track influencer.idInfluencer) {
-            <app-influencer-card [influencer]="influencer" />
+            <app-influencer-card
+              [influencer]="influencer"
+              [showInvitar]="esMarca()"
+              (invitar)="abrirInvitar($event)" />
           } @empty {
             <p class="text-center py-8 text-gray-500 col-span-3">No hay influencers disponibles</p>
           }
@@ -70,3 +73,27 @@
     }
   </div>
 </div>
+
+<!-- Toast de resultado -->
+@if (invitacionExito()) {
+  <div class="fixed bottom-6 right-6 z-50 bg-green-600 text-white text-sm font-semibold px-5 py-3 rounded-xl shadow-lg flex items-center gap-2">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+    </svg>
+    {{ invitacionExito() }}
+  </div>
+}
+@if (invitacionError()) {
+  <div class="fixed bottom-6 right-6 z-50 bg-red-600 text-white text-sm font-semibold px-5 py-3 rounded-xl shadow-lg">
+    {{ invitacionError() }}
+  </div>
+}
+
+<!-- Modal de invitación -->
+@if (influencerParaInvitar()) {
+  <app-invitar-influencer-modal
+    [influencer]="influencerParaInvitar()!"
+    [campanas]="misCampanas()"
+    (confirmado)="confirmarInvitacion($event)"
+    (cerrado)="cerrarModal()" />
+}

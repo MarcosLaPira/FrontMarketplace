@@ -2,7 +2,7 @@ import { Component, inject, input, signal, computed } from '@angular/core';
 import { CampanaFormComponent } from '../../../../../components/campana-form/campana-form.component';
 import { CampanaCardComponent } from '../../../../../components/campana-card/campana-card.component';
 import { PostulacionListComponent } from '../../../../../components/postulacion-list/postulacion-list.component';
-import { Campana, Categoria, Plataforma, CampanaCreateRequest } from '../../../../../models/types';
+import { Campana, Categoria, Plataforma, TipoContenido, CampanaCreateRequest } from '../../../../../models/types';
 import { CampanaService } from '../../../../../services/campana.service';
 import { PostulacionService } from '../../../../../services/postulacion.service';
 
@@ -18,6 +18,7 @@ export class MarcaCampanasComponent {
 
   categorias = input.required<Categoria[]>();
   plataformas = input.required<Plataforma[]>();
+  tiposContenido = input.required<TipoContenido[]>();
   campanas = input.required<Campana[]>();
 
   showNewForm = signal(false);
@@ -45,7 +46,7 @@ export class MarcaCampanasComponent {
     );
   });
 
-  crearCampana(data: { form: any; categorias: number[]; imagenesProducto: File[] }): void {
+  crearCampana(data: { form: any; categorias: number[]; imagenesProducto: File[]; plataformaContenidos: any[]; entregables: any[]; invitaciones: any[] }): void {
     const request = this.buildRequest(data);
     this.campanaService.createCampana(request, data.imagenesProducto).subscribe({
       next: () => {
@@ -60,7 +61,7 @@ export class MarcaCampanasComponent {
     this.editingCampana.set(campana);
   }
 
-  guardarEdit(data: { form: any; categorias: number[]; imagenesProducto: File[] }): void {
+  guardarEdit(data: { form: any; categorias: number[]; imagenesProducto: File[]; plataformaContenidos: any[]; entregables: any[]; invitaciones: any[] }): void {
     const campana = this.editingCampana();
     if (!campana) return;
 
@@ -107,7 +108,7 @@ export class MarcaCampanasComponent {
     });
   }
 
-  private buildRequest(data: { form: any; categorias: number[]; imagenesProducto: File[] }): CampanaCreateRequest {
+  private buildRequest(data: { form: any; categorias: number[]; imagenesProducto: File[]; plataformaContenidos: any[]; entregables: any[]; invitaciones: any[] }): CampanaCreateRequest {
     const val = data.form;
     return {
       titulo: val.titulo,
@@ -126,7 +127,12 @@ export class MarcaCampanasComponent {
       envioProductoIncluido: val.envioProductoIncluido,
       notasLogisticas: val.notasLogisticas || undefined,
       campanaPublica: val.campanaPublica,
-      cantidadInfluencers: Number(val.cantidadInfluencers)
+      cantidadInfluencers: Number(val.cantidadInfluencers),
+      minimoSeguidores: val.minimoSeguidores ? Number(val.minimoSeguidores) : undefined,
+      esExcluyenteMinimoSeguidores: val.esExcluyenteMinimoSeguidores ?? false,
+      plataformaContenidos: data.plataformaContenidos.length > 0 ? data.plataformaContenidos : undefined,
+      entregables: data.entregables.length > 0 ? data.entregables : undefined,
+      invitaciones: data.invitaciones.length > 0 ? data.invitaciones : undefined
     };
   }
 

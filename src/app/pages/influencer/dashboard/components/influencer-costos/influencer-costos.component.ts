@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { InfluencerCosto } from '../../../../../models/types';
 import { InfluencerService } from '../../../../../services/influencer.service';
@@ -16,6 +16,9 @@ export class InfluencerCostosComponent {
   private catalogService = inject(CatalogService);
 
   plataformas = this.catalogService.plataformas;
+  saving = signal(false);
+  successMsg = signal('');
+  errorMsg = signal('');
 
   costForm = this.fb.nonNullable.group({
     idPlataforma: ['', Validators.required],
@@ -26,6 +29,9 @@ export class InfluencerCostosComponent {
 
   agregarCosto(): void {
     if (this.costForm.valid) {
+      this.saving.set(true);
+      this.successMsg.set('');
+      this.errorMsg.set('');
       const val = this.costForm.getRawValue();
       const costo: InfluencerCosto = {
         idPlataforma: Number(val.idPlataforma),
@@ -34,8 +40,15 @@ export class InfluencerCostosComponent {
         canje: val.canje
       };
       this.influencerService.agregarCosto(costo.idPlataforma, costo).subscribe({
-        next: () => this.costForm.reset(),
-        error: (err: any) => console.error('Error adding cost:', err)
+        next: () => {
+          this.saving.set(false);
+          this.successMsg.set('Costo guardado correctamente');
+          this.costForm.reset();
+        },
+        error: () => {
+          this.saving.set(false);
+          this.errorMsg.set('Error al guardar el costo. Intentá de nuevo.');
+        }
       });
     }
   }

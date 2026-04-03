@@ -3,25 +3,34 @@ import { FormsModule } from '@angular/forms';
 import { CategorySelectorComponent } from '../../../../../components/category-selector/category-selector.component';
 import { InfluencerCardComponent } from '../../../../../components/influencer-card/influencer-card.component';
 import { InfluencerDetailPanelComponent } from '../../../../../components/influencer-detail-panel/influencer-detail-panel.component';
-import { Influencer, Categoria, Plataforma, InfluencerFilter } from '../../../../../models/types';
+import { InvitarInfluencerModalComponent } from '../../../../../components/invitar-influencer-modal/invitar-influencer-modal.component';
+import { Influencer, Categoria, Plataforma, InfluencerFilter, Campana } from '../../../../../models/types';
 import { InfluencerService } from '../../../../../services/influencer.service';
+import { CampanaService } from '../../../../../services/campana.service';
 
 @Component({
   selector: 'app-marca-influencers',
   standalone: true,
-  imports: [FormsModule, CategorySelectorComponent, InfluencerCardComponent, InfluencerDetailPanelComponent],
+  imports: [FormsModule, CategorySelectorComponent, InfluencerCardComponent, InfluencerDetailPanelComponent, InvitarInfluencerModalComponent],
   templateUrl: './marca-influencers.component.html'
 })
 export class MarcaInfluencersComponent {
   private influencerService = inject(InfluencerService);
+  private campanaService = inject(CampanaService);
 
   categorias = input.required<Categoria[]>();
   plataformas = input.required<Plataforma[]>();
+  misCampanas = input<Campana[]>([]);
 
   influencers = signal<Influencer[]>([]);
   loading = signal(false);
   selectedInfluencerId = signal<number | null>(null);
   showFilters = signal(false);
+
+  // Invitación
+  influencerParaInvitar = signal<Influencer | null>(null);
+  invitacionExito = signal<string>('');
+  invitacionError = signal<string>('');
 
   // Filtros
   searchName = signal('');
@@ -123,5 +132,32 @@ export class MarcaInfluencersComponent {
 
   closeDetail(): void {
     this.selectedInfluencerId.set(null);
+  }
+
+  abrirInvitar(influencer: Influencer): void {
+    this.invitacionExito.set('');
+    this.invitacionError.set('');
+    this.influencerParaInvitar.set(influencer);
+  }
+
+  cerrarModal(): void {
+    this.influencerParaInvitar.set(null);
+  }
+
+  confirmarInvitacion(data: { idCampana: number; mensaje: string }): void {
+    const influencer = this.influencerParaInvitar();
+    if (!influencer) return;
+
+    this.campanaService.invitarInfluencer(data.idCampana, influencer.idInfluencer, data.mensaje).subscribe({
+      next: () => {
+        this.influencerParaInvitar.set(null);
+        this.invitacionExito.set(`Invitación enviada a ${influencer.nombreSocial}`);
+        setTimeout(() => this.invitacionExito.set(''), 4000);
+      },
+      error: () => {
+        this.invitacionError.set('No se pudo enviar la invitación. Intentá de nuevo.');
+        setTimeout(() => this.invitacionError.set(''), 4000);
+      }
+    });
   }
 }

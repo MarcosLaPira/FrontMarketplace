@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Plataforma, InfluencerEstadistica } from '../../../../../models/types';
 import { InfluencerService } from '../../../../../services/influencer.service';
@@ -16,6 +16,9 @@ export class InfluencerEstadisticasComponent {
   private catalogService = inject(CatalogService);
 
   plataformas = this.catalogService.plataformas;
+  saving = signal(false);
+  successMsg = signal('');
+  errorMsg = signal('');
 
   estadisticasForm = this.fb.nonNullable.group({
     idPlataforma: ['', Validators.required],
@@ -26,6 +29,9 @@ export class InfluencerEstadisticasComponent {
 
   agregarEstadistica(): void {
     if (this.estadisticasForm.valid) {
+      this.saving.set(true);
+      this.successMsg.set('');
+      this.errorMsg.set('');
       const val = this.estadisticasForm.getRawValue();
       const estadistica: InfluencerEstadistica = {
         idPlataforma: Number(val.idPlataforma),
@@ -34,8 +40,15 @@ export class InfluencerEstadisticasComponent {
         engagementRate: Number(val.engagementRate)
       };
       this.influencerService.updateEstadisticas(estadistica.idPlataforma, estadistica).subscribe({
-        next: () => this.estadisticasForm.reset(),
-        error: (err: any) => console.error('Error adding statistics:', err)
+        next: () => {
+          this.saving.set(false);
+          this.successMsg.set('Estadísticas actualizadas correctamente');
+          this.estadisticasForm.reset();
+        },
+        error: () => {
+          this.saving.set(false);
+          this.errorMsg.set('Error al guardar. Intentá de nuevo.');
+        }
       });
     }
   }

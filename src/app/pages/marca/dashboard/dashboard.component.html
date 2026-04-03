@@ -34,6 +34,7 @@
       <app-marca-campanas
         [categorias]="categorias()"
         [plataformas]="plataformas()"
+        [tiposContenido]="tiposContenido()"
         [campanas]="misCampanas()" />
     }
 
@@ -46,7 +47,7 @@
     }
 
     @if (activeTab() === 'influencers') {
-      <app-marca-influencers [categorias]="categorias()" [plataformas]="plataformas()" />
+      <app-marca-influencers [categorias]="categorias()" [plataformas]="plataformas()" [misCampanas]="misCampanas()" />
     }
   </div>
 </div>

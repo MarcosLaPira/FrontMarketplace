@@ -190,15 +190,63 @@ export interface Campana {
   campanaPublica?: boolean;
   cantidadInfluencers?: number;
   cantidadInfluencersAceptados?: number;
+  minimoSeguidores?: number;
+  esExcluyenteMinimoSeguidores?: boolean;
   categorias?: Categoria[];
   postulaciones?: Postulacion[];
   imagenesProducto?: ImagenCampana[];
+  plataformaContenidos?: CampanaPlataformaContenido[];
+  entregables?: CampanaEntregable[];
+  invitacionesCampana?: InvitacionCampana[];
 }
 
 export interface ImagenCampana {
   idImagenCampana: number;
   url: string;
   nombreArchivo: string;
+}
+
+export interface PlataformaContenidoInput {
+  idPlataforma: number;
+  idTipoContenido: number;
+  precio: number;
+}
+
+export interface EntregableInput {
+  descripcion: string;
+  fechaLimite: string;
+  orden: number;
+}
+
+export interface InvitacionInput {
+  idInfluencer: number;
+  mensaje: string | null;
+}
+
+// Respuestas del backend (GET campañas)
+export interface CampanaPlataformaContenido {
+  idCampanaPlataformaContenido: number;
+  idPlataforma: number;
+  nombrePlataforma: string;
+  idTipoContenido: number;
+  nombreTipoContenido: string;
+  precio: number;
+}
+
+export interface CampanaEntregable {
+  idEntregable: number;
+  descripcion: string;
+  fechaLimite: string;
+  orden: number;
+}
+
+export interface InvitacionCampana {
+  idInvitacionCampana: number;
+  idInfluencer: number;
+  nombreSocialInfluencer: string;
+  estado: string;
+  mensaje: string | null;
+  fechaInvitacion: string;
 }
 
 export interface CampanaCreateRequest {
@@ -219,6 +267,11 @@ export interface CampanaCreateRequest {
   notasLogisticas?: string;
   campanaPublica?: boolean;
   cantidadInfluencers?: number;
+  minimoSeguidores?: number | null;
+  esExcluyenteMinimoSeguidores?: boolean;
+  plataformaContenidos?: PlataformaContenidoInput[];
+  entregables?: EntregableInput[];
+  invitaciones?: InvitacionInput[];
 }
 
 // Postulaciones
@@ -294,6 +347,11 @@ export interface Plataforma {
   nombrePlataforma: string;
 }
 
+export interface TipoContenido {
+  idTipoContenido: number;
+  nombre: string;
+}
+
 export interface EstadoCampana {
   idEstadoCampana: number;
   nombre: string;
@@ -304,6 +362,32 @@ export interface EstadoPostulacion {
   idEstadoPostulacion: number;
   nombre: string;
   descripcion: string;
+}
+
+// Invitaciones recibidas por el influencer
+export interface InvitacionInfluencer {
+  idInvitacionCampana: number;
+  idCampana: number;
+  campana: {
+    idCampana: number;
+    titulo: string;
+    descripcion: string;
+    presupuesto: number;
+    fechaInicio: string;
+    fechaFin: string;
+    marca?: {
+      idMarca: number;
+      nombreComercial: string;
+    };
+    plataforma?: {
+      idPlataforma: number;
+      nombrePlataforma: string;
+    };
+  };
+  idInfluencer: number;
+  estado: string;
+  mensaje: string;
+  fechaInvitacion: string;
 }
 
 // Respuestas paginadas

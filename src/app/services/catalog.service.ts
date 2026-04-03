@@ -1,7 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { API_BASE_URL } from '../shared/constants';
-import { Categoria, Plataforma, EstadoCampana } from '../models/types';
+import { Categoria, Plataforma, EstadoCampana, TipoContenido } from '../models/types';
 
 @Injectable({ providedIn: 'root' })
 export class CatalogService {
@@ -11,6 +11,7 @@ export class CatalogService {
   plataformas = signal<Plataforma[]>([]);
   categorias = signal<Categoria[]>([]);
   estadosCampana = signal<EstadoCampana[]>([]);
+  tiposContenido = signal<TipoContenido[]>([]);
 
   loadCatalogs(): void {
     this.http.get<any>(`${this.apiUrl}/plataformas`).subscribe({
@@ -36,6 +37,13 @@ export class CatalogService {
         this.estadosCampana.set(items);
       },
       error: (err) => console.error('Error loading estados campana:', err)
+    });
+    this.http.get<any>(`${this.apiUrl}/tipos-contenido`).subscribe({
+      next: (data) => {
+        const items = Array.isArray(data) ? data : (data?.value || data?.Value || []);
+        this.tiposContenido.set(items);
+      },
+      error: (err) => console.error('Error loading tipos contenido:', err)
     });
   }
 

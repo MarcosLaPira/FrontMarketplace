@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { Influencer } from '../../models/types';
 import { DecimalPipe } from '@angular/common';
 import { API_BASE_URL } from '../../shared/constants';
@@ -11,6 +11,9 @@ import { API_BASE_URL } from '../../shared/constants';
 })
 export class InfluencerCardComponent {
   influencer = input.required<Influencer>();
+  showInvitar = input<boolean>(false);
+
+  invitar = output<Influencer>();
 
   get initials(): string {
     return this.influencer().nombreSocial
