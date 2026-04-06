@@ -72,6 +72,21 @@ export interface InfluencerCosto {
   costoMin: number;
   costoMax: number;
   canje: boolean;
+  idTipoContenido: number;
+}
+
+export interface InfluencerCostoResponse {
+  idInfluencerCosto: number;
+  idInfluencer: number;
+  idPlataforma: number;
+  nombrePlataforma: string;
+  idTipoContenido: number;
+  nombreTipoContenido: string;
+  costoMin: number;
+  costoMax: number;
+  canje: boolean;
+  fechaAlta: string;
+  fechaActualizacion: string;
 }
 
 export interface InfluencerEstadistica {

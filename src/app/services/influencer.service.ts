@@ -5,6 +5,7 @@ import {
   Influencer,
   InfluencerDetalle,
   InfluencerCosto,
+  InfluencerCostoResponse,
   InfluencerEstadistica,
   InfluencerFilter
 } from '../models/types';
@@ -91,17 +92,25 @@ export class InfluencerService {
     return this.http.patch(`${this.apiUrl}/ActualizarInfluencer`, formData);
   }
 
+  // Get influencer costs
+  obtenerCostos(): Observable<InfluencerCostoResponse[]> {
+    return this.http.get<InfluencerCostoResponse[]>(`${this.apiUrl}/ObtenerCostosDeInfluencer`);
+  }
+
   // Add cost per platform
-  agregarCosto(idPlataforma: number, costo: InfluencerCosto): Observable<any> {
-    return this.http.post(`${this.apiUrl}/AgregarCostoDeInfluncerPorPlataforma`, costo, {
-      params: new HttpParams().set('IdPlataforma', idPlataforma.toString())
-    });
+  agregarCosto(costo: InfluencerCosto): Observable<any> {
+    return this.http.post(`${this.apiUrl}/AgregarCostoDeInfluncerPorPlataforma`, costo);
   }
 
   // Update cost per platform
-  actualizarCosto(idPlataforma: number, costo: InfluencerCosto): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/ActualizarCostoDeInfluncerPorPlataforma`, costo, {
-      params: new HttpParams().set('IdPlataforma', idPlataforma.toString())
+  actualizarCosto(costo: InfluencerCosto): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/ActualizarCostoDeInfluncerPorPlataforma`, costo);
+  }
+
+  // Delete cost per platform
+  eliminarCosto(idPlataforma: number, idTipoContenido: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/EliminarCostoPorPlataforma`, {
+      body: { idPlataforma, idTipoContenido }
     });
   }
 }
