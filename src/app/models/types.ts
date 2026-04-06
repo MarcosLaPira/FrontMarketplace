@@ -324,7 +324,7 @@ export interface CampanaFilter {
   idMarca?: number;
   idPlataforma?: number;
   idEstadoCampana?: number;
-  idCategoria?: number;
+  idsCategorias?: number[];
   esPresencial?: boolean;
   requiereProductoFisico?: boolean;
   requiereProductoVirtual?: boolean;

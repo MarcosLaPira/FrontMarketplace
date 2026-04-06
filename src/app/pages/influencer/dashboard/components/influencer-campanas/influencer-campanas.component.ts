@@ -37,7 +37,7 @@ export class InfluencerCampanasComponent implements OnInit {
 
   // Filtros
   filtroPlataforma = signal<number | undefined>(undefined);
-  filtroCategoria = signal<number | undefined>(undefined);
+  filtroCategorias = signal<number[]>([]);
   filtroPresencial = signal<boolean | undefined>(undefined);
   filtroProductoFisico = signal<boolean | undefined>(undefined);
   filtroEnvioIncluido = signal<boolean | undefined>(undefined);
@@ -53,7 +53,7 @@ export class InfluencerCampanasComponent implements OnInit {
   activeFiltersCount = computed(() => {
     let count = 0;
     if (this.filtroPlataforma()) count++;
-    if (this.filtroCategoria()) count++;
+    if (this.filtroCategorias().length) count++;
     if (this.filtroPresencial() !== undefined) count++;
     if (this.filtroProductoFisico() !== undefined) count++;
     if (this.filtroEnvioIncluido() !== undefined) count++;
@@ -81,7 +81,7 @@ export class InfluencerCampanasComponent implements OnInit {
     this.loading.set(true);
     const filters: CampanaFilter = {};
     if (this.filtroPlataforma()) filters.idPlataforma = this.filtroPlataforma();
-    if (this.filtroCategoria()) filters.idCategoria = this.filtroCategoria();
+    if (this.filtroCategorias().length) filters.idsCategorias = this.filtroCategorias();
     if (this.filtroPresencial() !== undefined) filters.esPresencial = this.filtroPresencial();
     if (this.filtroProductoFisico() !== undefined) filters.requiereProductoFisico = this.filtroProductoFisico();
     if (this.filtroEnvioIncluido() !== undefined) filters.envioProductoIncluido = this.filtroEnvioIncluido();
@@ -98,9 +98,18 @@ export class InfluencerCampanasComponent implements OnInit {
     this.loadCampanas();
   }
 
+  toggleCategoria(id: number): void {
+    const current = this.filtroCategorias();
+    if (current.includes(id)) {
+      this.filtroCategorias.set(current.filter(c => c !== id));
+    } else {
+      this.filtroCategorias.set([...current, id]);
+    }
+  }
+
   clearFilters(): void {
     this.filtroPlataforma.set(undefined);
-    this.filtroCategoria.set(undefined);
+    this.filtroCategorias.set([]);
     this.filtroPresencial.set(undefined);
     this.filtroProductoFisico.set(undefined);
     this.filtroEnvioIncluido.set(undefined);

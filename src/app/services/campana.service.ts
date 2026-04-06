@@ -21,7 +21,12 @@ export class CampanaService {
     let params = new HttpParams();
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
+        if (value === undefined || value === null || value === '') return;
+        if (Array.isArray(value)) {
+          for (const v of value) {
+            params = params.append(key, String(v));
+          }
+        } else {
           params = params.set(key, String(value));
         }
       });

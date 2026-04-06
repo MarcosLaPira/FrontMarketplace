@@ -56,10 +56,12 @@
       <!-- Overlay content -->
       <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8">
         <div class="flex flex-wrap items-center gap-2 mb-3">
-          @if (c.plataforma) {
-            <span class="bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full border border-white/20">
-              {{ c.plataforma.nombrePlataforma }}
-            </span>
+          @if (c.plataformaContenidos?.length) {
+            @for (pc of c.plataformaContenidos; track pc.idCampanaPlataformaContenido) {
+              <span class="bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full border border-white/20">
+                {{ pc.nombrePlataforma }} · {{ pc.nombreTipoContenido }}
+              </span>
+            }
           }
           @if (c.estadoCampana) {
             <span class="text-xs font-bold px-3 py-1 rounded-full backdrop-blur-md border border-white/20"
@@ -200,6 +202,34 @@
           </div>
         }
 
+        <!-- Plataformas y contenidos -->
+        @if (c.plataformaContenidos?.length) {
+          <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+            <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+              </svg>
+              Plataformas y contenidos
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              @for (pc of c.plataformaContenidos; track pc.idCampanaPlataformaContenido) {
+                <div class="flex items-center gap-3 p-4 rounded-xl bg-gray-50 border border-gray-100">
+                  <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span class="text-lg">📱</span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-gray-900 text-sm">{{ pc.nombrePlataforma }}</p>
+                    <p class="text-xs text-gray-500">{{ pc.nombreTipoContenido }}</p>
+                  </div>
+                  @if (pc.precio) {
+                    <span class="text-sm font-bold text-indigo-600">${{ pc.precio }}</span>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+
         <!-- Galería de imágenes -->
         @if (c.imagenesProducto && c.imagenesProducto.length > 1) {
           <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
@@ -292,11 +322,19 @@
                 </span>
                 <span class="text-gray-700">{{ c.campanaPublica ? 'Campaña pública' : 'Campaña privada' }}</span>
               </div>
-              @if (c.plataforma) {
-                <div class="flex items-center gap-2.5 text-sm">
-                  <span class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">📱</span>
-                  <span class="text-gray-700">{{ c.plataforma.nombrePlataforma }}</span>
-                </div>
+              @if (c.plataformaContenidos?.length) {
+                @for (pc of c.plataformaContenidos; track pc.idCampanaPlataformaContenido) {
+                  <div class="flex items-center gap-2.5 text-sm">
+                    <span class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">📱</span>
+                    <div>
+                      <span class="text-gray-700">{{ pc.nombrePlataforma }}</span>
+                      <span class="text-gray-400"> · {{ pc.nombreTipoContenido }}</span>
+                      @if (pc.precio) {
+                        <span class="text-indigo-600 font-semibold"> — ${{ pc.precio }}</span>
+                      }
+                    </div>
+                  </div>
+                }
               }
             </div>
 

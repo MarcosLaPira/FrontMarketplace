@@ -91,16 +91,28 @@
           </select>
         </div>
 
-        <!-- Categoría -->
-        <div>
-          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Categoría</label>
-          <select [ngModel]="filtroCategoria()" (ngModelChange)="filtroCategoria.set($event || undefined)"
-            class="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
-            <option [ngValue]="undefined">Todas</option>
-            @for (c of categorias(); track c.idCategoria) {
-              <option [ngValue]="c.idCategoria">{{ c.nombre }}</option>
+        <!-- Categorías -->
+        <div class="sm:col-span-2 lg:col-span-4">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Categorías</label>
+            @if (filtroCategorias().length > 0) {
+              <button (click)="filtroCategorias.set([])" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors">
+                Limpiar ({{ filtroCategorias().length }})
+              </button>
             }
-          </select>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            @for (c of categorias(); track c.idCategoria) {
+              <button (click)="toggleCategoria(c.idCategoria)" type="button"
+                class="px-3 py-1.5 rounded-lg text-xs font-medium border transition flex items-center gap-1.5"
+                [class]="filtroCategorias().includes(c.idCategoria) ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'">
+                @if (filtroCategorias().includes(c.idCategoria)) {
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                }
+                {{ c.nombre }}
+              </button>
+            }
+          </div>
         </div>
 
         <!-- Ciudad -->
@@ -179,10 +191,14 @@
                 <div class="h-40 overflow-hidden relative">
                   <img [src]="getImagenUrl(campana)" alt="Producto" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                  @if (campana.plataforma) {
-                    <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-xs font-bold px-2.5 py-1 rounded-full text-gray-800">
-                      {{ campana.plataforma.nombrePlataforma }}
-                    </span>
+                  @if (campana.plataformaContenidos?.length) {
+                    <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                      @for (pc of campana.plataformaContenidos; track pc.idCampanaPlataformaContenido) {
+                        <span class="bg-white/90 backdrop-blur-sm text-xs font-bold px-2.5 py-1 rounded-full text-gray-800">
+                          {{ pc.nombrePlataforma }} · {{ pc.nombreTipoContenido }}
+                        </span>
+                      }
+                    </div>
                   }
                   @if (getDaysLeft(campana.fechaFin) <= 7 && getDaysLeft(campana.fechaFin) > 0) {
                     <span class="absolute top-3 right-3 bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
@@ -192,10 +208,14 @@
                 </div>
               } @else {
                 <div class="h-24 bg-gradient-to-br from-indigo-500 to-purple-500 relative">
-                  @if (campana.plataforma) {
-                    <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-xs font-bold px-2.5 py-1 rounded-full text-gray-800">
-                      {{ campana.plataforma.nombrePlataforma }}
-                    </span>
+                  @if (campana.plataformaContenidos?.length) {
+                    <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                      @for (pc of campana.plataformaContenidos; track pc.idCampanaPlataformaContenido) {
+                        <span class="bg-white/90 backdrop-blur-sm text-xs font-bold px-2.5 py-1 rounded-full text-gray-800">
+                          {{ pc.nombrePlataforma }} · {{ pc.nombreTipoContenido }}
+                        </span>
+                      }
+                    </div>
                   }
                   @if (getDaysLeft(campana.fechaFin) <= 7 && getDaysLeft(campana.fechaFin) > 0) {
                     <span class="absolute top-3 right-3 bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
@@ -280,8 +300,10 @@
                       @if (campana.marca) {
                         <span class="text-xs font-semibold text-indigo-600 uppercase">{{ campana.marca }}</span>
                       }
-                      @if (campana.plataforma) {
-                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ campana.plataforma.nombrePlataforma }}</span>
+                      @if (campana.plataformaContenidos?.length) {
+                        @for (pc of campana.plataformaContenidos; track pc.idCampanaPlataformaContenido) {
+                          <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ pc.nombrePlataforma }} · {{ pc.nombreTipoContenido }}</span>
+                        }
                       }
                       @if (getDaysLeft(campana.fechaFin) <= 7 && getDaysLeft(campana.fechaFin) > 0) {
                         <span class="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-semibold">{{ getDaysLeft(campana.fechaFin) }}d restantes</span>
@@ -325,8 +347,14 @@
 
                   <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                     <div>
-                      <p class="text-gray-400 text-xs">Plataforma</p>
-                      <p class="font-semibold">{{ campana.plataforma?.nombrePlataforma }}</p>
+                      <p class="text-gray-400 text-xs">Plataformas</p>
+                      @if (campana.plataformaContenidos?.length) {
+                        @for (pc of campana.plataformaContenidos; track pc.idCampanaPlataformaContenido) {
+                          <p class="font-semibold">{{ pc.nombrePlataforma }} — {{ pc.nombreTipoContenido }}</p>
+                        }
+                      } @else {
+                        <p class="font-semibold">—</p>
+                      }
                     </div>
                     <div>
                       <p class="text-gray-400 text-xs">Presupuesto</p>
