@@ -7,6 +7,7 @@ import {
   Plataforma,
   TipoContenido,
   Campana,
+  Influencer,
   PlataformaContenidoInput,
   EntregableInput,
   InvitacionInput,
@@ -391,10 +392,10 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
     this.invInfluencerSeleccionado.set(null);
 
     this.influencerService.getInfluencers({ search: nombre }).subscribe({
-      next: (lista) => {
-        const filtrados = lista
-          .filter(i => !this.invitaciones().some(inv => inv.idInfluencer === i.idInfluencer))
-          .map(i => ({ idInfluencer: i.idInfluencer, nombreSocial: i.nombreSocial }));
+      next: (res) => {
+        const filtrados = (res.items || [])
+          .filter((i: Influencer) => !this.invitaciones().some(inv => inv.idInfluencer === i.idInfluencer))
+          .map((i: Influencer) => ({ idInfluencer: i.idInfluencer, nombreSocial: i.nombreSocial }));
         this.invResultados.set(filtrados);
         if (filtrados.length === 0) {
           this.invError.set('No se encontraron influencers con ese nombre.');

@@ -339,22 +339,24 @@
             </div>
 
             <!-- CTA Postularme -->
-            @if (isCampanaActiva() && haySpotsDisponibles()) {
+            @if (!hidePostular() && isCampanaActiva() && haySpotsDisponibles()) {
               <button (click)="postularme.emit(c)"
                 class="w-full py-3.5 rounded-xl font-bold text-sm transition-all bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 active:scale-[0.98] shadow-lg shadow-indigo-200">
                 🚀 Postularme a esta campaña
               </button>
-            } @else if (!haySpotsDisponibles()) {
+            } @else if (!hidePostular() && !haySpotsDisponibles()) {
               <div class="w-full py-3.5 rounded-xl font-bold text-sm text-center bg-gray-100 text-gray-400 cursor-not-allowed">
                 Sin spots disponibles
               </div>
-            } @else {
+            } @else if (!hidePostular()) {
               <div class="w-full py-3.5 rounded-xl font-bold text-sm text-center bg-gray-100 text-gray-400 cursor-not-allowed">
                 Campaña no disponible
               </div>
             }
 
-            <p class="text-xs text-gray-400 text-center">Al postularte, la marca recibirá tu perfil y mensaje</p>
+            @if (!hidePostular()) {
+              <p class="text-xs text-gray-400 text-center">Al postularte, la marca recibirá tu perfil y mensaje</p>
+            }
           </div>
         </div>
 

@@ -4,7 +4,7 @@ import { CategorySelectorComponent } from '../../../../../components/category-se
 import { InfluencerCardComponent } from '../../../../../components/influencer-card/influencer-card.component';
 import { InfluencerDetailPanelComponent } from '../../../../../components/influencer-detail-panel/influencer-detail-panel.component';
 import { InvitarInfluencerModalComponent } from '../../../../../components/invitar-influencer-modal/invitar-influencer-modal.component';
-import { Influencer, Categoria, Plataforma, InfluencerFilter, Campana } from '../../../../../models/types';
+import { Influencer, Categoria, Plataforma, InfluencerFilter, Campana, PaginatedResponse } from '../../../../../models/types';
 import { InfluencerService } from '../../../../../services/influencer.service';
 import { CampanaService } from '../../../../../services/campana.service';
 
@@ -26,6 +26,12 @@ export class MarcaInfluencersComponent {
   loading = signal(false);
   selectedInfluencerId = signal<number | null>(null);
   showFilters = signal(false);
+
+  // Paginación
+  currentPage = signal(1);
+  totalPages = signal(0);
+  totalCount = signal(0);
+  pageSize = 20;
 
   // Invitación
   influencerParaInvitar = signal<Influencer | null>(null);
@@ -61,6 +67,7 @@ export class MarcaInfluencersComponent {
   }
 
   onSearch(): void {
+    this.currentPage.set(1);
     this.loadInfluencers();
   }
 
@@ -76,6 +83,7 @@ export class MarcaInfluencersComponent {
     this.filterSoloVerificados.set(false);
     this.filterGeneroAudiencia.set('');
     this.filterRatingMin.set(null);
+    this.currentPage.set(1);
     this.loadInfluencers();
   }
 
@@ -96,7 +104,7 @@ export class MarcaInfluencersComponent {
 
   loadInfluencers(): void {
     this.loading.set(true);
-    const filters: InfluencerFilter = { pageSize: 20 };
+    const filters: InfluencerFilter = { pageSize: this.pageSize, page: this.currentPage() };
 
     const cats = this.filterCategorias();
     if (cats.length) filters.idsCategorias = cats;
@@ -115,8 +123,11 @@ export class MarcaInfluencersComponent {
     if (this.filterRatingMin() != null) filters.ratingMin = this.filterRatingMin()!;
 
     this.influencerService.getInfluencers(filters).subscribe({
-      next: (data: Influencer[]) => {
-        this.influencers.set(data || []);
+      next: (res) => {
+        this.influencers.set(res.items || []);
+        this.totalCount.set(res.totalCount);
+        this.totalPages.set(res.totalPages);
+        this.currentPage.set(res.page);
         this.loading.set(false);
       },
       error: (err: any) => {
@@ -128,6 +139,24 @@ export class MarcaInfluencersComponent {
 
   openDetail(id: number): void {
     this.selectedInfluencerId.set(id);
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages() || page === this.currentPage()) return;
+    this.currentPage.set(page);
+    this.loadInfluencers();
+  }
+
+  get visiblePages(): number[] {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    const pages: number[] = [];
+    const start = Math.max(1, current - 2);
+    const end = Math.min(total, current + 2);
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
   }
 
   closeDetail(): void {

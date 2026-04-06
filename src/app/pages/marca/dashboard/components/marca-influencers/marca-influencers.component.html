@@ -25,7 +25,7 @@
     <!-- Quick stats -->
     <div class="flex flex-wrap gap-4 mt-5 text-sm">
       <span class="bg-white/15 backdrop-blur-sm px-3 py-1.5 rounded-lg">
-        <span class="font-bold">{{ influencers().length }}</span> influencers encontrados
+        <span class="font-bold">{{ totalCount() }}</span> influencers encontrados
       </span>
       @if (activeFilterCount > 0) {
         <button (click)="clearFilters()" class="bg-white/15 backdrop-blur-sm px-3 py-1.5 rounded-lg hover:bg-white/25 transition flex items-center gap-1.5">
@@ -196,6 +196,47 @@
           </div>
         }
       </div>
+
+      <!-- Paginación -->
+      @if (totalPages() > 1) {
+        <div class="flex items-center justify-center gap-2 pt-6">
+          <button (click)="goToPage(currentPage() - 1)"
+            [disabled]="currentPage() === 1"
+            class="px-3 py-2 rounded-lg border text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed"
+            [class]="currentPage() === 1 ? 'bg-gray-50 border-gray-200 text-gray-400' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+
+          @if (visiblePages[0] > 1) {
+            <button (click)="goToPage(1)" class="px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 transition">1</button>
+            @if (visiblePages[0] > 2) {
+              <span class="px-1 text-gray-400 text-sm">...</span>
+            }
+          }
+
+          @for (page of visiblePages; track page) {
+            <button (click)="goToPage(page)"
+              class="px-3 py-2 rounded-lg border text-sm font-medium transition"
+              [class]="page === currentPage() ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'">
+              {{ page }}
+            </button>
+          }
+
+          @if (visiblePages[visiblePages.length - 1] < totalPages()) {
+            @if (visiblePages[visiblePages.length - 1] < totalPages() - 1) {
+              <span class="px-1 text-gray-400 text-sm">...</span>
+            }
+            <button (click)="goToPage(totalPages())" class="px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 transition">{{ totalPages() }}</button>
+          }
+
+          <button (click)="goToPage(currentPage() + 1)"
+            [disabled]="currentPage() === totalPages()"
+            class="px-3 py-2 rounded-lg border text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed"
+            [class]="currentPage() === totalPages() ? 'bg-gray-50 border-gray-200 text-gray-400' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      }
     } @else {
       <!-- Empty state -->
       <div class="flex flex-col items-center justify-center py-16 text-center">

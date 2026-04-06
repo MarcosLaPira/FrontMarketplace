@@ -13,6 +13,7 @@ export class CampanaDetailComponent implements OnInit {
   private campanaService = inject(CampanaService);
 
   idCampana = input.required<number>();
+  hidePostular = input(false);
   volver = output<void>();
   postularme = output<Campana>();
 

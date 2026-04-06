@@ -66,7 +66,7 @@ export class ExploreComponent implements OnInit {
     if (this.filtroCategoria) filters.idsCategorias = [parseInt(this.filtroCategoria)];
 
     this.influencerService.getInfluencers(filters).subscribe({
-      next: (data: Influencer[]) => { this.influencers.set(data || []); },
+      next: (res) => { this.influencers.set(res.items || []); },
       error: () => {}
     });
   }

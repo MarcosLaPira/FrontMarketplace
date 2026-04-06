@@ -407,8 +407,38 @@ export interface InvitacionInfluencer {
 
 // Respuestas paginadas
 export interface PaginatedResponse<T> {
-  data: T[];
+  items: T[];
   totalCount: number;
-  pageNumber: number;
+  page: number;
   pageSize: number;
+  totalPages: number;
+}
+
+// Entregas de influencers
+export interface RevisionEntrega {
+  idRevisionEntrega: number;
+  comentario: string;
+  esAprobacion: boolean;
+  fechaRevision: string;
+}
+
+export interface EntregaInfluencer {
+  idEntregaInfluencer: number;
+  idCampana: number;
+  idInfluencer: number;
+  idEntregable: number;
+  descripcionEntregable: string;
+  fechaLimiteEntregable: string;
+  orden: number;
+  estado: string; // Pendiente | Enviada | Aprobada | ConDevolucion
+  urlEntregable?: string;
+  comentarioInfluencer?: string;
+  fechaEnvio?: string;
+  revisiones?: RevisionEntrega[];
+}
+
+export interface EnviarEntregaRequest {
+  idEntregable: number;
+  urlEntregable: string;
+  comentario?: string;
 }

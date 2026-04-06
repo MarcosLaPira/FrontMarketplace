@@ -14,4 +14,8 @@ export class InvitacionService {
   getMisInvitaciones(): Observable<InvitacionInfluencer[]> {
     return this.http.get<InvitacionInfluencer[]>(`${this.apiUrl}/mis-invitaciones`);
   }
+
+  responderInvitacion(id: number, idEstado: number): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/cambiar-estado/${id}`, { idEstadoInvitacionCampana: idEstado });
+  }
 }
