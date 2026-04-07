@@ -1,0 +1,195 @@
+<!-- GRID MODE -->
+@if (viewMode() === 'grid') {
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 overflow-hidden group flex flex-col cursor-pointer" (click)="verDetalle.emit(campana().idCampana)">
+
+    <!-- Imagen o gradient header -->
+    @if (getImagenUrl()) {
+      <div class="h-40 overflow-hidden relative">
+        <img [src]="getImagenUrl()" alt="Producto" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+        @if (campana().plataformaContenidos?.length) {
+          <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
+            @for (pc of campana().plataformaContenidos; track pc.idCampanaPlataformaContenido) {
+              <span class="bg-white/90 backdrop-blur-sm text-xs font-bold px-2.5 py-1 rounded-full text-gray-800">
+                {{ pc.nombrePlataforma }} · {{ pc.nombreTipoContenido }}
+              </span>
+            }
+          </div>
+        }
+        @if (getDaysLeft() <= 7 && getDaysLeft() > 0) {
+          <span class="absolute top-3 right-3 bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+            {{ getDaysLeft() }}d restantes
+          </span>
+        }
+      </div>
+    } @else {
+      <div class="h-24 bg-gradient-to-br from-indigo-500 to-purple-500 relative">
+        @if (campana().plataformaContenidos?.length) {
+          <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
+            @for (pc of campana().plataformaContenidos; track pc.idCampanaPlataformaContenido) {
+              <span class="bg-white/90 backdrop-blur-sm text-xs font-bold px-2.5 py-1 rounded-full text-gray-800">
+                {{ pc.nombrePlataforma }} · {{ pc.nombreTipoContenido }}
+              </span>
+            }
+          </div>
+        }
+        @if (getDaysLeft() <= 7 && getDaysLeft() > 0) {
+          <span class="absolute top-3 right-3 bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+            {{ getDaysLeft() }}d restantes
+          </span>
+        }
+      </div>
+    }
+
+    <!-- Content -->
+    <div class="p-5 flex flex-col flex-1">
+      @if (campana().marca) {
+        <p class="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-1">{{ campana().marca }}</p>
+      }
+      <h3 class="text-lg font-bold text-gray-900 mb-1.5 line-clamp-1">{{ campana().titulo }}</h3>
+      <p class="text-sm text-gray-500 line-clamp-2 mb-4 flex-1">{{ campana().descripcion }}</p>
+
+      <!-- Categorías -->
+      @if (campana().categorias?.length) {
+        <div class="flex flex-wrap gap-1.5 mb-4">
+          @for (cat of campana().categorias; track cat.idCategoria) {
+            <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded-full font-medium">{{ cat.nombre }}</span>
+          }
+        </div>
+      }
+
+      <!-- Info row -->
+      <div class="flex items-center justify-between text-sm mb-3">
+        <span class="text-2xl font-bold text-gray-900">${{ campana().presupuesto }}</span>
+        @if (campana().estadoCampana?.nombre && campana().estadoCampana!.nombre !== 'Activa') {
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
+            {{ campana().estadoCampana!.nombre }}
+          </span>
+        }
+      </div>
+
+      <!-- Pills de info -->
+      <div class="flex flex-wrap gap-1.5 mb-4">
+        @if (campana().esPresencial) {
+          <span class="flex items-center gap-1 text-xs bg-rose-50 text-rose-600 px-2 py-1 rounded-lg font-medium">
+            📍
+            @if (campana().ciudad || campana().provincia) {
+              {{ campana().ciudad }}{{ campana().ciudad && campana().provincia ? ', ' : '' }}{{ campana().provincia }}
+            } @else {
+              Presencial
+            }
+          </span>
+        } @else {
+          <span class="flex items-center gap-1 text-xs bg-sky-50 text-sky-600 px-2 py-1 rounded-lg font-medium">💻 Remota</span>
+        }
+        @if (campana().minimoSeguidores) {
+          <span class="flex items-center gap-1 text-xs bg-violet-50 text-violet-600 px-2 py-1 rounded-lg font-medium">
+            👥 +{{ campana().minimoSeguidores! | number }} seg.
+          </span>
+        }
+        @if (campana().requiereProductoFisico) {
+          <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-lg font-medium">📦 Prod. físico</span>
+        }
+        @if (campana().requiereProductoVirtual) {
+          <span class="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded-lg font-medium">💿 Prod. virtual</span>
+        }
+        @if (campana().envioProductoIncluido) {
+          <span class="text-xs bg-green-50 text-green-600 px-2 py-1 rounded-lg font-medium">🚚 Envío incluido</span>
+        }
+      </div>
+
+      <!-- Spots & fechas -->
+      @if (campana().cantidadInfluencers) {
+        <div class="mb-4">
+          <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
+            <span>Spots disponibles</span>
+            <span class="font-semibold text-gray-700">{{ getSpotsText() }}</span>
+          </div>
+          <div class="w-full bg-gray-100 rounded-full h-1.5">
+            <div class="bg-indigo-500 h-1.5 rounded-full transition-all" [style.width.%]="getSpotsPercent()"></div>
+          </div>
+        </div>
+      }
+
+      <div class="text-xs text-gray-400 mb-4">
+        {{ campana().fechaInicio | date:'dd MMM' }} — {{ campana().fechaFin | date:'dd MMM yyyy' }}
+      </div>
+
+      <!-- CTA -->
+      @if (!hidePostular()) {
+        <button (click)="postularme.emit(campana()); $event.stopPropagation()"
+          class="w-full py-2.5 rounded-xl font-semibold text-sm transition-all bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98]">
+          Postularme
+        </button>
+      }
+    </div>
+  </div>
+}
+
+<!-- LIST MODE -->
+@if (viewMode() === 'list') {
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden">
+    <div class="flex items-stretch cursor-pointer" (click)="toggleExpand.emit(campana().idCampana)">
+      <!-- Imagen lateral -->
+      @if (getImagenUrl()) {
+        <div class="hidden sm:block w-32 flex-shrink-0">
+          <img [src]="getImagenUrl()" alt="Producto" class="w-full h-full object-cover" />
+        </div>
+      } @else {
+        <div class="hidden sm:block w-2 flex-shrink-0 bg-gradient-to-b from-indigo-500 to-purple-500"></div>
+      }
+
+      <div class="flex-1 p-5 flex items-center gap-4">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-1">
+            @if (campana().marca) {
+              <span class="text-xs font-semibold text-indigo-600 uppercase">{{ campana().marca }}</span>
+            }
+            @if (campana().plataformaContenidos?.length) {
+              @for (pc of campana().plataformaContenidos; track pc.idCampanaPlataformaContenido) {
+                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ pc.nombrePlataforma }} · {{ pc.nombreTipoContenido }}</span>
+              }
+            }
+            @if (getDaysLeft() <= 7 && getDaysLeft() > 0) {
+              <span class="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-semibold">{{ getDaysLeft() }}d restantes</span>
+            }
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 truncate cursor-pointer hover:text-indigo-600 transition" (click)="verDetalle.emit(campana().idCampana); $event.stopPropagation()">{{ campana().titulo }}</h3>
+          <p class="text-sm text-gray-500 line-clamp-1 mt-0.5">{{ campana().descripcion }}</p>
+          @if (campana().categorias?.length) {
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              @for (cat of campana().categorias; track cat.idCategoria) {
+                <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded-full font-medium">{{ cat.nombre }}</span>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Precio y CTA -->
+        <div class="flex flex-col items-end gap-2 flex-shrink-0">
+          <span class="text-xl font-bold text-gray-900">${{ campana().presupuesto }}</span>
+          <div class="flex items-center gap-2 text-xs text-gray-400">
+            @if (campana().esPresencial) { <span>📍</span> }
+            @if (campana().envioProductoIncluido) { <span>🚚</span> }
+            <span>{{ campana().fechaInicio | date:'dd/MM' }} - {{ campana().fechaFin | date:'dd/MM' }}</span>
+          </div>
+          @if (!hidePostular()) {
+            <button (click)="postularme.emit(campana()); $event.stopPropagation()"
+              class="px-5 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition">
+              Postularme
+            </button>
+          }
+        </div>
+
+        <svg class="w-5 h-5 text-gray-300 transition-transform flex-shrink-0" [class.rotate-180]="expanded()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Expanded details -->
+    @if (expanded()) {
+      <app-campana-card-detail [campana]="campana()" />
+    }
+  </div>
+}

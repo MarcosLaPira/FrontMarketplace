@@ -1,16 +1,16 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DatePipe } from '@angular/common';
 import { Campana, CampanaFilter } from '../../../../../models/types';
 import { CampanaService } from '../../../../../services/campana.service';
 import { CatalogService } from '../../../../../services/catalog.service';
 import { PostulacionService } from '../../../../../services/postulacion.service';
 import { CampanaDetailComponent } from '../../../../../components/campana-detail/campana-detail.component';
+import { InfluencerCampanaCardComponent } from '../influencer-campana-card/influencer-campana-card.component';
 
 @Component({
   selector: 'app-influencer-campanas',
   standalone: true,
-  imports: [FormsModule, DatePipe, CampanaDetailComponent],
+  imports: [FormsModule, CampanaDetailComponent, InfluencerCampanaCardComponent],
   templateUrl: './influencer-campanas.component.html'
 })
 export class InfluencerCampanasComponent implements OnInit {
@@ -121,34 +121,6 @@ export class InfluencerCampanasComponent implements OnInit {
 
   toggleExpand(id: number): void {
     this.expandedCampanaId.set(this.expandedCampanaId() === id ? null : id);
-  }
-
-  getImagenUrl(campana: Campana): string | null {
-    const imagenes = campana.imagenesProducto;
-    if (imagenes?.length && imagenes[0].url) {
-      return imagenes[0].url.startsWith('http') ? imagenes[0].url : `https://localhost:7070${imagenes[0].url}`;
-    }
-    return null;
-  }
-
-  getDaysLeft(fechaFin: Date): number {
-    const end = new Date(fechaFin);
-    const now = new Date();
-    return Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-  }
-
-  getSpotsText(campana: Campana): string {
-    const aceptados = campana.cantidadInfluencersAceptados ?? 0;
-    const total = campana.cantidadInfluencers ?? 0;
-    const disponibles = Math.max(0, total - aceptados);
-    return `${disponibles} de ${total}`;
-  }
-
-  getSpotsPercent(campana: Campana): number {
-    const total = campana.cantidadInfluencers ?? 0;
-    if (!total) return 0;
-    const aceptados = campana.cantidadInfluencersAceptados ?? 0;
-    return Math.round((aceptados / total) * 100);
   }
 
   verDetalle(id: number): void {

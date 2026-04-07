@@ -1,16 +1,17 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Postulacion, InvitacionInfluencer, EntregaInfluencer } from '../../../../../models/types';
+import { Campana, Postulacion, InvitacionInfluencer, EntregaInfluencer } from '../../../../../models/types';
 import { PostulacionService } from '../../../../../services/postulacion.service';
 import { InvitacionService } from '../../../../../services/invitacion.service';
 import { EntregaService } from '../../../../../services/entrega.service';
 import { CampanaDetailComponent } from '../../../../../components/campana-detail/campana-detail.component';
+import { InfluencerCampanaCardComponent } from '../influencer-campana-card/influencer-campana-card.component';
 
 @Component({
   selector: 'app-influencer-postulaciones',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, ReactiveFormsModule, CampanaDetailComponent],
+  imports: [DatePipe, ReactiveFormsModule, CampanaDetailComponent, InfluencerCampanaCardComponent],
   templateUrl: './influencer-postulaciones.component.html'
 })
 export class InfluencerPostulacionesComponent implements OnInit {
@@ -39,6 +40,9 @@ export class InfluencerPostulacionesComponent implements OnInit {
   selectedInvitacion = signal<InvitacionInfluencer | null>(null);
   respondiendo = signal<Record<number, boolean>>({});
 
+  // Detalle de postulación
+  selectedPostulacionCampanaId = signal<number | null>(null);
+
   totalPostulaciones = computed(() => this.postulaciones().length);
   totalInvitaciones = computed(() => this.invitaciones().length);
 
@@ -66,7 +70,9 @@ export class InfluencerPostulacionesComponent implements OnInit {
     this.loadingInvitaciones.set(true);
     this.invitacionService.getMisInvitaciones().subscribe({
       next: (data) => {
+
         this.invitaciones.set(data);
+        console.log('Invitaciones cargadas:', data);
         this.loadingInvitaciones.set(false);
       },
       error: () => this.loadingInvitaciones.set(false)
@@ -99,14 +105,14 @@ export class InfluencerPostulacionesComponent implements OnInit {
     const idEstado = aceptar ? 2 : 3;
     this.invitacionService.responderInvitacion(inv.idInvitacionCampana, idEstado).subscribe({
       next: () => {
-        const nuevoEstado = aceptar ? 'Aceptada' : 'Rechazada';
+        const nuevoIdEstado = aceptar ? 2 : 3;
         this.invitaciones.update(list =>
           list.map(i => i.idInvitacionCampana === inv.idInvitacionCampana
-            ? { ...i, estado: nuevoEstado }
+            ? { ...i, idEstadoInvitacionCampana: nuevoIdEstado }
             : i)
         );
         this.selectedInvitacion.update(i =>
-          i?.idInvitacionCampana === inv.idInvitacionCampana ? { ...i, estado: nuevoEstado } : i
+          i?.idInvitacionCampana === inv.idInvitacionCampana ? { ...i, idEstadoInvitacionCampana: nuevoIdEstado } : i
         );
         this.respondiendo.update(v => ({ ...v, [inv.idInvitacionCampana]: false }));
       },
@@ -198,5 +204,31 @@ export class InfluencerPostulacionesComponent implements OnInit {
     const end = new Date(fecha);
     const now = new Date();
     return Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+  }
+
+  invitacionToCampana(inv: InvitacionInfluencer): Campana {
+    return {
+      idCampana: inv.campana.idCampana,
+      titulo: inv.campana.titulo,
+      descripcion: inv.campana.descripcion,
+      presupuesto: inv.campana.presupuesto,
+      fechaInicio: new Date(inv.campana.fechaInicio),
+      fechaFin: new Date(inv.campana.fechaFin),
+      marca: inv.campana.marca?.nombreComercial,
+      plataforma: inv.campana.plataforma
+    };
+  }
+
+  verDetalleInvitacionPorCampana(idCampana: number): void {
+    const inv = this.invitaciones().find(i => i.idCampana === idCampana);
+    if (inv) this.verDetalleInvitacion(inv);
+  }
+
+  verDetallePostulacion(idCampana: number): void {
+    this.selectedPostulacionCampanaId.set(idCampana);
+  }
+
+  volverDePostulacion(): void {
+    this.selectedPostulacionCampanaId.set(null);
   }
 }

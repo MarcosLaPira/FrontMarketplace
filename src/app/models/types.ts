@@ -400,7 +400,8 @@ export interface InvitacionInfluencer {
     };
   };
   idInfluencer: number;
-  estado: string;
+  idEstadoInvitacionCampana: number;
+  estado?: string;
   mensaje: string;
   fechaInvitacion: string;
 }

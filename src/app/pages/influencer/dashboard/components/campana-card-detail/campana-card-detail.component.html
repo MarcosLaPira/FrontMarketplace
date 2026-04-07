@@ -1,0 +1,63 @@
+<div class="px-5 pb-5 border-t border-gray-100 pt-4 space-y-3">
+  <p class="text-sm text-gray-700">{{ campana().descripcion }}</p>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+    <div>
+      <p class="text-gray-400 text-xs">Plataformas</p>
+      @if (campana().plataformaContenidos?.length) {
+        @for (pc of campana().plataformaContenidos; track pc.idCampanaPlataformaContenido) {
+          <p class="font-semibold">{{ pc.nombrePlataforma }} — {{ pc.nombreTipoContenido }}</p>
+        }
+      } @else {
+        <p class="font-semibold">—</p>
+      }
+    </div>
+    <div>
+      <p class="text-gray-400 text-xs">Presupuesto</p>
+      <p class="font-semibold">${{ campana().presupuesto }}</p>
+    </div>
+    <div>
+      <p class="text-gray-400 text-xs">Modalidad</p>
+      <p class="font-semibold">{{ campana().esPresencial ? 'Presencial' : 'Virtual' }}</p>
+    </div>
+    @if (campana().cantidadInfluencers) {
+      <div>
+        <p class="text-gray-400 text-xs">Spots</p>
+        <p class="font-semibold">{{ getSpotsText() }}</p>
+      </div>
+    }
+  </div>
+
+  <div class="flex flex-wrap gap-2">
+    @if (campana().requiereProductoFisico) {
+      <span class="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">📦 Producto físico</span>
+    }
+    @if (campana().requiereProductoVirtual) {
+      <span class="text-xs bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full">💿 Producto virtual</span>
+    }
+    @if (campana().envioProductoIncluido) {
+      <span class="text-xs bg-green-50 text-green-700 px-2.5 py-1 rounded-full">🚚 Envío incluido</span>
+    }
+    @if (campana().campanaPublica) {
+      <span class="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">🌐 Pública</span>
+    }
+  </div>
+
+  @if (campana().esPresencial && (campana().direccion || campana().ciudad || campana().provincia)) {
+    <div class="text-sm">
+      <p class="text-gray-400 text-xs mb-0.5">Ubicación</p>
+      <p class="font-medium text-gray-700">
+        @if (campana().direccion) { {{ campana().direccion }}, }
+        @if (campana().ciudad) { {{ campana().ciudad }}, }
+        @if (campana().provincia) { {{ campana().provincia }} }
+      </p>
+    </div>
+  }
+
+  @if (campana().notasLogisticas) {
+    <div class="text-sm bg-gray-50 p-3 rounded-lg">
+      <p class="text-gray-400 text-xs mb-1">Notas logísticas</p>
+      <p class="text-gray-700">{{ campana().notasLogisticas }}</p>
+    </div>
+  }
+</div>
