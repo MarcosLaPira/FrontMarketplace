@@ -54,6 +54,10 @@ export class CampanaService {
     return this.http.get<Campana[]>(`${this.apiUrl}/mis-campanas`);
   }
 
+  getCampanasEnCursoInfluencer(): Observable<Campana[]> {
+    return this.http.get<Campana[]>(`${this.apiUrl}/campanasEnCurso-influencer`);
+  }
+
   invitarInfluencer(idCampana: number, idInfluencer: number, mensaje: string): Observable<any> {
     return this.http.post(`${API_BASE_URL}/invitaciones/crear`, { idCampana, idInfluencer, mensaje });
   }

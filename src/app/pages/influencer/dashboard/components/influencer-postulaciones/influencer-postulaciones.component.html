@@ -9,17 +9,17 @@
     </app-campana-detail>
   }
 
-  <!-- ==================== VISTA DETALLE DE CAMPAÑA EN CURSO ==================== -->
+  <!-- ==================== VISTA DETALLE DE CAMPA�A EN CURSO ==================== -->
   @if (activeSubTab() === 'enCurso' && selectedCampanaId()) {
     <div class="space-y-6">
-      <!-- Detalle de campaña (reutilizando componente, sin CTA postular) -->
+      <!-- Detalle de campa�a (reutilizando componente, sin CTA postular) -->
       <app-campana-detail
         [idCampana]="selectedCampanaId()!"
         [hidePostular]="true"
         (volver)="volverAlListado()">
       </app-campana-detail>
 
-      <!-- ==================== SECCIÍ“N ENTREGAS ==================== -->
+      <!-- ==================== SECCI͓N ENTREGAS ==================== -->
       <div class="space-y-4">
         <div class="flex items-center gap-3">
           <div class="bg-indigo-100 p-2 rounded-lg">
@@ -29,7 +29,7 @@
           </div>
           <div>
             <h3 class="text-lg font-bold text-gray-900">Mis Entregas</h3>
-            <p class="text-sm text-gray-500">Subí tu contenido y seguí el estado de cada entregable</p>
+            <p class="text-sm text-gray-500">Sub� tu contenido y segu� el estado de cada entregable</p>
           </div>
         </div>
 
@@ -46,8 +46,8 @@
               <svg class="w-10 h-10 text-amber-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              <p class="text-amber-700 font-medium text-sm">Esta campaña aún no tiene entregas asignadas.</p>
-              <p class="text-amber-600 text-xs mt-1">Los entregables se generan automáticamente cuando la campaña se activa.</p>
+              <p class="text-amber-700 font-medium text-sm">Esta campa�a a�n no tiene entregas asignadas.</p>
+              <p class="text-amber-600 text-xs mt-1">Los entregables se generan autom�ticamente cuando la campa�a se activa.</p>
             </div>
           }
 
@@ -66,7 +66,7 @@
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                       </svg>
-                      Límite: {{ entrega.fechaLimiteEntregable | date:'dd/MM/yyyy' }}
+                      L�mite: {{ entrega.fechaLimiteEntregable | date:'dd/MM/yyyy' }}
                       @if (getDaysLeft(entrega.fechaLimiteEntregable) <= 3) {
                         <span class="text-red-500 font-semibold">({{ getDaysLeft(entrega.fechaLimiteEntregable) }}d restantes)</span>
                       }
@@ -102,7 +102,7 @@
                         <div class="flex-1">
                           <p class="font-semibold text-xs mb-0.5"
                             [class]="rev.esAprobacion ? 'text-green-700' : 'text-orange-700'">
-                            {{ rev.esAprobacion ? 'Aprobada por la marca' : 'Devolución de la marca' }}
+                            {{ rev.esAprobacion ? 'Aprobada por la marca' : 'Devoluci�n de la marca' }}
                           </p>
                           <p class="text-gray-700 leading-relaxed">{{ rev.comentario }}</p>
                           <p class="text-gray-400 text-xs mt-1">{{ rev.fechaRevision | date:'dd/MM/yyyy HH:mm' }}</p>
@@ -123,12 +123,12 @@
                     </div>
                     <a [href]="entrega.urlEntregable" target="_blank" rel="noopener noreferrer"
                       class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition flex-shrink-0">
-                      Ver →
+                      Ver ?
                     </a>
                   </div>
                 }
 
-                <!-- Formulario de envío (solo si se puede enviar) -->
+                <!-- Formulario de env�o (solo si se puede enviar) -->
                 @if (puedeEnviar(entrega.estado)) {
                   @if (envioForms()[entrega.idEntregable]; as form) {
                     <form [formGroup]="form" (ngSubmit)="enviarEntrega(entrega)" class="space-y-3">
@@ -146,20 +146,20 @@
                             ? 'border-red-300 bg-red-50'
                             : 'border-gray-200 bg-white hover:border-gray-300'" />
                         @if (form.get('urlEntregable')?.invalid && form.get('urlEntregable')?.touched) {
-                          <p class="text-xs text-red-500 mt-1">Ingresá una URL válida (debe empezar con http/https)</p>
+                          <p class="text-xs text-red-500 mt-1">Ingres� una URL v�lida (debe empezar con http/https)</p>
                         }
                       </div>
 
-                      <!-- Descripción / Comentario -->
+                      <!-- Descripci�n / Comentario -->
                       <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Descripción <span class="text-gray-400 font-normal">(opcional)</span></label>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Descripci�n <span class="text-gray-400 font-normal">(opcional)</span></label>
                         <textarea formControlName="comentario" rows="3"
-                          placeholder="Contale a la marca de qué trata el contenido, contexto, o lo que quieras agregar..."
+                          placeholder="Contale a la marca de qu� trata el contenido, contexto, o lo que quieras agregar..."
                           class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white hover:border-gray-300 text-sm transition focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none">
                         </textarea>
                       </div>
 
-                      <!-- Botón enviar -->
+                      <!-- Bot�n enviar -->
                       <button type="submit"
                         [disabled]="enviando()[entrega.idEntregable]"
                         class="w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
@@ -182,7 +182,7 @@
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                           </svg>
-                          ¡Contenido enviado! La marca lo revisará pronto.
+                          �Contenido enviado! La marca lo revisar� pronto.
                         </div>
                       }
                     </form>
@@ -195,17 +195,17 @@
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    Este entregable fue aprobado por la marca. ¡Buen trabajo!
+                    Este entregable fue aprobado por la marca. �Buen trabajo!
                   </div>
                 }
 
-                <!-- Estado: enviada (en revisión) -->
+                <!-- Estado: enviada (en revisi�n) -->
                 @if (entrega.estado.toLowerCase() === 'enviada') {
                   <div class="flex items-center gap-2 bg-blue-50 rounded-xl p-3 text-blue-700 text-sm">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                     </svg>
-                    Contenido enviado. Esperando revisión de la marca.
+                    Contenido enviado. Esperando revisi�n de la marca.
                   </div>
                 }
 
@@ -217,7 +217,7 @@
     </div>
   }
 
-  <!-- ==================== VISTA DETALLE DE INVITACIÓN ==================== -->
+  <!-- ==================== VISTA DETALLE DE INVITACI�N ==================== -->
   @if (activeSubTab() === 'invitaciones' && selectedInvitacion()) {
     <app-campana-detail
       [idCampana]="selectedInvitacion()!.idCampana"
@@ -226,7 +226,7 @@
     </app-campana-detail>
 
     <!-- Panel aceptar / rechazar -->
-    @if (selectedInvitacion()!.idEstadoInvitacionCampana === 1) {
+    @if (selectedInvitacion()!.estadoInvitacionCampana.idEstadoInvitacionCampana === 1) {
       <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
         @if (selectedInvitacion()!.mensaje) {
           <div class="bg-indigo-50 rounded-xl p-4 mb-4 flex items-start gap-3">
@@ -239,8 +239,8 @@
             </div>
           </div>
         }
-        <h3 class="text-base font-bold text-gray-900 mb-1">Responder invitación</h3>
-        <p class="text-sm text-gray-500 mb-4">La marca te invitó a participar en esta campaña. ¿Qué decidís?</p>
+        <h3 class="text-base font-bold text-gray-900 mb-1">Responder invitaci�n</h3>
+        <p class="text-sm text-gray-500 mb-4">La marca te invit� a participar en esta campa�a. �Qu� decid�s?</p>
         <div class="flex gap-3">
           <button
             (click)="responderInvitacion(selectedInvitacion()!, true)"
@@ -256,7 +256,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
             }
-            Aceptar invitación
+            Aceptar invitaci�n
           </button>
           <button
             (click)="responderInvitacion(selectedInvitacion()!, false)"
@@ -274,15 +274,15 @@
       </div>
     } @else {
       <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center gap-4">
-        @if (selectedInvitacion()!.idEstadoInvitacionCampana === 2) {
+        @if (selectedInvitacion()!.estadoInvitacionCampana.idEstadoInvitacionCampana === 2) {
           <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
             <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
           </div>
           <div>
-            <p class="font-bold text-gray-900 text-sm">Invitación aceptada</p>
-            <p class="text-xs text-gray-500">Ya aceptaste participar en esta campaña.</p>
+            <p class="font-bold text-gray-900 text-sm">Invitaci�n aceptada</p>
+            <p class="text-xs text-gray-500">Ya aceptaste participar en esta campa�a.</p>
           </div>
         } @else {
           <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -291,8 +291,8 @@
             </svg>
           </div>
           <div>
-            <p class="font-bold text-gray-900 text-sm">Invitación rechazada</p>
-            <p class="text-xs text-gray-500">Ya rechazaste la invitación a esta campaña.</p>
+            <p class="font-bold text-gray-900 text-sm">Invitaci�n rechazada</p>
+            <p class="text-xs text-gray-500">Ya rechazaste la invitaci�n a esta campa�a.</p>
           </div>
         }
       </div>
@@ -310,7 +310,7 @@
       </div>
       <div>
         <h2 class="text-2xl md:text-3xl font-bold">Postulaciones e Invitaciones</h2>
-        <p class="text-indigo-100 text-sm">Seguí el estado de tus postulaciones y revisá las invitaciones de marcas</p>
+        <p class="text-indigo-100 text-sm">Segu� el estado de tus postulaciones y revis� las invitaciones de marcas</p>
       </div>
     </div>
 
@@ -322,9 +322,9 @@
       <span class="bg-white/15 backdrop-blur-sm px-3 py-1.5 rounded-lg text-sm">
         <span class="font-bold">{{ totalInvitaciones() }}</span> invitaciones
       </span>
-      @if (postulacionesAceptadas().length > 0) {
+      @if (campanasEnCurso().length > 0) {
         <span class="bg-green-400/30 backdrop-blur-sm px-3 py-1.5 rounded-lg text-sm">
-          <span class="font-bold">{{ postulacionesAceptadas().length }}</span> en curso
+          <span class="font-bold">{{ campanasEnCurso().length }}</span> en curso
         </span>
       }
     </div>
@@ -338,7 +338,7 @@
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
       Mis Postulaciones
       @if (totalPostulaciones() > 0) {
-        <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-1.5 py-0.5 rounded-full"
+        <span class="text-xs font-bold px-1.5 py-0.5 rounded-full"
           [class]="activeSubTab() === 'postulaciones' ? 'bg-white/20 text-white' : 'bg-indigo-100 text-indigo-700'">
           {{ totalPostulaciones() }}
         </span>
@@ -350,9 +350,9 @@
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
       Invitaciones
       @if (totalInvitaciones() > 0) {
-        <span class="text-xs font-bold px-1.5 py-0.5 rounded-full"
+        <span class="text-xs font-bold px-1.5 py-0.5 rounded-full animate-pulse"
           [class]="activeSubTab() === 'invitaciones' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700'">
-          {{ totalInvitaciones() }}
+          {{ totalInvitaciones() }} nueva{{ totalInvitaciones() !== 1 ? 's' : '' }}
         </span>
       }
     </button>
@@ -361,10 +361,10 @@
       [class]="activeSubTab() === 'enCurso' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
       En Curso
-      @if (postulacionesAceptadas().length > 0) {
+      @if (campanasEnCurso().length > 0) {
         <span class="text-xs font-bold px-1.5 py-0.5 rounded-full"
           [class]="activeSubTab() === 'enCurso' ? 'bg-white/20 text-white' : 'bg-green-100 text-green-700'">
-          {{ postulacionesAceptadas().length }}
+          {{ campanasEnCurso().length }}
         </span>
       }
     </button>
@@ -399,8 +399,8 @@
           <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-5">
             <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
           </div>
-          <h3 class="text-lg font-bold text-gray-800 mb-2">Sin postulaciones aún</h3>
-          <p class="text-gray-500 text-sm max-w-sm mb-5">Explorá las campañas disponibles y postulate para empezar a colaborar con marcas.</p>
+          <h3 class="text-lg font-bold text-gray-800 mb-2">Sin postulaciones a�n</h3>
+          <p class="text-gray-500 text-sm max-w-sm mb-5">Explor� las campa�as disponibles y postulate para empezar a colaborar con marcas.</p>
         </div>
       }
     }
@@ -408,6 +408,14 @@
 
   <!-- ==================== INVITACIONES TAB ==================== -->
   @if (activeSubTab() === 'invitaciones') {
+
+    <!-- Banner informativo -->
+    <div class="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
+      <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+      </svg>
+      <p class="text-sm text-amber-700">Estas son las invitaciones de marcas que a�n <strong>esperan tu respuesta</strong>. Acept� o rechaz� cada una para continuar.</p>
+    </div>
 
     @if (loadingInvitaciones()) {
       <div class="flex flex-col items-center justify-center py-16">
@@ -428,8 +436,8 @@
                 [hidePostular]="true"
                 (verDetalle)="verDetalleInvitacionPorCampana($event)" />
 
-              <!-- Acciones de invitación -->
-              @if (inv.idEstadoInvitacionCampana === 1) {
+              <!-- Acciones de invitaci�n -->
+              @if (inv.estadoInvitacionCampana.idEstadoInvitacionCampana === 1) {
                 <div class="flex gap-2">
                   <button
                     (click)="responderInvitacion(inv, true)"
@@ -461,11 +469,12 @@
                   </button>
                 </div>
               } @else {
+                <!-- Resultado de respuesta en esta sesi�n -->
                 <div class="flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-semibold"
-                  [class]="inv.idEstadoInvitacionCampana === 2
+                  [class]="inv.estadoInvitacionCampana.idEstadoInvitacionCampana === 2
                     ? 'bg-emerald-50 text-emerald-600'
                     : 'bg-red-50 text-red-500'">
-                  @if (inv.idEstadoInvitacionCampana === 2) {
+                  @if (inv.estadoInvitacionCampana.idEstadoInvitacionCampana === 2) {
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
@@ -485,37 +494,35 @@
       } @else {
         <!-- Empty state invitaciones -->
         <div class="flex flex-col items-center justify-center py-16 text-center">
-          <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-5">
-            <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <div class="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mb-5">
+            <svg class="w-10 h-10 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
           </div>
-          <h3 class="text-lg font-bold text-gray-800 mb-2">Sin invitaciones aún</h3>
-          <p class="text-gray-500 text-sm max-w-sm mb-5">Cuando una marca quiera trabajar con vos, vas a ver sus invitaciones acá.</p>
+          <h3 class="text-lg font-bold text-gray-800 mb-2">Sin invitaciones pendientes</h3>
+          <p class="text-gray-500 text-sm max-w-sm">No ten�s invitaciones que requieran tu respuesta. Cuando una marca te invite a una campa�a, aparecer� ac�.</p>
         </div>
       }
     }
   }
 
-  <!-- ==================== EN CURSO TAB (listado de campañas) ==================== -->
+  <!-- ==================== EN CURSO TAB (listado de campa�as) ==================== -->
   @if (activeSubTab() === 'enCurso') {
 
-    @if (loadingPostulaciones()) {
+    @if (loadingEnCurso()) {
       <div class="flex flex-col items-center justify-center py-16">
         <div class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-        <p class="mt-4 text-gray-500 text-sm">Cargando campañas en curso...</p>
+        <p class="mt-4 text-gray-500 text-sm">Cargando campa&#241;as en curso...</p>
       </div>
     }
 
-    @if (!loadingPostulaciones()) {
-      @if (postulacionesAceptadas().length > 0) {
+    @if (!loadingEnCurso()) {
+      @if (campanasEnCurso().length > 0) {
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          @for (post of postulacionesAceptadas(); track post.idPostulacion) {
-            @if (post.campana) {
-              <app-influencer-campana-card
-                [campana]="post.campana"
-                [viewMode]="'grid'"
-                [hidePostular]="true"
-                (verDetalle)="seleccionarCampana($event)" />
-            }
+          @for (campana of campanasEnCurso(); track campana.idCampana) {
+            <app-influencer-campana-card
+              [campana]="campana"
+              [viewMode]="'grid'"
+              [hidePostular]="true"
+              (verDetalle)="seleccionarCampana($event)" />
           }
         </div>
       } @else {
@@ -526,8 +533,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
             </svg>
           </div>
-          <h3 class="text-lg font-bold text-gray-800 mb-2">Sin campañas en curso</h3>
-          <p class="text-gray-500 text-sm max-w-sm">Cuando una de tus postulaciones sea aceptada y la campaña se active, aparecerá aquí para que puedas entregar tu contenido.</p>
+          <h3 class="text-lg font-bold text-gray-800 mb-2">Sin campa&#241;as en curso</h3>
+          <p class="text-gray-500 text-sm max-w-sm">Cuando una campa&#241;a en la que particip&#225;s se active, aparecer&#225; aqu&#237; para que puedas entregar tu contenido.</p>
         </div>
       }
     }

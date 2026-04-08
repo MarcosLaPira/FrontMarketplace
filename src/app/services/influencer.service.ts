@@ -42,23 +42,23 @@ export class InfluencerService {
 
   // Get all influencers with filters
   getInfluencers(filters?: InfluencerFilter): Observable<PaginatedResponse<Influencer>> {
-    const body: Record<string, any> = {};
+    let params = new HttpParams();
     if (filters) {
-      if (filters.idsCategorias?.length) body['idsCategorias'] = filters.idsCategorias;
-      if (filters.plataformaId) body['plataformaId'] = filters.plataformaId;
-      if (filters.seguidoresMin != null) body['seguidoresMin'] = filters.seguidoresMin;
-      if (filters.seguidoresMax != null) body['seguidoresMax'] = filters.seguidoresMax;
-      if (filters.costoMin != null) body['costoMin'] = filters.costoMin;
-      if (filters.costoMax != null) body['costoMax'] = filters.costoMax;
-      if (filters.soloCanje != null) body['soloCanje'] = filters.soloCanje;
-      if (filters.soloVerificados != null) body['soloVerificados'] = filters.soloVerificados;
-      if (filters.generoAudiencia) body['generoAudiencia'] = filters.generoAudiencia;
-      if (filters.ratingMin != null) body['ratingMin'] = filters.ratingMin;
-      if (filters.search) body['search'] = filters.search;
-      if (filters.page) body['page'] = filters.page;
-      if (filters.pageSize) body['pageSize'] = filters.pageSize;
+      if (filters.idsCategorias?.length) filters.idsCategorias.forEach(id => params = params.append('idsCategorias', id.toString()));
+      if (filters.plataformaId) params = params.set('plataformaId', filters.plataformaId.toString());
+      if (filters.seguidoresMin != null) params = params.set('seguidoresMin', filters.seguidoresMin.toString());
+      if (filters.seguidoresMax != null) params = params.set('seguidoresMax', filters.seguidoresMax.toString());
+      if (filters.costoMin != null) params = params.set('costoMin', filters.costoMin.toString());
+      if (filters.costoMax != null) params = params.set('costoMax', filters.costoMax.toString());
+      if (filters.soloCanje != null) params = params.set('soloCanje', filters.soloCanje.toString());
+      if (filters.soloVerificados != null) params = params.set('soloVerificados', filters.soloVerificados.toString());
+      if (filters.generoAudiencia) params = params.set('generoAudiencia', filters.generoAudiencia);
+      if (filters.ratingMin != null) params = params.set('ratingMin', filters.ratingMin.toString());
+      if (filters.search) params = params.set('search', filters.search);
+      if (filters.page) params = params.set('page', filters.page.toString());
+      if (filters.pageSize) params = params.set('pageSize', filters.pageSize.toString());
     }
-    return this.http.post<PaginatedResponse<Influencer>>(`${this.apiUrl}/ObtenerInfluencers`, body);
+    return this.http.get<PaginatedResponse<Influencer>>(`${this.apiUrl}/ObtenerInfluencers`, { params });
   }
 
   // Update statistics

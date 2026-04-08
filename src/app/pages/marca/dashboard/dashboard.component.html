@@ -35,7 +35,8 @@
         [categorias]="categorias()"
         [plataformas]="plataformas()"
         [tiposContenido]="tiposContenido()"
-        [campanas]="misCampanas()" />
+        [campanas]="misCampanas()"
+        (invitarInfluencerClick)="irAInfluencers($event)" />
     }
 
     @if (activeTab() === 'mi-marca') {
@@ -47,7 +48,11 @@
     }
 
     @if (activeTab() === 'influencers') {
-      <app-marca-influencers [categorias]="categorias()" [plataformas]="plataformas()" [misCampanas]="misCampanas()" />
+      <app-marca-influencers
+        [categorias]="categorias()"
+        [plataformas]="plataformas()"
+        [misCampanas]="misCampanas()"
+        [campanaIdParaInvitar]="campanaIdParaInvitar()" />
     }
   </div>
 </div>

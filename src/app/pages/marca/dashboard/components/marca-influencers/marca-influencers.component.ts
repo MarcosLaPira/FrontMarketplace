@@ -21,6 +21,7 @@ export class MarcaInfluencersComponent {
   categorias = input.required<Categoria[]>();
   plataformas = input.required<Plataforma[]>();
   misCampanas = input<Campana[]>([]);
+  campanaIdParaInvitar = input<number | null>(null);
 
   influencers = signal<Influencer[]>([]);
   loading = signal(false);
@@ -31,7 +32,7 @@ export class MarcaInfluencersComponent {
   currentPage = signal(1);
   totalPages = signal(0);
   totalCount = signal(0);
-  pageSize = 20;
+  pageSize = 9;
 
   // Invitación
   influencerParaInvitar = signal<Influencer | null>(null);

@@ -107,6 +107,7 @@
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
           Cancelar
         </button>
+        <ng-content select="[actionExtra]"></ng-content>
         <div class="flex-1"></div>
         <button (click)="togglePostulaciones.emit(campana().idCampana); $event.stopPropagation()"
           class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition">

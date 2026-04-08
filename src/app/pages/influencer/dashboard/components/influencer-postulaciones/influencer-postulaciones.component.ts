@@ -5,6 +5,7 @@ import { Campana, Postulacion, InvitacionInfluencer, EntregaInfluencer } from '.
 import { PostulacionService } from '../../../../../services/postulacion.service';
 import { InvitacionService } from '../../../../../services/invitacion.service';
 import { EntregaService } from '../../../../../services/entrega.service';
+import { CampanaService } from '../../../../../services/campana.service';
 import { CampanaDetailComponent } from '../../../../../components/campana-detail/campana-detail.component';
 import { InfluencerCampanaCardComponent } from '../influencer-campana-card/influencer-campana-card.component';
 
@@ -18,6 +19,7 @@ export class InfluencerPostulacionesComponent implements OnInit {
   private postulacionService = inject(PostulacionService);
   private invitacionService = inject(InvitacionService);
   private entregaService = inject(EntregaService);
+  private campanaService = inject(CampanaService);
   private fb = inject(FormBuilder);
 
   activeSubTab = signal<'postulaciones' | 'invitaciones' | 'enCurso'>('postulaciones');
@@ -29,6 +31,8 @@ export class InfluencerPostulacionesComponent implements OnInit {
   loadingInvitaciones = signal(false);
 
   // En Curso
+  campanasEnCurso = signal<Campana[]>([]);
+  loadingEnCurso = signal(false);
   selectedCampanaId = signal<number | null>(null);
   entregas = signal<EntregaInfluencer[]>([]);
   loadingEntregas = signal(false);
@@ -44,7 +48,10 @@ export class InfluencerPostulacionesComponent implements OnInit {
   selectedPostulacionCampanaId = signal<number | null>(null);
 
   totalPostulaciones = computed(() => this.postulaciones().length);
-  totalInvitaciones = computed(() => this.invitaciones().length);
+  invitacionesPendientes = computed(() =>
+    this.invitaciones().filter(i => i.estadoInvitacionCampana.idEstadoInvitacionCampana === 1)
+  );
+  totalInvitaciones = computed(() => this.invitacionesPendientes().length);
 
   postulacionesAceptadas = computed(() =>
     this.postulaciones().filter(p => p.estado?.nombre?.toLowerCase() === 'aceptada')
@@ -53,6 +60,7 @@ export class InfluencerPostulacionesComponent implements OnInit {
   ngOnInit(): void {
     this.loadPostulaciones();
     this.loadInvitaciones();
+    this.loadCampanasEnCurso();
   }
 
   loadPostulaciones(): void {
@@ -70,12 +78,23 @@ export class InfluencerPostulacionesComponent implements OnInit {
     this.loadingInvitaciones.set(true);
     this.invitacionService.getMisInvitaciones().subscribe({
       next: (data) => {
-
-        this.invitaciones.set(data);
-        console.log('Invitaciones cargadas:', data);
+        // Solo mostramos invitaciones pendientes de respuesta (estado 1)
+        const pendientes = data.filter(inv => inv.estadoInvitacionCampana.idEstadoInvitacionCampana === 1);
+        this.invitaciones.set(pendientes);
         this.loadingInvitaciones.set(false);
       },
       error: () => this.loadingInvitaciones.set(false)
+    });
+  }
+
+  loadCampanasEnCurso(): void {
+    this.loadingEnCurso.set(true);
+    this.campanaService.getCampanasEnCursoInfluencer().subscribe({
+      next: (data) => {
+        this.campanasEnCurso.set(data);
+        this.loadingEnCurso.set(false);
+      },
+      error: () => this.loadingEnCurso.set(false)
     });
   }
 
@@ -105,14 +124,14 @@ export class InfluencerPostulacionesComponent implements OnInit {
     const idEstado = aceptar ? 2 : 3;
     this.invitacionService.responderInvitacion(inv.idInvitacionCampana, idEstado).subscribe({
       next: () => {
-        const nuevoIdEstado = aceptar ? 2 : 3;
+        const nuevoEstado = { ...inv.estadoInvitacionCampana, idEstadoInvitacionCampana: idEstado };
         this.invitaciones.update(list =>
           list.map(i => i.idInvitacionCampana === inv.idInvitacionCampana
-            ? { ...i, idEstadoInvitacionCampana: nuevoIdEstado }
+            ? { ...i, estadoInvitacionCampana: nuevoEstado }
             : i)
         );
         this.selectedInvitacion.update(i =>
-          i?.idInvitacionCampana === inv.idInvitacionCampana ? { ...i, idEstadoInvitacionCampana: nuevoIdEstado } : i
+          i?.idInvitacionCampana === inv.idInvitacionCampana ? { ...i, estadoInvitacionCampana: nuevoEstado } : i
         );
         this.respondiendo.update(v => ({ ...v, [inv.idInvitacionCampana]: false }));
       },

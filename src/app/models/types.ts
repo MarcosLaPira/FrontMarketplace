@@ -380,6 +380,13 @@ export interface EstadoPostulacion {
 }
 
 // Invitaciones recibidas por el influencer
+export interface EstadoInvitacionCampana {
+  idEstadoInvitacionCampana: number;
+  nombre: string;
+  descripcion: string;
+  invitacionesCampana: unknown[];
+}
+
 export interface InvitacionInfluencer {
   idInvitacionCampana: number;
   idCampana: number;
@@ -400,8 +407,7 @@ export interface InvitacionInfluencer {
     };
   };
   idInfluencer: number;
-  idEstadoInvitacionCampana: number;
-  estado?: string;
+  estadoInvitacionCampana: EstadoInvitacionCampana;
   mensaje: string;
   fechaInvitacion: string;
 }

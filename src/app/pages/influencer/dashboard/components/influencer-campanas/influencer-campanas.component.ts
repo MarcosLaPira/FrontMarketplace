@@ -79,7 +79,7 @@ export class InfluencerCampanasComponent implements OnInit {
 
   loadCampanas(): void {
     this.loading.set(true);
-    const filters: CampanaFilter = {};
+    const filters: CampanaFilter = { idEstadoCampana: 1 };
     if (this.filtroPlataforma()) filters.idPlataforma = this.filtroPlataforma();
     if (this.filtroCategorias().length) filters.idsCategorias = this.filtroCategorias();
     if (this.filtroPresencial() !== undefined) filters.esPresencial = this.filtroPresencial();

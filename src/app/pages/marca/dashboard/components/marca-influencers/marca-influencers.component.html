@@ -283,6 +283,7 @@
   <app-invitar-influencer-modal
     [influencer]="influencerParaInvitar()!"
     [campanas]="misCampanas()"
+    [campanaIdInicial]="campanaIdParaInvitar()"
     (confirmado)="confirmarInvitacion($event)"
     (cerrado)="cerrarModal()" />
 }

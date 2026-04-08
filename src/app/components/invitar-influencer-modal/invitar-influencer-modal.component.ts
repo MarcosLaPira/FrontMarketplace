@@ -1,4 +1,4 @@
-import { Component, input, output, signal, computed } from '@angular/core';
+import { Component, input, output, signal, computed, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Campana, Influencer } from '../../models/types';
 import { API_BASE_URL } from '../../shared/constants';
@@ -12,6 +12,7 @@ import { API_BASE_URL } from '../../shared/constants';
 export class InvitarInfluencerModalComponent {
   influencer = input.required<Influencer>();
   campanas = input.required<Campana[]>();
+  campanaIdInicial = input<number | null>(null);
 
   confirmado = output<{ idCampana: number; mensaje: string }>();
   cerrado = output<void>();
@@ -21,6 +22,15 @@ export class InvitarInfluencerModalComponent {
   enviando = signal<boolean>(false);
 
   canConfirmar = computed(() => this.campanaSeleccionadaId() !== null);
+
+  constructor() {
+    effect(() => {
+      const id = this.campanaIdInicial();
+      if (id !== null) {
+        this.campanaSeleccionadaId.set(id);
+      }
+    });
+  }
 
   get fotoPerfilUrl(): string | null {
     const foto = this.influencer().fotoPerfil;

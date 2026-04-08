@@ -29,6 +29,7 @@ export class DashboardComponent implements OnInit {
   activeTab = signal<'campanas' | 'mi-marca' | 'influencers'>('campanas');
   marca = signal<Marca | null>(null);
   misCampanas = signal<Campana[]>([]);
+  campanaIdParaInvitar = signal<number | null>(null);
 
   ngOnInit(): void {
     this.loadMarcaData();
@@ -38,6 +39,11 @@ export class DashboardComponent implements OnInit {
 
   onTabChange(tab: 'campanas' | 'mi-marca' | 'influencers'): void {
     this.activeTab.set(tab);
+  }
+
+  irAInfluencers(idCampana: number): void {
+    this.campanaIdParaInvitar.set(idCampana);
+    this.activeTab.set('influencers');
   }
 
   loadMarcaData(): void {

@@ -1,4 +1,4 @@
-import { Component, inject, input, signal, computed } from '@angular/core';
+import { Component, inject, input, output, signal, computed } from '@angular/core';
 import { CampanaFormComponent } from '../../../../../components/campana-form/campana-form.component';
 import { CampanaCardComponent } from '../../../../../components/campana-card/campana-card.component';
 import { PostulacionListComponent } from '../../../../../components/postulacion-list/postulacion-list.component';
@@ -16,6 +16,8 @@ export class MarcaCampanasComponent {
   private campanaService = inject(CampanaService);
   private postulacionService = inject(PostulacionService);
 
+  invitarInfluencerClick = output<number>();
+
   categorias = input.required<Categoria[]>();
   plataformas = input.required<Plataforma[]>();
   tiposContenido = input.required<TipoContenido[]>();
@@ -23,21 +25,25 @@ export class MarcaCampanasComponent {
 
   showNewForm = signal(false);
   editingCampana = signal<Campana | null>(null);
-  subTab = signal<'activas' | 'pasadas'>('activas');
+  subTab = signal<'publicadas' | 'enCurso' | 'pasadas'>('publicadas');
   expandedCampanaId = signal<number | null>(null);
 
   private estadosInactivos = [6, 7]; // 6 = Finalizada, 7 = Cancelada
+  private estadosEnCurso = [2, 3, 4, 5];
 
   private esInactiva(c: Campana): boolean {
     return c.estadoCampana != null && this.estadosInactivos.includes(c.estadoCampana.idEstadoCampana);
   }
 
-  campanasActivas = computed(() => {
-    const now = new Date();
-    return this.campanas().filter(c =>
-      new Date(c.fechaFin) >= now && !this.esInactiva(c)
-    );
-  });
+  campanasPublicadas = computed(() =>
+    this.campanas().filter(c => c.estadoCampana?.idEstadoCampana === 1)
+  );
+
+  campanasEnCurso = computed(() =>
+    this.campanas().filter(c =>
+      c.estadoCampana != null && this.estadosEnCurso.includes(c.estadoCampana.idEstadoCampana)
+    )
+  );
 
   campanasPasadas = computed(() => {
     const now = new Date();
@@ -77,6 +83,10 @@ export class MarcaCampanasComponent {
 
   cancelEdit(): void {
     this.editingCampana.set(null);
+  }
+
+  invitarInfluencer(idCampana: number): void {
+    this.invitarInfluencerClick.emit(idCampana);
   }
 
   deleteCampana(idCampana: number): void {
