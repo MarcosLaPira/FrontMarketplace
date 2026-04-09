@@ -9,6 +9,8 @@ import { CampanaService } from '../../../../../services/campana.service';
 import { CampanaDetailComponent } from '../../../../../components/campana-detail/campana-detail.component';
 import { InfluencerCampanaCardComponent } from '../influencer-campana-card/influencer-campana-card.component';
 
+import { EntregaHistorialService } from '../../../../../services/entrega-historial.service';
+
 @Component({
   selector: 'app-influencer-postulaciones',
   standalone: true,
@@ -21,6 +23,8 @@ export class InfluencerPostulacionesComponent implements OnInit {
   private entregaService = inject(EntregaService);
   private campanaService = inject(CampanaService);
   private fb = inject(FormBuilder);
+
+  private entregaHistorialService = inject(EntregaHistorialService);
 
   activeSubTab = signal<'postulaciones' | 'invitaciones' | 'enCurso'>('postulaciones');
 
@@ -46,6 +50,11 @@ export class InfluencerPostulacionesComponent implements OnInit {
 
   // Detalle de postulación
   selectedPostulacionCampanaId = signal<number | null>(null);
+
+  // Historial de entregas
+  historialEntrega = signal<any[] | null>(null);
+  loadingHistorial = signal(false);
+  modalHistorial = signal<{idEntregable: number, idInfluencer: number} | null>(null);
 
   totalPostulaciones = computed(() => this.postulaciones().length);
   invitacionesPendientes = computed(() =>
@@ -249,5 +258,23 @@ export class InfluencerPostulacionesComponent implements OnInit {
 
   volverDePostulacion(): void {
     this.selectedPostulacionCampanaId.set(null);
+  }
+
+  // === HISTORIAL DE ENTREGA ===
+  abrirHistorialEntrega(entrega: EntregaInfluencer) {
+    this.modalHistorial.set({ idEntregable: entrega.idEntregable, idInfluencer: entrega.idInfluencer });
+    this.loadingHistorial.set(true);
+    this.entregaHistorialService.getHistorialEntrega(entrega.idEntregable, entrega.idInfluencer).subscribe({
+      next: (data) => {
+        this.historialEntrega.set(data);
+        this.loadingHistorial.set(false);
+      },
+      error: () => this.loadingHistorial.set(false)
+    });
+  }
+
+  cerrarHistorialEntrega() {
+    this.modalHistorial.set(null);
+    this.historialEntrega.set(null);
   }
 }
