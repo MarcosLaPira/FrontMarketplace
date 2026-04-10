@@ -1,3 +1,5 @@
+
+
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -18,6 +20,34 @@ import { EntregaHistorialService } from '../../../../../services/entrega-histori
   templateUrl: './influencer-postulaciones.component.html'
 })
 export class InfluencerPostulacionesComponent implements OnInit {
+
+    // ==================== CHAT DE ENTREGAS Y DEVOLUCIONES ====================
+
+
+    enviandoMensaje = signal(false);
+
+   enviarMensajeChat() {
+    if (!this.nuevoMensaje().trim()) return;  // leer con ()
+    this.enviandoMensaje.set(true);           // set() para escribir
+
+    setTimeout(() => {
+      this.chatMensajes.update(msgs => [
+        ...msgs,
+        {
+          id: msgs.length + 1,
+          autor: 'Yo',
+          mensaje: this.nuevoMensaje(),        // leer con ()
+          fecha: new Date(),
+          esDevolucion: false
+        }
+      ]);
+      this.nuevoMensaje.set('');              // set() para escribir
+      this.enviandoMensaje.set(false);        // set() para escribir
+    }, 500);
+  }
+
+
+
   private postulacionService = inject(PostulacionService);
   private invitacionService = inject(InvitacionService);
   private entregaService = inject(EntregaService);
@@ -101,16 +131,32 @@ export class InfluencerPostulacionesComponent implements OnInit {
     this.campanaService.getCampanasEnCursoInfluencer().subscribe({
       next: (data) => {
         this.campanasEnCurso.set(data);
-        this.loadingEnCurso.set(false);
+        this.loadingEnCurso.set(false); // <--- FALTABA ESTO
       },
       error: () => this.loadingEnCurso.set(false)
     });
   }
 
-  seleccionarCampana(idCampana: number): void {
-    this.selectedCampanaId.set(idCampana);
-    this.cargarEntregas(idCampana);
-  }
+ seleccionarCampana(idCampana: number): void {
+  this.selectedCampanaId.set(idCampana);
+  this.cargarEntregas(idCampana);
+}
+
+cargarEntregas(idCampana: number): void {
+  this.loadingEntregas.set(true);
+  this.entregaService.getMisEntregasPorCampana(idCampana).subscribe({
+    next: (data) => {
+      this.entregas.set(data);
+      this.loadingEntregas.set(false);
+      // Cargar el chat automáticamente con el primer entregable
+      if (data.length > 0) {
+        this.cargarChat(data[0]);
+      }
+    },
+    error: () => this.loadingEntregas.set(false)
+  });
+}
+
 
   volverAlListado(): void {
     this.selectedCampanaId.set(null);
@@ -148,17 +194,9 @@ export class InfluencerPostulacionesComponent implements OnInit {
     });
   }
 
-  cargarEntregas(idCampana: number): void {
-    this.loadingEntregas.set(true);
-    this.entregaService.getMisEntregasPorCampana(idCampana).subscribe({
-      next: (data) => {
-        this.entregas.set(data);
-        this.inicializarFormularios(data);
-        this.loadingEntregas.set(false);
-      },
-      error: () => this.loadingEntregas.set(false)
-    });
-  }
+
+
+
 
   private inicializarFormularios(entregas: EntregaInfluencer[]): void {
     const forms: Record<number, FormGroup> = {};
@@ -207,25 +245,23 @@ export class InfluencerPostulacionesComponent implements OnInit {
     return 'bg-gray-50 text-gray-600 border-gray-100';
   }
 
-  getEstadoEntregaClass(estado: string): string {
-    const s = estado?.toLowerCase();
-    if (s === 'aprobada') return 'bg-green-100 text-green-700 border border-green-200';
-    if (s === 'enviada') return 'bg-blue-100 text-blue-700 border border-blue-200';
-    if (s === 'condevolucion') return 'bg-orange-100 text-orange-700 border border-orange-200';
+  getEstadoEntregaClass(estado: number): string {
+    if (estado === 3) return 'bg-green-100 text-green-700 border border-green-200';
+    if (estado === 2) return 'bg-blue-100 text-blue-700 border border-blue-200';
+    if (estado === 4) return 'bg-orange-100 text-orange-700 border border-orange-200';
     return 'bg-amber-50 text-amber-700 border border-amber-200'; // pendiente
   }
 
-  getEstadoEntregaLabel(estado: string): string {
-    const s = estado?.toLowerCase();
-    if (s === 'aprobada') return 'Aprobada';
-    if (s === 'enviada') return 'Enviada — en revisión';
-    if (s === 'condevolucion') return 'Con devolución';
+  getEstadoEntregaLabel(estado: number): string {
+    if (estado === 3) return 'Aprobada';
+    if (estado === 2) return 'Enviada — en revisión';
+    if (estado === 4) return 'Con devolución';
     return 'Pendiente';
   }
 
-  puedeEnviar(estado: string): boolean {
-    const s = estado?.toLowerCase();
-    return s === 'pendiente' || s === 'condevolucion';
+  puedeEnviar(estado: number): boolean {
+    const s = estado;
+    return s === 1 || s === 4;
   }
 
   getDaysLeft(fecha: string): number {
@@ -277,4 +313,127 @@ export class InfluencerPostulacionesComponent implements OnInit {
     this.modalHistorial.set(null);
     this.historialEntrega.set(null);
   }
+
+
+
+
+
+    // Reemplazar los signals del chat
+  chatEntregaActiva = signal<EntregaInfluencer | null>(null);
+  chatMensajes = signal<any[]>([]);
+  loadingChat = signal(false);
+  enviandoChat = signal(false);
+  nuevoMensaje = signal('');
+  archivoChat = signal<File | null>(null);
+
+  // Reemplazar abrirHistorialEntrega
+  abrirChat(entrega: EntregaInfluencer) {
+    this.chatEntregaActiva.set(entrega);
+    this.cargarChat(entrega);
+  }
+
+  cerrarChat() {
+    this.chatEntregaActiva.set(null);
+    this.chatMensajes.set([]);
+    this.nuevoMensaje.set('');
+    this.archivoChat.set(null);
+  }
+
+  cargarChat(entrega: EntregaInfluencer) {
+    this.loadingChat.set(true);
+    this.entregaHistorialService
+      .getHistorialEntrega(entrega.idEntregable, entrega.idInfluencer)
+      .subscribe({
+        next: (data) => {
+          this.chatMensajes.set(data);
+          this.loadingChat.set(false);
+        },
+        error: () => this.loadingChat.set(false)
+      });
+  }
+
+
+  enviarEntregaChat() {
+    const entrega = this.chatEntregaActiva();
+    if (!entrega || (!this.nuevoMensaje().trim() && !this.archivoChat())) return;
+
+    this.enviandoChat.set(true);
+
+    const formData = new FormData();
+    formData.append('IdEntregable', entrega.idEntregable.toString());
+    formData.append('Comentario', this.nuevoMensaje());
+    if (this.archivoChat()) {
+      formData.append('Archivo', this.archivoChat()!);
+    }
+
+    this.entregaService.enviarEntregaFormData(formData).subscribe({
+      next: () => {
+        this.nuevoMensaje.set('');
+        this.archivoChat.set(null);
+        this.cargarChat(entrega); // recargar el chat
+        this.enviandoChat.set(false);
+      },
+      error: () => this.enviandoChat.set(false)
+    });
+  }
+
+
+
+
+  imagenAmpliada = signal<string | null>(null);
+  previewUrl = signal<string | null>(null);
+
+  esImagen(url: string): boolean {
+    return /\.(jpg|jpeg|png|gif|webp|avif)$/i.test(url);
+  }
+
+  abrirImagen(url: string) {
+    this.imagenAmpliada.set(url);
+  }
+
+  onArchivoSeleccionado(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files?.length) {
+      const file = input.files[0];
+      this.archivoChat.set(file);
+      // Generar preview si es imagen
+      if (this.esImagen(file.name)) {
+        const reader = new FileReader();
+        reader.onload = (e) => this.previewUrl.set(e.target?.result as string);
+        reader.readAsDataURL(file);
+      } else {
+        this.previewUrl.set(null);
+      }
+    }
+  }
+
+
+
+   public puedeEnviarMensaje = computed(() => {
+    const mensajes = this.chatMensajes();
+    if (!mensajes || mensajes.length === 0) return false;
+    const ultimo = mensajes[mensajes.length - 1];
+    // Puede ser string o número según API, ajustar si es necesario
+    return (
+      ultimo.estadoEntrega === 'Pendiente' ||
+      ultimo.estadoEntrega === 'ConDevolucion' ||
+      ultimo.estadoEntrega === 1 || // 1: Pendiente
+      ultimo.estadoEntrega === 4    // 4: ConDevolucion
+    );
+  });
+
+
+
+  // Permitir enviar archivo solo si el último mensaje del historial tiene estadoEntrega 'Pendiente' o 'ConDevolucion'
+  public puedeEnviarArchivo = computed(() => {
+    const mensajes = this.chatMensajes();
+    if (!mensajes || mensajes.length === 0) return false;
+    const ultimo = mensajes[mensajes.length - 1];
+    return (
+      ultimo.estadoEntrega === 'Pendiente' ||
+      ultimo.estadoEntrega === 'ConDevolucion'
+    );
+  });
+  // Permite enviar mensaje solo si el último mensaje tiene estadoEntrega 'Pendiente' o 'ConDevolucion'
+
 }

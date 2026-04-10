@@ -437,7 +437,7 @@ export interface EntregaInfluencer {
   descripcionEntregable: string;
   fechaLimiteEntregable: string;
   orden: number;
-  estado: string; // Pendiente | Enviada | Aprobada | ConDevolucion
+  estado: number; // Pendiente | Enviada | Aprobada | ConDevolucion
   urlEntregable?: string;
   comentarioInfluencer?: string;
   fechaEnvio?: string;

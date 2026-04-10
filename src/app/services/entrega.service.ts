@@ -20,4 +20,8 @@ export class EntregaService {
   getMisEntregasPorCampana(idCampana: number): Observable<EntregaInfluencer[]> {
     return this.http.get<EntregaInfluencer[]>(`${this.apiUrl}/mis-entregas/campana/${idCampana}`);
   }
+
+  enviarEntregaFormData(formData: FormData): Observable<any> {
+  return this.http.post(`${this.apiUrl}/enviar`, formData);
+}
 }
