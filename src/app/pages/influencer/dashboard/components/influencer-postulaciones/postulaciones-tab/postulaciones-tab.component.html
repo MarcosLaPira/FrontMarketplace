@@ -1,0 +1,30 @@
+@if (loading) {
+  <div class="flex flex-col items-center justify-center py-16">
+    <div class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+    <p class="mt-4 text-gray-500 text-sm">Cargando postulaciones...</p>
+  </div>
+} @else if (postulaciones.length > 0) {
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+    @for (post of postulaciones; track post.idPostulacion) {
+      @if (post.campana) {
+        <app-influencer-campana-card
+          [campana]="post.campana"
+          [viewMode]="'grid'"
+          [hidePostular]="true"
+          (verDetalle)="verDetalle.emit($event)" />
+      }
+    }
+  </div>
+} @else {
+  <div class="flex flex-col items-center justify-center py-16 text-center">
+    <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-5">
+      <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+      </svg>
+    </div>
+    <h3 class="text-lg font-bold text-gray-800 mb-2">Sin postulaciones aún</h3>
+    <p class="text-gray-500 text-sm max-w-sm mb-5">
+      Explorá las campañas disponibles y postulate para empezar a colaborar con marcas.
+    </p>
+  </div>
+}

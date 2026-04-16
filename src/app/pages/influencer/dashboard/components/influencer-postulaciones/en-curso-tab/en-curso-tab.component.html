@@ -1,0 +1,30 @@
+@if (loading) {
+  <div class="flex flex-col items-center justify-center py-16">
+    <div class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+    <p class="mt-4 text-gray-500 text-sm">Cargando campañas en curso...</p>
+  </div>
+
+} @else if (campanasEnCurso.length > 0) {
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+    @for (campana of campanasEnCurso; track campana.idCampana) {
+      <app-influencer-campana-card
+        [campana]="campana"
+        [viewMode]="'grid'"
+        [hidePostular]="true"
+        (verDetalle)="seleccionar.emit($event)" />
+    }
+  </div>
+
+} @else {
+  <div class="flex flex-col items-center justify-center py-16 text-center">
+    <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mb-5">
+      <svg class="w-10 h-10 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+      </svg>
+    </div>
+    <h3 class="text-lg font-bold text-gray-800 mb-2">Sin campañas en curso</h3>
+    <p class="text-gray-500 text-sm max-w-sm">
+      Cuando una campaña en la que participás se active, aparecerá aquí para que puedas entregar tu contenido.
+    </p>
+  </div>
+}

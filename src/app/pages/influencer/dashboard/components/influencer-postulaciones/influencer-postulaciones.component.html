@@ -1,6 +1,6 @@
 ﻿<div class="space-y-6">
 
-  <!-- ==================== VISTA DETALLE DE CAMPANA EN POSTULACION ==================== -->
+  <!-- ==================== DETALLE: Postulación ====================-->
   @if (activeSubTab() === 'postulaciones' && selectedPostulacionCampanaId()) {
     <app-campana-detail
       [idCampana]="selectedPostulacionCampanaId()!"
@@ -9,288 +9,18 @@
     </app-campana-detail>
   }
 
-  <!-- ==================== VISTA DETALLE DE CAMPAÑA EN CURSO ==================== -->
+  <!-- ==================== DETALLE: Campaña en curso ==================== -->
   @if (activeSubTab() === 'enCurso' && selectedCampanaId()) {
+    <app-campana-detail
+      [idCampana]="selectedCampanaId()!"
+      [hidePostular]="true"
+      (volver)="volverAlListado()">
+    </app-campana-detail>
 
-    <div class="space-y-6">
-
-      <app-campana-detail
-        [idCampana]="selectedCampanaId()!"
-        [hidePostular]="true"
-        (volver)="volverAlListado()">
-      </app-campana-detail>
-
-      <!-- ==================== SECCIÓN ENTREGAS ==================== -->
-
-
-
-        <!-- MODAL CHAT -->
-
-      <!-- ==================== SECCIÓN CHAT DE ENTREGA ==================== -->
-      <div class="w-full flex flex-col items-center mt-2 mb-4">
-        <div class="flex items-center w-full gap-2 mb-2">
-          <div class="flex-1 h-px bg-indigo-200"></div>
-          <span class="text-xs font-bold uppercase tracking-widest text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full shadow-sm border border-indigo-100">Entregables y chat</span>
-          <div class="flex-1 h-px bg-indigo-200"></div>
-        </div>
-      </div>
-
-    <div class="flex flex-col bg-gray-50/80 rounded-2xl border border-gray-100 shadow-lg transition-all duration-300 mx-auto w-full max-w-2xl" style="min-height: 350px; max-height: 90vh;">
-      <!-- Header removido para UX más limpia -->
-
-    <!-- Área de mensajes -->
-      <div class="flex-1 px-4 py-4 space-y-3 bg-gray-100/80" #chatContainer>
-
-      @if (loadingChat()) {
-        <div class="flex items-center justify-center h-full">
-          <div class="w-6 h-6 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-        </div>
-      } @else if (loadingEntregas()) {
-        <div class="flex items-center justify-center h-full">
-          <div class="w-6 h-6 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-        </div>
-      } @else if (chatMensajes().length === 0) {
-        <div class="flex flex-col items-center justify-center h-full text-center gap-3">
-          <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
-            <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-            </svg>
-          </div>
-          <div>
-            <p class="text-sm font-semibold text-gray-600">¡Todavía no hay entregas!</p>
-            <p class="text-xs text-gray-400 mt-1">Adjuntá tu archivo y enviá tu primera entrega.</p>
-          </div>
-        </div>
-      } @else {
-
-        <!-- Separador de entregable -->
-        @if (entregas().length > 0) {
-          <div class="flex items-center gap-3 my-4">
-            <div class="flex-1 h-px bg-indigo-100"></div>
-            <div class="flex items-center gap-2 bg-indigo-100 border border-indigo-200 rounded-full px-4 py-1.5 shadow-sm">
-              <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-              </svg>
-              <span class="text-xs font-bold text-indigo-700 tracking-wide">{{ entregas()[0].descripcionEntregable }}</span>
-            </div>
-            <div class="flex-1 h-px bg-indigo-100"></div>
-          </div>
-        }
-
-        @for (msg of chatMensajes(); track msg.fecha + msg.autor + msg.tipoMensaje) {
-
-          <!-- Sistema: pill centrada -->
-          @if (msg.autor === 'Sistema') {
-            <div class="flex justify-center my-1">
-              <span class="text-xs text-gray-400 bg-white border border-gray-200 px-3 py-1 rounded-full shadow-sm">
-                {{ msg.mensaje }} · {{ msg.fecha | date:'dd/MM HH:mm' }}
-              </span>
-            </div>
-          }
-
-          <!-- Influencer: burbuja derecha -->
-          @if (msg.autor === 'Influencer') {
-            <div class="flex justify-end mb-2">
-              <div class="max-w-[78%] space-y-1">
-                <div class="bg-indigo-600 text-white rounded-2xl rounded-br-none px-4 py-3 text-sm shadow-lg border border-indigo-300">
-
-                  @if (msg.mensaje) {
-                    <p class="leading-relaxed">{{ msg.mensaje }}</p>
-                  }
-
-                  <!-- Preview de imagen si el archivo es imagen -->
-                  @if (msg.archivoUrl) {
-                    @if (esImagen(msg.archivoUrl)) {
-                      <div class="mt-1 rounded-xl overflow-hidden border-2 border-white/20">
-                        <img [src]="'https://localhost:7070' + msg.archivoUrl"
-                          alt="Entrega"
-                          class="w-full max-h-52 object-cover cursor-pointer"
-                          (click)="abrirImagen('https://localhost:7070' + msg.archivoUrl)" />
-                      </div>
-                    } @else {
-                      <a [href]="'https://localhost:7070' + msg.archivoUrl"
-                        target="_blank"
-                        class="flex items-center gap-2 bg-white/20 hover:bg-white/30 rounded-xl px-3 py-2 transition">
-                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
-                        </svg>
-                        <span class="text-xs font-medium">Ver archivo adjunto</span>
-                      </a>
-                    }
-                  }
-
-                </div>
-                <p class="text-xs text-gray-400 text-right pr-1">{{ msg.fecha | date:'dd/MM HH:mm' }}</p>
-              </div>
-            </div>
-          }
-
-          <!-- Marca: burbuja izquierda -->
-          @if (msg.autor === 'Marca') {
-            <div class="flex justify-start gap-2 mb-2">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-md"
-                [class]="msg.tipoMensaje === 'Aprobacion' ? 'bg-green-100' : 'bg-orange-100'">
-                @if (msg.tipoMensaje === 'Aprobacion') {
-                  <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                  </svg>
-                } @else {
-                  <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/>
-                  </svg>
-                }
-              </div>
-              <div class="max-w-[78%] space-y-1">
-                <div class="rounded-2xl rounded-bl-none px-4 py-3 text-sm shadow-lg border"
-                  [class]="msg.tipoMensaje === 'Aprobacion'
-                    ? 'bg-green-50 border-green-200 text-green-900'
-                    : 'bg-orange-50 border-orange-200 text-orange-900'">
-                  <p class="text-xs font-bold mb-1.5"
-                    [class]="msg.tipoMensaje === 'Aprobacion' ? 'text-green-600' : 'text-orange-500'">
-                    {{ msg.tipoMensaje === 'Aprobacion' ? '✓ Aprobado por la marca' : '↩ Devolución de la marca' }}
-                  </p>
-                  <p class="leading-relaxed">{{ msg.mensaje }}</p>
-                </div>
-                <p class="text-xs text-gray-400 pl-1">Marca · {{ msg.fecha | date:'dd/MM HH:mm' }}</p>
-              </div>
-            </div>
-          }
-
-        }
-      }
-    </div>
-
-    <!-- Lightbox para imagen -->
-    @if (imagenAmpliada()) {
-      <div class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-        (click)="imagenAmpliada.set(null)">
-        <img [src]="imagenAmpliada()!" class="max-w-full max-h-full rounded-xl shadow-2xl object-contain" />
-        <button class="absolute top-4 right-4 text-white/70 hover:text-white p-2">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-    }
-
-      <!-- Footer input -->
-      <div class="bg-white flex-shrink-0 rounded-b-2xl px-4 pb-4 pt-2 shadow-none">
-
-        @if (entregas().length > 0 && puedeEnviar(entregas()[0].estado)) {
-
-          <div class="space-y-2">
-
-          <!-- Preview archivo seleccionado -->
-          @if (archivoChat()) {
-            <div class="rounded-xl overflow-hidden border border-indigo-100 bg-indigo-50">
-              @if (esImagen(archivoChat()!.name)) {
-                <div class="relative">
-                  <img [src]="previewUrl()" alt="preview"
-                    class="w-full max-h-48 object-cover" />
-                  <button (click)="archivoChat.set(null); previewUrl.set(null)"
-                    class="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                  </button>
-                </div>
-              } @else {
-                <div class="flex items-center gap-3 px-3 py-2.5">
-                  <div class="w-9 h-9 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                  </div>
-                  <span class="text-xs text-indigo-700 font-medium truncate flex-1">{{ archivoChat()!.name }}</span>
-                  <button (click)="archivoChat.set(null); previewUrl.set(null)"
-                    class="text-indigo-400 hover:text-red-500 transition font-bold text-sm flex-shrink-0">✕</button>
-                </div>
-              }
-            </div>
-          }
-
-          <!-- Input row -->
-            <div class="flex items-center gap-2">
-
-            <!-- Adjuntar -->
-            <label class="cursor-pointer p-2 rounded-xl text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition flex-shrink-0"
-              [class.opacity-50]="!puedeEnviarArchivo()"
-              [class.cursor-not-allowed]="!puedeEnviarArchivo()">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
-              </svg>
-              <input type="file" class="hidden"
-                (change)="onArchivoSeleccionado($event)"
-                accept="image/*,video/*,.pdf"
-                [disabled]="!puedeEnviarArchivo()">
-            </label>
-
-            <!-- Texto -->
-              <input
-                type="text"
-                [value]="nuevoMensaje()"
-                (input)="nuevoMensaje.set($any($event.target).value)"
-                (keydown.enter)="enviarEntregaChat()"
-                placeholder="Escribí un comentario para acompañar tu entrega..."
-                class="flex-1 px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 text-base bg-gray-50 shadow-sm transition-all"
-                style="min-height: 48px;"
-              />
-
-            <!-- Botón enviar -->
-              <button
-                (click)="enviarEntregaChat()"
-                [disabled]="enviandoChat() || (!nuevoMensaje().trim() && !archivoChat()) || !puedeEnviarArchivo()"
-                class="p-3 rounded-2xl transition flex-shrink-0 shadow-md"
-                [class]="enviandoChat() || (!nuevoMensaje().trim() && !archivoChat()) || !puedeEnviarArchivo()
-                  ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg active:scale-95'">
-                @if (enviandoChat()) {
-                  <div class="w-5 h-5 border-2 border-indigo-300 border-t-white rounded-full animate-spin"></div>
-                } @else {
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                  </svg>
-                }
-              </button>
-
-                </div>
-              </div>
-
-            } @else if (entregas().length > 0 && entregas()[0].estado === 3) {
-
-              <!-- Aprobada -->
-              <div class="px-4 py-4 flex items-center justify-center gap-2 text-green-600 text-sm font-semibold">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                ¡Entrega aprobada por la marca!
-              </div>
-
-            } @else if (entregas().length > 0) {
-
-              <!-- Turno de la marca -->
-              <div class="px-4 py-4 flex items-center justify-center gap-2 text-gray-400 text-sm">
-                <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                Esperando revisión de la marca...
-              </div>
-
-            }
-
-          </div>
-    </div>
-
-        <!-- Lista de entregables -->
-
-
-
-    </div>
-
-
+    <app-entrega-chat [idCampana]="selectedCampanaId()!" />
   }
 
-  <!-- ==================== VISTA DETALLE DE INVITACIÓN ==================== -->
+  <!-- ==================== DETALLE: Invitación ==================== -->
   @if (activeSubTab() === 'invitaciones' && selectedInvitacion()) {
     <app-campana-detail
       [idCampana]="selectedInvitacion()!.idCampana"
@@ -371,10 +101,10 @@
     }
   }
 
-  <!-- ==================== VISTA PRINCIPAL ==================== -->
-  @if (!(activeSubTab() === 'enCurso' && selectedCampanaId()) && !(activeSubTab() === 'invitaciones' && selectedInvitacion()) && !(activeSubTab() === 'postulaciones' && selectedPostulacionCampanaId())) {
+  <!-- ==================== VISTA PRINCIPAL (listados) ==================== -->
+  @if (!isDetalleVisible()) {
 
-    <!-- Header -->
+    <!-- Banner de estadísticas -->
     <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 md:p-8 text-white">
       <div class="flex items-center gap-3 mb-2">
         <div class="bg-white/15 backdrop-blur-sm p-2 rounded-lg">
@@ -402,7 +132,7 @@
       </div>
     </div>
 
-    <!-- Sub-Tabs -->
+    <!-- Sub-Tabs de navegación -->
     <div class="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 w-fit">
       <button (click)="activeSubTab.set('postulaciones')"
         class="px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2"
@@ -418,6 +148,7 @@
           </span>
         }
       </button>
+
       <button (click)="activeSubTab.set('invitaciones')"
         class="px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2"
         [class]="activeSubTab() === 'invitaciones' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'">
@@ -432,6 +163,7 @@
           </span>
         }
       </button>
+
       <button (click)="activeSubTab.set('enCurso')"
         class="px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2"
         [class]="activeSubTab() === 'enCurso' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'">
@@ -448,167 +180,30 @@
       </button>
     </div>
 
-    <!-- ==================== POSTULACIONES TAB ==================== -->
+    <!-- Contenido según tab activo -->
     @if (activeSubTab() === 'postulaciones') {
-      @if (loadingPostulaciones()) {
-        <div class="flex flex-col items-center justify-center py-16">
-          <div class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-          <p class="mt-4 text-gray-500 text-sm">Cargando postulaciones...</p>
-        </div>
-      }
-      @if (!loadingPostulaciones()) {
-        @if (postulaciones().length > 0) {
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            @for (post of postulaciones(); track post.idPostulacion) {
-              @if (post.campana) {
-                <app-influencer-campana-card
-                  [campana]="post.campana"
-                  [viewMode]="'grid'"
-                  [hidePostular]="true"
-                  (verDetalle)="verDetallePostulacion($event)" />
-              }
-            }
-          </div>
-        } @else {
-          <div class="flex flex-col items-center justify-center py-16 text-center">
-            <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-5">
-              <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-              </svg>
-            </div>
-            <h3 class="text-lg font-bold text-gray-800 mb-2">Sin postulaciones aún</h3>
-            <p class="text-gray-500 text-sm max-w-sm mb-5">Explorá las campañas disponibles y postulate para empezar a colaborar con marcas.</p>
-          </div>
-        }
-      }
+      <app-postulaciones-tab
+        [postulaciones]="postulaciones()"
+        [loading]="loadingPostulaciones()"
+        (verDetalle)="verDetallePostulacion($event)" />
     }
 
-    <!-- ==================== INVITACIONES TAB ==================== -->
     @if (activeSubTab() === 'invitaciones') {
-      <div class="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
-        <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-        </svg>
-        <p class="text-sm text-amber-700">Estas son las invitaciones de marcas que aún <strong>esperan tu respuesta</strong>. Aceptá o rechazá cada una para continuar.</p>
-      </div>
-
-      @if (loadingInvitaciones()) {
-        <div class="flex flex-col items-center justify-center py-16">
-          <div class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-          <p class="mt-4 text-gray-500 text-sm">Cargando invitaciones...</p>
-        </div>
-      }
-      @if (!loadingInvitaciones()) {
-        @if (invitaciones().length > 0) {
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            @for (inv of invitaciones(); track inv.idInvitacionCampana) {
-              @if (inv.campana) {
-                <div class="flex flex-col gap-2">
-                  <app-influencer-campana-card
-                    [campana]="invitacionToCampana(inv)"
-                    [viewMode]="'grid'"
-                    [hidePostular]="true"
-                    (verDetalle)="verDetalleInvitacionPorCampana($event)" />
-                  @if (inv.estadoInvitacionCampana.idEstadoInvitacionCampana === 1) {
-                    <div class="flex gap-2">
-                      <button
-                        (click)="responderInvitacion(inv, true)"
-                        [disabled]="respondiendo()[inv.idInvitacionCampana]"
-                        class="flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
-                        [class]="respondiendo()[inv.idInvitacionCampana]
-                          ? 'bg-emerald-100 text-emerald-400 cursor-not-allowed'
-                          : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm'">
-                        @if (respondiendo()[inv.idInvitacionCampana]) {
-                          <div class="w-4 h-4 border-2 border-emerald-300 border-t-white rounded-full animate-spin"></div>
-                        } @else {
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                          </svg>
-                        }
-                        Aceptar
-                      </button>
-                      <button
-                        (click)="responderInvitacion(inv, false)"
-                        [disabled]="respondiendo()[inv.idInvitacionCampana]"
-                        class="flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98] border-2"
-                        [class]="respondiendo()[inv.idInvitacionCampana]
-                          ? 'border-gray-200 text-gray-300 cursor-not-allowed'
-                          : 'border-red-200 text-red-600 hover:bg-red-50'">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                        Rechazar
-                      </button>
-                    </div>
-                  } @else {
-                    <div class="flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-semibold"
-                      [class]="inv.estadoInvitacionCampana.idEstadoInvitacionCampana === 2
-                        ? 'bg-emerald-50 text-emerald-600'
-                        : 'bg-red-50 text-red-500'">
-                      @if (inv.estadoInvitacionCampana.idEstadoInvitacionCampana === 2) {
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        Aceptada
-                      } @else {
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                        Rechazada
-                      }
-                    </div>
-                  }
-                </div>
-              }
-            }
-          </div>
-        } @else {
-          <div class="flex flex-col items-center justify-center py-16 text-center">
-            <div class="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mb-5">
-              <svg class="w-10 h-10 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-              </svg>
-            </div>
-            <h3 class="text-lg font-bold text-gray-800 mb-2">Sin invitaciones pendientes</h3>
-            <p class="text-gray-500 text-sm max-w-sm">No tenés invitaciones que requieran tu respuesta. Cuando una marca te invite a una campaña, aparecerá acá.</p>
-          </div>
-        }
-      }
+      <app-invitaciones-tab
+        [invitaciones]="invitaciones()"
+        [loading]="loadingInvitaciones()"
+        [respondiendo]="respondiendo()"
+        (responder)="responderInvitacion($event.inv, $event.aceptar)"
+        (verDetalle)="verDetalleInvitacionPorCampana($event)" />
     }
 
-    <!-- ==================== EN CURSO TAB ==================== -->
     @if (activeSubTab() === 'enCurso') {
-      @if (loadingEnCurso()) {
-        <div class="flex flex-col items-center justify-center py-16">
-          <div class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-          <p class="mt-4 text-gray-500 text-sm">Cargando campañas en curso...</p>
-        </div>
-      }
-      @if (!loadingEnCurso()) {
-        @if (campanasEnCurso().length > 0) {
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            @for (campana of campanasEnCurso(); track campana.idCampana) {
-              <app-influencer-campana-card
-                [campana]="campana"
-                [viewMode]="'grid'"
-                [hidePostular]="true"
-                (verDetalle)="seleccionarCampana($event)" />
-            }
-          </div>
-        } @else {
-          <div class="flex flex-col items-center justify-center py-16 text-center">
-            <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mb-5">
-              <svg class="w-10 h-10 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-              </svg>
-            </div>
-            <h3 class="text-lg font-bold text-gray-800 mb-2">Sin campañas en curso</h3>
-            <p class="text-gray-500 text-sm max-w-sm">Cuando una campaña en la que participás se active, aparecerá aquí para que puedas entregar tu contenido.</p>
-          </div>
-        }
-      }
+      <app-en-curso-tab
+        [campanasEnCurso]="campanasEnCurso()"
+        [loading]="loadingEnCurso()"
+        (seleccionar)="seleccionarCampana($event)" />
     }
 
-  } <!-- fin @if vista principal -->
+  }
 
 </div>

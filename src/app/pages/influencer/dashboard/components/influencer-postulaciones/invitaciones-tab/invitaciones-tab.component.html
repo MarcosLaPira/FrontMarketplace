@@ -1,0 +1,98 @@
+<!-- Aviso informativo -->
+<div class="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
+  <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+  </svg>
+  <p class="text-sm text-amber-700">
+    Estas son las invitaciones de marcas que aún <strong>esperan tu respuesta</strong>. Aceptá o rechazá cada una para continuar.
+  </p>
+</div>
+
+@if (loading) {
+  <div class="flex flex-col items-center justify-center py-16">
+    <div class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+    <p class="mt-4 text-gray-500 text-sm">Cargando invitaciones...</p>
+  </div>
+
+} @else if (invitaciones.length > 0) {
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+    @for (inv of invitaciones; track inv.idInvitacionCampana) {
+      @if (inv.campana) {
+        <div class="flex flex-col gap-2">
+          <app-influencer-campana-card
+            [campana]="invitacionToCampana(inv)"
+            [viewMode]="'grid'"
+            [hidePostular]="true"
+            (verDetalle)="verDetalle.emit($event)" />
+
+          @if (inv.estadoInvitacionCampana.idEstadoInvitacionCampana === 1) {
+            <!-- Pendiente: mostrar botones de acción -->
+            <div class="flex gap-2">
+              <button
+                (click)="responder.emit({ inv, aceptar: true })"
+                [disabled]="respondiendo[inv.idInvitacionCampana]"
+                class="flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                [class]="respondiendo[inv.idInvitacionCampana]
+                  ? 'bg-emerald-100 text-emerald-400 cursor-not-allowed'
+                  : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm'">
+                @if (respondiendo[inv.idInvitacionCampana]) {
+                  <div class="w-4 h-4 border-2 border-emerald-300 border-t-white rounded-full animate-spin"></div>
+                } @else {
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                }
+                Aceptar
+              </button>
+              <button
+                (click)="responder.emit({ inv, aceptar: false })"
+                [disabled]="respondiendo[inv.idInvitacionCampana]"
+                class="flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98] border-2"
+                [class]="respondiendo[inv.idInvitacionCampana]
+                  ? 'border-gray-200 text-gray-300 cursor-not-allowed'
+                  : 'border-red-200 text-red-600 hover:bg-red-50'">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Rechazar
+              </button>
+            </div>
+
+          } @else {
+            <!-- Ya respondida: badge de estado -->
+            <div class="flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-semibold"
+              [class]="inv.estadoInvitacionCampana.idEstadoInvitacionCampana === 2
+                ? 'bg-emerald-50 text-emerald-600'
+                : 'bg-red-50 text-red-500'">
+              @if (inv.estadoInvitacionCampana.idEstadoInvitacionCampana === 2) {
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Aceptada
+              } @else {
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Rechazada
+              }
+            </div>
+          }
+
+        </div>
+      }
+    }
+  </div>
+
+} @else {
+  <div class="flex flex-col items-center justify-center py-16 text-center">
+    <div class="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mb-5">
+      <svg class="w-10 h-10 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+    </div>
+    <h3 class="text-lg font-bold text-gray-800 mb-2">Sin invitaciones pendientes</h3>
+    <p class="text-gray-500 text-sm max-w-sm">
+      No tenés invitaciones que requieran tu respuesta. Cuando una marca te invite a una campaña, aparecerá acá.
+    </p>
+  </div>
+}
