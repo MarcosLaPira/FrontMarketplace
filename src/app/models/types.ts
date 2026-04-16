@@ -449,3 +449,16 @@ export interface EnviarEntregaRequest {
   urlEntregable: string;
   comentario?: string;
 }
+
+export type EstadoEntrega = 'Pendiente' | 'Enviada' | 'Aprobada' | 'ConDevolucion';
+export type AutorMensaje = 'Influencer' | 'Marca' | 'Sistema';
+export type TipoMensaje = 'Envio' | 'Asignacion' | 'Devolucion' | 'Aprobacion';
+
+export interface ChatMensaje {
+  autor: AutorMensaje;
+  tipoMensaje: TipoMensaje;
+  mensaje: string;
+  archivoUrl: string | null;
+  fecha: string;
+  estadoEntrega: EstadoEntrega;
+}

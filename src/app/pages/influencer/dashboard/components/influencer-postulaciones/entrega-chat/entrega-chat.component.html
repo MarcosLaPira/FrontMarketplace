@@ -1,246 +1,313 @@
-<!-- Separador de sección -->
-<div class="w-full flex flex-col items-center mt-2 mb-4">
-  <div class="flex items-center w-full gap-2 mb-2">
-    <div class="flex-1 h-px bg-indigo-200"></div>
-    <span class="text-xs font-bold uppercase tracking-widest text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full shadow-sm border border-indigo-100">
-      Entregables y chat
-    </span>
-    <div class="flex-1 h-px bg-indigo-200"></div>
-  </div>
+﻿<!-- Separador de sección -->
+<div class="w-full flex items-center gap-2 mt-2 mb-4">
+  <div class="flex-1 h-px bg-indigo-200"></div>
+  <span class="text-xs font-bold uppercase tracking-widest text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+    Entregables y chat
+  </span>
+  <div class="flex-1 h-px bg-indigo-200"></div>
 </div>
 
-<!-- Chat container -->
-<div class="flex flex-col bg-gray-50/80 rounded-2xl border border-gray-100 shadow-lg mx-auto w-full max-w-2xl"
-  style="min-height: 350px; max-height: 90vh;">
+<!-- Loading inicial -->
+@if (loadingEntregas()) {
+  <div class="flex items-center justify-center py-12">
+    <div class="w-7 h-7 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+  </div>
 
-  <!-- Área de mensajes -->
-  <div class="flex-1 px-4 py-4 space-y-3 bg-gray-100/80">
+} @else if (entregas().length === 0) {
+  <!-- Sin entregables asignados -->
+  <div class="flex flex-col items-center justify-center py-12 text-center gap-3">
+    <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center">
+      <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+      </svg>
+    </div>
+    <p class="text-sm font-semibold text-gray-500">No tenés entregables asignados aún</p>
+  </div>
 
-    @if (loadingChat() || loadingEntregas()) {
-      <div class="flex items-center justify-center h-full">
-        <div class="w-6 h-6 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-      </div>
+} @else {
 
-    } @else if (chatMensajes().length === 0) {
-      <div class="flex flex-col items-center justify-center h-full text-center gap-3">
-        <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
-          <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-          </svg>
-        </div>
-        <div>
-          <p class="text-sm font-semibold text-gray-600">¡Todavía no hay entregas!</p>
-          <p class="text-xs text-gray-400 mt-1">Adjuntá tu archivo y enviá tu primera entrega.</p>
-        </div>
-      </div>
-
-    } @else {
-
-      <!-- Nombre del entregable -->
-      @if (entregas().length > 0) {
-        <div class="flex items-center gap-3 my-4">
-          <div class="flex-1 h-px bg-indigo-100"></div>
-          <div class="flex items-center gap-2 bg-indigo-100 border border-indigo-200 rounded-full px-4 py-1.5 shadow-sm">
-            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-            </svg>
-            <span class="text-xs font-bold text-indigo-700 tracking-wide">{{ entregas()[0].descripcionEntregable }}</span>
-          </div>
-          <div class="flex-1 h-px bg-indigo-100"></div>
-        </div>
+  <!-- Info del entregable activo -->
+  <div class="flex items-center gap-3 mb-3 px-1">
+    <div class="flex items-center gap-2 flex-1 min-w-0">
+      <svg class="w-4 h-4 text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+      </svg>
+      <span class="text-sm font-semibold text-gray-700 truncate">{{ entregas()[0].descripcionEntregable }}</span>
+    </div>
+    <!-- Badge de estado actual -->
+    @switch (estadoActual()) {
+      @case ('Pendiente') {
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700 border border-yellow-200 flex-shrink-0">
+          Pendiente de entrega
+        </span>
       }
+      @case ('Enviada') {
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 border border-blue-200 flex-shrink-0">
+          En revisión
+        </span>
+      }
+      @case ('Aprobada') {
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700 border border-green-200 flex-shrink-0">
+          Aprobada ✓
+        </span>
+      }
+      @case ('ConDevolucion') {
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 border border-orange-200 flex-shrink-0">
+          Con devolución
+        </span>
+      }
+    }
+  </div>
 
-      <!-- Lista de mensajes -->
-      @for (msg of chatMensajes(); track msg.fecha + msg.autor + msg.tipoMensaje) {
+  <!-- Chat container -->
+  <div class="flex flex-col bg-gray-50 rounded-2xl border border-gray-200 shadow-md w-full overflow-hidden"
+    style="min-height: 320px; max-height: 85vh;">
 
-        <!-- Sistema: pill centrada -->
-        @if (msg.autor === 'Sistema') {
-          <div class="flex justify-center my-1">
-            <span class="text-xs text-gray-400 bg-white border border-gray-200 px-3 py-1 rounded-full shadow-sm">
-              {{ msg.mensaje }} · {{ msg.fecha | date:'dd/MM HH:mm' }}
-            </span>
-          </div>
-        }
+    <!-- Área de mensajes -->
+    <div #mensajesContainer class="flex-1 overflow-y-auto px-4 py-4 space-y-2" style="min-height: 220px; max-height: 480px;">
 
-        <!-- Influencer: burbuja derecha -->
-        @if (msg.autor === 'Influencer') {
-          <div class="flex justify-end mb-2">
-            <div class="max-w-[78%] space-y-1">
-              <div class="bg-indigo-600 text-white rounded-2xl rounded-br-none px-4 py-3 text-sm shadow-lg border border-indigo-300">
-                @if (msg.mensaje) {
-                  <p class="leading-relaxed">{{ msg.mensaje }}</p>
-                }
-                @if (msg.archivoUrl) {
-                  @if (esImagen(msg.archivoUrl)) {
-                    <div class="mt-1 rounded-xl overflow-hidden border-2 border-white/20">
-                      <img [src]="'https://localhost:7070' + msg.archivoUrl"
-                        alt="Entrega"
-                        class="w-full max-h-52 object-cover cursor-pointer"
-                        (click)="abrirImagen('https://localhost:7070' + msg.archivoUrl)" />
-                    </div>
-                  } @else {
-                    <a [href]="'https://localhost:7070' + msg.archivoUrl"
-                      target="_blank"
-                      class="flex items-center gap-2 bg-white/20 hover:bg-white/30 rounded-xl px-3 py-2 transition">
-                      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
-                      </svg>
-                      <span class="text-xs font-medium">Ver archivo adjunto</span>
-                    </a>
+      @if (loadingChat()) {
+        <div class="flex items-center justify-center h-32">
+          <div class="w-6 h-6 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+        </div>
+
+      } @else if (chatMensajes().length === 0) {
+        <div class="flex flex-col items-center justify-center h-32 text-center gap-2">
+          <svg class="w-8 h-8 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          </svg>
+          <p class="text-sm text-gray-400">El historial aparecerá aquí</p>
+        </div>
+
+      } @else {
+
+        @for (msg of chatMensajes(); track msg.fecha + msg.autor + msg.tipoMensaje) {
+
+          <!-- Sistema: pill centrada -->
+          @if (msg.autor === 'Sistema') {
+            <div class="flex justify-center my-2">
+              <span class="text-xs text-gray-400 bg-white border border-gray-200 px-3 py-1 rounded-full shadow-sm">
+                {{ msg.mensaje }} · {{ msg.fecha | date:'dd/MM HH:mm' }}
+              </span>
+            </div>
+          }
+
+          <!-- Influencer: burbuja derecha (azul/indigo) -->
+          @if (msg.autor === 'Influencer') {
+            <div class="flex justify-end mb-1">
+              <div class="max-w-[80%] space-y-0.5">
+                <div class="bg-indigo-600 text-white rounded-2xl rounded-br-sm px-4 py-3 text-sm shadow">
+                  @if (msg.mensaje) {
+                    <p class="leading-relaxed mb-1">{{ msg.mensaje }}</p>
                   }
+                  @if (msg.archivoUrl) {
+                    @if (esImagen(msg.archivoUrl)) {
+                      <div class="rounded-xl overflow-hidden border-2 border-white/20 cursor-pointer mt-1"
+                        (click)="abrirImagen(uploadsBase + msg.archivoUrl)">
+                        <img [src]="uploadsBase + msg.archivoUrl"
+                          alt="Imagen adjunta"
+                          class="w-full max-h-52 object-cover hover:opacity-90 transition" />
+                      </div>
+                    } @else {
+                      <a [href]="uploadsBase + msg.archivoUrl" target="_blank"
+                        class="flex items-center gap-2 bg-white/15 hover:bg-white/25 rounded-xl px-3 py-2 mt-1 transition">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                        </svg>
+                        <span class="text-xs font-medium">Ver archivo adjunto</span>
+                      </a>
+                    }
+                  }
+                </div>
+                <p class="text-[11px] text-gray-400 text-right pr-1">{{ msg.fecha | date:'dd/MM HH:mm' }}</p>
+              </div>
+            </div>
+          }
+
+          <!-- Marca: burbuja izquierda (verde o naranja) -->
+          @if (msg.autor === 'Marca') {
+            <div class="flex justify-start gap-2 mb-1">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm"
+                [class]="msg.tipoMensaje === 'Aprobacion' ? 'bg-green-100' : 'bg-orange-100'">
+                @if (msg.tipoMensaje === 'Aprobacion') {
+                  <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                } @else {
+                  <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                  </svg>
                 }
               </div>
-              <p class="text-xs text-gray-400 text-right pr-1">{{ msg.fecha | date:'dd/MM HH:mm' }}</p>
+              <div class="max-w-[78%] space-y-0.5">
+                <div class="rounded-2xl rounded-bl-sm px-4 py-3 text-sm shadow border"
+                  [class]="msg.tipoMensaje === 'Aprobacion'
+                    ? 'bg-green-50 border-green-200 text-green-900'
+                    : 'bg-orange-50 border-orange-200 text-orange-900'">
+                  <p class="text-[11px] font-bold uppercase tracking-wide mb-1.5"
+                    [class]="msg.tipoMensaje === 'Aprobacion' ? 'text-green-600' : 'text-orange-500'">
+                    {{ msg.tipoMensaje === 'Aprobacion' ? '✓ Aprobado' : '↩ Devolución' }}
+                  </p>
+                  <p class="leading-relaxed">{{ msg.mensaje }}</p>
+                </div>
+                <p class="text-[11px] text-gray-400 pl-1">Marca · {{ msg.fecha | date:'dd/MM HH:mm' }}</p>
+              </div>
             </div>
-          </div>
-        }
+          }
 
-        <!-- Marca: burbuja izquierda -->
-        @if (msg.autor === 'Marca') {
-          <div class="flex justify-start gap-2 mb-2">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-md"
-              [class]="msg.tipoMensaje === 'Aprobacion' ? 'bg-green-100' : 'bg-orange-100'">
-              @if (msg.tipoMensaje === 'Aprobacion') {
-                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
+        }
+      }
+    </div>
+
+    <!-- ────── FOOTER según estado ────── -->
+    <div class="bg-white border-t border-gray-100 rounded-b-2xl flex-shrink-0 px-4 py-3">
+
+      <!-- Aprobada -->
+      @if (estadoActual() === 'Aprobada') {
+        <div class="flex items-center justify-center gap-2 text-green-600 text-sm font-semibold py-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          ¡Tu entrega fue aprobada por la marca!
+        </div>
+
+      <!-- Enviada (en revisión) -->
+      } @else if (estadoActual() === 'Enviada') {
+        <div class="flex items-center justify-center gap-2 text-blue-500 text-sm py-2">
+          <svg class="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span>Tu entrega está siendo revisada por la marca...</span>
+        </div>
+
+      <!-- Pendiente o ConDevolucion: formulario de envío -->
+      } @else if (puedeEnviarEntrega()) {
+
+        <div class="space-y-3">
+
+          <!-- Aviso contextual de devolución -->
+          @if (estadoActual() === 'ConDevolucion' && ultimaDevolucion(); as dev) {
+            <div class="flex items-start gap-2 bg-orange-50 border border-orange-200 rounded-xl px-3 py-2.5">
+              <svg class="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-orange-600 mb-0.5">La marca pidió cambios:</p>
+                <p class="text-xs text-orange-700 leading-relaxed">{{ dev.mensaje }}</p>
+              </div>
+            </div>
+          }
+
+          <!-- Preview del archivo seleccionado -->
+          @if (archivoChat()) {
+            <div class="rounded-xl overflow-hidden border border-indigo-100 bg-indigo-50">
+              @if (esImagen(archivoChat()!.name) && previewUrl()) {
+                <div class="relative">
+                  <img [src]="previewUrl()!" alt="preview" class="w-full max-h-44 object-cover" />
+                  <button (click)="quitarArchivo()"
+                    class="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
               } @else {
-                <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/>
-                </svg>
+                <div class="flex items-center gap-3 px-3 py-2.5">
+                  <div class="w-9 h-9 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-indigo-700 font-medium truncate flex-1">{{ archivoChat()!.name }}</span>
+                  <button (click)="quitarArchivo()" class="text-indigo-300 hover:text-red-500 transition flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
               }
             </div>
-            <div class="max-w-[78%] space-y-1">
-              <div class="rounded-2xl rounded-bl-none px-4 py-3 text-sm shadow-lg border"
-                [class]="msg.tipoMensaje === 'Aprobacion'
-                  ? 'bg-green-50 border-green-200 text-green-900'
-                  : 'bg-orange-50 border-orange-200 text-orange-900'">
-                <p class="text-xs font-bold mb-1.5"
-                  [class]="msg.tipoMensaje === 'Aprobacion' ? 'text-green-600' : 'text-orange-500'">
-                  {{ msg.tipoMensaje === 'Aprobacion' ? '✓ Aprobado por la marca' : '↩ Devolución de la marca' }}
-                </p>
-                <p class="leading-relaxed">{{ msg.mensaje }}</p>
+          }
+
+          <!-- Input row -->
+          <div class="flex items-center gap-2">
+
+            <!-- Botón adjuntar (archivo obligatorio) -->
+            <label class="relative flex-shrink-0 cursor-pointer">
+              <div class="p-2.5 rounded-xl transition flex items-center"
+                [class]="archivoChat()
+                  ? 'bg-indigo-100 text-indigo-600'
+                  : 'bg-gray-100 text-gray-500 hover:bg-indigo-50 hover:text-indigo-600'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                </svg>
               </div>
-              <p class="text-xs text-gray-400 pl-1">Marca · {{ msg.fecha | date:'dd/MM HH:mm' }}</p>
-            </div>
+              <input type="file" class="hidden"
+                (change)="onArchivoSeleccionado($event)"
+                accept="image/*,video/*,.pdf">
+              @if (!archivoChat()) {
+                <span class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                  <span class="text-white text-[9px] font-bold">!</span>
+                </span>
+              }
+            </label>
+
+            <!-- Comentario opcional -->
+            <input
+              type="text"
+              [value]="nuevoMensaje()"
+              (input)="nuevoMensaje.set($any($event.target).value)"
+              (keydown.enter)="archivoChat() && enviarEntregaChat()"
+              placeholder="Agregá un comentario (opcional)..."
+              class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 text-sm bg-gray-50 transition-all"
+            />
+
+            <!-- Botón enviar -->
+            <button
+              (click)="enviarEntregaChat()"
+              [disabled]="enviandoChat() || !archivoChat()"
+              class="p-2.5 rounded-xl transition flex-shrink-0"
+              [class]="(enviandoChat() || !archivoChat())
+                ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow active:scale-95'">
+              @if (enviandoChat()) {
+                <div class="w-5 h-5 border-2 border-indigo-300 border-t-white rounded-full animate-spin"></div>
+              } @else {
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                </svg>
+              }
+            </button>
           </div>
-        }
 
-      }
-    }
-  </div>
+          <!-- Indicación campo obligatorio -->
+          @if (!archivoChat()) {
+            <p class="text-[11px] text-gray-400 text-center">
+              <span class="text-red-400 font-semibold">*</span> Adjuntá un archivo para enviar tu entrega (imagen, video o PDF)
+            </p>
+          }
 
-  <!-- Lightbox -->
-  @if (imagenAmpliada()) {
-    <div class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-      (click)="imagenAmpliada.set(null)">
-      <img [src]="imagenAmpliada()!" class="max-w-full max-h-full rounded-xl shadow-2xl object-contain" />
-      <button class="absolute top-4 right-4 text-white/70 hover:text-white p-2">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-    </div>
-  }
-
-  <!-- Footer: input de envío -->
-  <div class="bg-white flex-shrink-0 rounded-b-2xl px-4 pb-4 pt-2">
-
-    @if (entregas().length > 0 && puedeEnviar(entregas()[0].estado)) {
-
-      <div class="space-y-2">
-
-        <!-- Preview del archivo seleccionado -->
-        @if (archivoChat()) {
-          <div class="rounded-xl overflow-hidden border border-indigo-100 bg-indigo-50">
-            @if (esImagen(archivoChat()!.name)) {
-              <div class="relative">
-                <img [src]="previewUrl()" alt="preview" class="w-full max-h-48 object-cover" />
-                <button (click)="archivoChat.set(null); previewUrl.set(null)"
-                  class="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                  </svg>
-                </button>
-              </div>
-            } @else {
-              <div class="flex items-center gap-3 px-3 py-2.5">
-                <div class="w-9 h-9 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                  </svg>
-                </div>
-                <span class="text-xs text-indigo-700 font-medium truncate flex-1">{{ archivoChat()!.name }}</span>
-                <button (click)="archivoChat.set(null); previewUrl.set(null)"
-                  class="text-indigo-400 hover:text-red-500 transition font-bold text-sm flex-shrink-0">✕</button>
-              </div>
-            }
-          </div>
-        }
-
-        <!-- Input row -->
-        <div class="flex items-center gap-2">
-
-          <!-- Botón adjuntar -->
-          <label class="cursor-pointer p-2 rounded-xl text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition flex-shrink-0"
-            [class.opacity-50]="!puedeEnviarArchivo()"
-            [class.cursor-not-allowed]="!puedeEnviarArchivo()">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
-            </svg>
-            <input type="file" class="hidden"
-              (change)="onArchivoSeleccionado($event)"
-              accept="image/*,video/*,.pdf"
-              [disabled]="!puedeEnviarArchivo()">
-          </label>
-
-          <!-- Campo de texto -->
-          <input
-            type="text"
-            [value]="nuevoMensaje()"
-            (input)="nuevoMensaje.set($any($event.target).value)"
-            (keydown.enter)="enviarEntregaChat()"
-            placeholder="Escribí un comentario para acompañar tu entrega..."
-            class="flex-1 px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 text-base bg-gray-50 shadow-sm transition-all"
-            style="min-height: 48px;"
-          />
-
-          <!-- Botón enviar -->
-          <button
-            (click)="enviarEntregaChat()"
-            [disabled]="enviandoChat() || (!nuevoMensaje().trim() && !archivoChat()) || !puedeEnviarArchivo()"
-            class="p-3 rounded-2xl transition flex-shrink-0 shadow-md"
-            [class]="enviandoChat() || (!nuevoMensaje().trim() && !archivoChat()) || !puedeEnviarArchivo()
-              ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-              : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg active:scale-95'">
-            @if (enviandoChat()) {
-              <div class="w-5 h-5 border-2 border-indigo-300 border-t-white rounded-full animate-spin"></div>
-            } @else {
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-              </svg>
-            }
-          </button>
+          <!-- Error de envío -->
+          @if (errorEnvio()) {
+            <p class="text-xs text-red-500 text-center font-medium">{{ errorEnvio() }}</p>
+          }
 
         </div>
-      </div>
+      }
 
-    } @else if (entregas().length > 0 && entregas()[0].estado === 3) {
-      <div class="px-4 py-4 flex items-center justify-center gap-2 text-green-600 text-sm font-semibold">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        ¡Entrega aprobada por la marca!
-      </div>
-
-    } @else if (entregas().length > 0) {
-      <div class="px-4 py-4 flex items-center justify-center gap-2 text-gray-400 text-sm">
-        <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        Esperando revisión de la marca...
-      </div>
-    }
-
+    </div>
   </div>
-</div>
+}
+
+<!-- Lightbox -->
+@if (imagenAmpliada()) {
+  <div class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+    (click)="imagenAmpliada.set(null)">
+    <img [src]="imagenAmpliada()!" class="max-w-full max-h-full rounded-xl shadow-2xl object-contain" />
+    <button class="absolute top-4 right-4 text-white/70 hover:text-white p-2">
+      <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+}
