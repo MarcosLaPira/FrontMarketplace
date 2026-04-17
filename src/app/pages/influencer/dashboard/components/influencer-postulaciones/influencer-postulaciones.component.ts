@@ -125,18 +125,11 @@ export class InfluencerPostulacionesComponent implements OnInit {
     const idEstado = aceptar ? 2 : 3;
     this.invitacionService.responderInvitacion(inv.idInvitacionCampana, idEstado).subscribe({
       next: () => {
-        const nuevoEstado = { ...inv.estadoInvitacionCampana, idEstadoInvitacionCampana: idEstado };
-        this.invitaciones.update(list =>
-          list.map(i => i.idInvitacionCampana === inv.idInvitacionCampana
-            ? { ...i, estadoInvitacionCampana: nuevoEstado }
-            : i)
-        );
-        this.selectedInvitacion.update(i =>
-          i?.idInvitacionCampana === inv.idInvitacionCampana
-            ? { ...i, estadoInvitacionCampana: nuevoEstado }
-            : i
-        );
         this.respondiendo.update(v => ({ ...v, [inv.idInvitacionCampana]: false }));
+        this.loadInvitaciones();
+        if (aceptar) {
+          this.loadCampanasEnCurso();
+        }
       },
       error: () => this.respondiendo.update(v => ({ ...v, [inv.idInvitacionCampana]: false }))
     });

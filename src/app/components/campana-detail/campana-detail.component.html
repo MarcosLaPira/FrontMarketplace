@@ -1,16 +1,16 @@
-<!-- Loading -->
+﻿<!-- Loading -->
 @if (loading()) {
   <div class="flex flex-col items-center justify-center py-24">
-    <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-    <p class="mt-4 text-gray-500">Cargando detalles de la campaña...</p>
+    <div class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+    <p class="mt-4 text-gray-500 text-sm">Cargando detalles de la campaña...</p>
   </div>
 }
 
 <!-- Error -->
 @if (error()) {
   <div class="flex flex-col items-center justify-center py-24 text-center">
-    <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
-      <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-5">
+      <svg class="w-10 h-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
       </svg>
     </div>
@@ -24,11 +24,11 @@
 
 <!-- Detalle -->
 @if (campana(); as c) {
-  <div class="space-y-6">
+  <div class="space-y-5">
 
     <!-- Botón volver -->
-    <button (click)="volver.emit()" class="flex items-center gap-2 text-gray-500 hover:text-indigo-600 transition text-sm font-medium group">
-      <svg class="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <button (click)="volver.emit()" class="flex items-center gap-1.5 text-gray-500 hover:text-indigo-600 transition text-sm font-medium group">
+      <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
       </svg>
       Volver a campañas
@@ -37,12 +37,12 @@
     <!-- Hero -->
     <div class="relative rounded-2xl overflow-hidden">
       @if (c.imagenesProducto?.length) {
-        <div class="h-56 md:h-72">
+        <div class="h-52 md:h-64">
           <img [src]="getImagenUrl(c.imagenesProducto![0].url)" alt="Imagen de campaña" class="w-full h-full object-cover" />
           <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
         </div>
       } @else {
-        <div class="h-48 md:h-64 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
+        <div class="h-44 md:h-56 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
           <div class="absolute inset-0 opacity-10">
             <svg class="w-full h-full" viewBox="0 0 400 300" fill="none">
               <circle cx="50" cy="50" r="80" fill="white"/>
@@ -54,20 +54,20 @@
       }
 
       <!-- Overlay content -->
-      <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-        <div class="flex flex-wrap items-center gap-2 mb-3">
+      <div class="absolute bottom-0 left-0 right-0 p-5 md:p-7">
+        <div class="flex flex-wrap items-center gap-2 mb-2.5">
+          @if (c.estadoCampana) {
+            <span class="text-xs font-bold px-3 py-1 rounded-full backdrop-blur-md border border-white/20"
+              [class]="c.estadoCampana.idEstadoCampana === 1 ? 'bg-green-500/30 text-green-100' : 'bg-gray-500/30 text-gray-200'">
+              {{ c.estadoCampana.nombre }}
+            </span>
+          }
           @if (c.plataformaContenidos?.length) {
             @for (pc of c.plataformaContenidos; track pc.idCampanaPlataformaContenido) {
               <span class="bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full border border-white/20">
                 {{ pc.nombrePlataforma }} · {{ pc.nombreTipoContenido }}
               </span>
             }
-          }
-          @if (c.estadoCampana) {
-            <span class="text-xs font-bold px-3 py-1 rounded-full backdrop-blur-md border border-white/20"
-              [class]="c.estadoCampana.idEstadoCampana === 1 ? 'bg-green-500/30 text-green-100' : 'bg-gray-500/30 text-gray-200'">
-              {{ c.estadoCampana.nombre }}
-            </span>
           }
           @if (getDaysLeft() <= 7 && getDaysLeft() > 0) {
             <span class="bg-orange-500/30 backdrop-blur-md text-orange-100 text-xs font-bold px-3 py-1 rounded-full border border-orange-300/20">
@@ -77,184 +77,195 @@
         </div>
         <h1 class="text-2xl md:text-3xl font-bold text-white mb-1">{{ c.titulo }}</h1>
         @if (c.marca) {
-          <p class="text-white/80 text-sm">por <span class="font-semibold text-white">{{ c.marca }}</span></p>
+          <p class="text-white/70 text-sm">por <span class="font-semibold text-white">{{ c.marca }}</span></p>
         }
       </div>
     </div>
 
     <!-- Grid principal -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
       <!-- Columna izquierda: info detallada -->
-      <div class="lg:col-span-2 space-y-6">
+      <div class="lg:col-span-2 space-y-5">
 
         <!-- Descripción -->
-        <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <h2 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+          <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
             Sobre esta campaña
           </h2>
-          <p class="text-gray-600 leading-relaxed whitespace-pre-line">{{ c.descripcion }}</p>
+          <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{{ c.descripcion }}</p>
         </div>
 
-        <!-- Requisitos y logística -->
-        <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Logística compacta -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+          <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
             </svg>
-            Requisitos y logística
+            Logística
           </h2>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             <!-- Modalidad -->
-            <div class="flex items-start gap-3 p-4 rounded-xl" [class]="c.esPresencial ? 'bg-amber-50' : 'bg-blue-50'">
-              <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" [class]="c.esPresencial ? 'bg-amber-100' : 'bg-blue-100'">
-                <span class="text-lg">{{ c.esPresencial ? '📍' : '💻' }}</span>
-              </div>
-              <div>
-                <p class="font-semibold text-gray-900 text-sm">{{ c.esPresencial ? 'Presencial' : 'Virtual / Remoto' }}</p>
-                <p class="text-xs text-gray-500 mt-0.5">{{ c.esPresencial ? 'Requiere asistencia física en ubicación' : 'Podés participar desde cualquier lugar' }}</p>
-              </div>
+            <div class="flex flex-col items-center gap-1.5 p-3 rounded-xl text-center border transition-colors"
+              [class]="c.esPresencial ? 'bg-amber-50 border-amber-100' : 'bg-blue-50 border-blue-100'">
+              <span class="text-2xl">{{ c.esPresencial ? '📍' : '💻' }}</span>
+              <p class="text-xs font-semibold leading-tight" [class]="c.esPresencial ? 'text-amber-700' : 'text-blue-700'">
+                {{ c.esPresencial ? 'Presencial' : 'Remoto' }}
+              </p>
             </div>
 
             <!-- Producto físico -->
-            <div class="flex items-start gap-3 p-4 rounded-xl" [class]="c.requiereProductoFisico ? 'bg-emerald-50' : 'bg-gray-50'">
-              <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" [class]="c.requiereProductoFisico ? 'bg-emerald-100' : 'bg-gray-100'">
-                <span class="text-lg">📦</span>
-              </div>
-              <div>
-                <p class="font-semibold text-gray-900 text-sm">Producto físico</p>
-                <p class="text-xs text-gray-500 mt-0.5">{{ c.requiereProductoFisico ? 'Se requiere mostrar producto físico' : 'No se requiere producto físico' }}</p>
-              </div>
+            <div class="flex flex-col items-center gap-1.5 p-3 rounded-xl text-center border transition-colors"
+              [class]="c.requiereProductoFisico ? 'bg-emerald-50 border-emerald-100' : 'bg-gray-50 border-gray-100'">
+              <span class="text-2xl">📦</span>
+              <p class="text-xs font-semibold leading-tight" [class]="c.requiereProductoFisico ? 'text-emerald-700' : 'text-gray-400'">
+                Prod. físico
+              </p>
+              <span class="text-xs leading-tight" [class]="c.requiereProductoFisico ? 'text-emerald-600' : 'text-gray-400'">
+                {{ c.requiereProductoFisico ? 'Requerido' : 'No requerido' }}
+              </span>
             </div>
 
             <!-- Producto virtual -->
-            <div class="flex items-start gap-3 p-4 rounded-xl" [class]="c.requiereProductoVirtual ? 'bg-purple-50' : 'bg-gray-50'">
-              <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" [class]="c.requiereProductoVirtual ? 'bg-purple-100' : 'bg-gray-100'">
-                <span class="text-lg">💿</span>
-              </div>
-              <div>
-                <p class="font-semibold text-gray-900 text-sm">Producto virtual</p>
-                <p class="text-xs text-gray-500 mt-0.5">{{ c.requiereProductoVirtual ? 'Se requiere producto digital/virtual' : 'No se requiere producto virtual' }}</p>
-              </div>
+            <div class="flex flex-col items-center gap-1.5 p-3 rounded-xl text-center border transition-colors"
+              [class]="c.requiereProductoVirtual ? 'bg-purple-50 border-purple-100' : 'bg-gray-50 border-gray-100'">
+              <span class="text-2xl">💿</span>
+              <p class="text-xs font-semibold leading-tight" [class]="c.requiereProductoVirtual ? 'text-purple-700' : 'text-gray-400'">
+                Prod. virtual
+              </p>
+              <span class="text-xs leading-tight" [class]="c.requiereProductoVirtual ? 'text-purple-600' : 'text-gray-400'">
+                {{ c.requiereProductoVirtual ? 'Requerido' : 'No requerido' }}
+              </span>
             </div>
 
             <!-- Envío -->
-            <div class="flex items-start gap-3 p-4 rounded-xl" [class]="c.envioProductoIncluido ? 'bg-green-50' : 'bg-gray-50'">
-              <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" [class]="c.envioProductoIncluido ? 'bg-green-100' : 'bg-gray-100'">
-                <span class="text-lg">🚚</span>
-              </div>
-              <div>
-                <p class="font-semibold text-gray-900 text-sm">Envío de producto</p>
-                <p class="text-xs text-gray-500 mt-0.5">{{ c.envioProductoIncluido ? 'La marca se encarga del envío' : 'No incluye envío de producto' }}</p>
-              </div>
+            <div class="flex flex-col items-center gap-1.5 p-3 rounded-xl text-center border transition-colors"
+              [class]="c.envioProductoIncluido ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-100'">
+              <span class="text-2xl">🚚</span>
+              <p class="text-xs font-semibold leading-tight" [class]="c.envioProductoIncluido ? 'text-green-700' : 'text-gray-400'">
+                Envío
+              </p>
+              <span class="text-xs leading-tight" [class]="c.envioProductoIncluido ? 'text-green-600' : 'text-gray-400'">
+                {{ c.envioProductoIncluido ? 'Incluido' : 'No incluido' }}
+              </span>
             </div>
           </div>
 
           <!-- Ubicación -->
           @if (c.esPresencial && (c.direccion || c.ciudad || c.provincia)) {
-            <div class="mt-4 p-4 bg-amber-50 rounded-xl flex items-start gap-3">
-              <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-              </div>
-              <div>
-                <p class="font-semibold text-gray-900 text-sm">Ubicación del evento</p>
-                <p class="text-sm text-gray-600 mt-0.5">
-                  @if (c.direccion) { {{ c.direccion }}, }
-                  @if (c.ciudad) { {{ c.ciudad }} }
-                  @if (c.provincia) { — {{ c.provincia }} }
-                </p>
-              </div>
+            <div class="mt-3 p-3.5 bg-amber-50 border border-amber-100 rounded-xl flex items-center gap-2.5">
+              <svg class="w-4 h-4 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              <p class="text-sm text-amber-800">
+                @if (c.direccion) { {{ c.direccion }}, }
+                @if (c.ciudad) { {{ c.ciudad }} }
+                @if (c.provincia) { — {{ c.provincia }} }
+              </p>
             </div>
           }
 
           <!-- Notas logísticas -->
           @if (c.notasLogisticas) {
-            <div class="mt-4 p-4 bg-indigo-50 rounded-xl">
+            <div class="mt-3 p-3.5 bg-indigo-50 border border-indigo-100 rounded-xl">
               <p class="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-1">Notas logísticas</p>
               <p class="text-sm text-gray-700 leading-relaxed">{{ c.notasLogisticas }}</p>
             </div>
           }
         </div>
 
-        <!-- Categorías -->
-        @if (c.categorias?.length) {
-          <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-            <h2 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-              <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-              </svg>
-              Categorías
-            </h2>
-            <div class="flex flex-wrap gap-2">
-              @for (cat of c.categorias; track cat.idCategoria) {
-                <span class="bg-indigo-50 text-indigo-700 px-3.5 py-1.5 rounded-full text-sm font-medium border border-indigo-100">
-                  {{ cat.nombre }}
-                </span>
-              }
-            </div>
-          </div>
-        }
+        <!-- Categorías y Plataformas (fusionadas en una sola card) -->
+        @if (c.categorias?.length || c.plataformaContenidos?.length) {
+          <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm space-y-4">
 
-        <!-- Plataformas y contenidos -->
-        @if (c.plataformaContenidos?.length) {
-          <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-            <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-              </svg>
-              Plataformas y contenidos
-            </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              @for (pc of c.plataformaContenidos; track pc.idCampanaPlataformaContenido) {
-                <div class="flex items-center gap-3 p-4 rounded-xl bg-gray-50 border border-gray-100">
-                  <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span class="text-lg">📱</span>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-gray-900 text-sm">{{ pc.nombrePlataforma }}</p>
-                    <p class="text-xs text-gray-500">{{ pc.nombreTipoContenido }}</p>
-                  </div>
-                  @if (pc.precio) {
-                    <span class="text-sm font-bold text-indigo-600">${{ pc.precio }}</span>
+            @if (c.categorias?.length) {
+              <div>
+                <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2.5 flex items-center gap-2">
+                  <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                  </svg>
+                  Categorías
+                </h2>
+                <div class="flex flex-wrap gap-1.5">
+                  @for (cat of c.categorias; track cat.idCategoria) {
+                    <span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-medium border border-indigo-100">
+                      {{ cat.nombre }}
+                    </span>
                   }
                 </div>
-              }
-            </div>
+              </div>
+            }
+
+            @if (c.categorias?.length && c.plataformaContenidos?.length) {
+              <hr class="border-gray-100">
+            }
+
+            @if (c.plataformaContenidos?.length) {
+              <div>
+                <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2.5 flex items-center gap-2">
+                  <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                  Plataformas y contenidos
+                </h2>
+                <div class="flex flex-wrap gap-2">
+                  @for (pc of c.plataformaContenidos; track pc.idCampanaPlataformaContenido) {
+                    <div class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-50 border border-gray-100">
+                      <span>📱</span>
+                      <span class="text-xs font-semibold text-gray-900">{{ pc.nombrePlataforma }}</span>
+                      <span class="text-xs text-gray-400">· {{ pc.nombreTipoContenido }}</span>
+                      @if (pc.precio) {
+                        <span class="text-xs font-bold text-indigo-600">${{ pc.precio }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
           </div>
         }
 
         <!-- Entregables -->
         @if (c.entregables?.length) {
-          <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-            <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-              </svg>
-              Entregables requeridos
+          <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+            <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center justify-between">
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                </svg>
+                Entregables requeridos
+              </span>
+              <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full normal-case tracking-normal">
+                {{ c.entregables!.length }} {{ c.entregables!.length === 1 ? 'entregable' : 'entregables' }}
+              </span>
             </h2>
-            <div class="space-y-3">
-              @for (ent of c.entregables; track ent.idEntregable) {
-                <div class="flex items-start gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100 group hover:border-indigo-100 hover:bg-indigo-50/30 transition-colors">
-                  <!-- Número de orden -->
-                  <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0 text-sm font-bold group-hover:bg-indigo-200 transition-colors">
-                    {{ ent.orden }}
+
+            <div>
+              @for (ent of c.entregables; track ent.idEntregable; let last = $last) {
+                <div class="flex items-start gap-3.5">
+                  <!-- Número con línea conectora -->
+                  <div class="flex flex-col items-center flex-shrink-0 pt-0.5">
+                    <div class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow-sm shadow-indigo-200">
+                      {{ ent.orden }}
+                    </div>
+                    @if (!last) {
+                      <div class="w-px flex-1 min-h-5 bg-indigo-100 my-1"></div>
+                    }
                   </div>
-                  <!-- Descripción y fecha -->
-                  <div class="flex-1 min-w-0">
+                  <!-- Contenido -->
+                  <div class="flex-1" [class]="last ? 'pb-0' : 'pb-4'">
                     <p class="text-sm font-medium text-gray-800 leading-relaxed">{{ ent.descripcion }}</p>
-                    <div class="flex items-center gap-1.5 mt-1.5">
-                      <svg class="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span class="inline-flex items-center gap-1 mt-1.5 text-xs text-gray-400">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                       </svg>
-                      <span class="text-xs text-gray-500">Fecha límite: <span class="font-semibold text-gray-700">{{ ent.fechaLimite | date:'dd MMM yyyy' }}</span></span>
-                    </div>
+                      Límite: <span class="font-semibold text-gray-600">{{ ent.fechaLimite | date:'dd MMM yyyy' }}</span>
+                    </span>
                   </div>
                 </div>
               }
@@ -264,9 +275,9 @@
 
         <!-- Galería de imágenes -->
         @if (c.imagenesProducto && c.imagenesProducto.length > 1) {
-          <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-            <h2 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-              <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+            <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
+              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
               </svg>
               Imágenes del producto
@@ -282,27 +293,33 @@
         }
       </div>
 
-      <!-- Columna derecha: sidebar sticky -->
-      <div class="space-y-5">
+      <!-- Columna derecha: sidebar -->
+      <div class="space-y-4 sticky top-6 self-start">
 
-        <!-- Card de postulación -->
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden sticky top-6">
+        <!-- Card de postulación sticky -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
           <!-- Presupuesto destacado -->
-          <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-center">
-            <p class="text-indigo-200 text-xs uppercase tracking-widest mb-1">Presupuesto</p>
-            <p class="text-4xl font-bold text-white">${{ c.presupuesto }}</p>
+          <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 text-center">
+            <p class="text-indigo-200 text-xs uppercase tracking-widest mb-0.5">Presupuesto</p>
+            <p class="text-3xl font-bold text-white">${{ c.presupuesto }}</p>
+            @if (c.cantidadInfluencers) {
+              <p class="text-indigo-200 text-xs mt-1.5">
+                {{ getSpotsDisponibles() }} de {{ c.cantidadInfluencers }} spots disponibles
+              </p>
+            }
           </div>
-           <!-- Estado de la campaña -->
 
-          <div class="p-5 space-y-4">
+          <div class="p-4 space-y-3.5">
+
             <!-- Timeline de la campaña -->
             <div>
-              <div class="flex items-center justify-between text-xs text-gray-500 mb-2">
+              <div class="flex items-center justify-between text-xs text-gray-400 mb-1.5">
                 <span>{{ c.fechaInicio | date:'dd MMM yyyy' }}</span>
                 <span>{{ c.fechaFin | date:'dd MMM yyyy' }}</span>
               </div>
-              <div class="w-full bg-gray-100 rounded-full h-2">
-                <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all" [style.width.%]="getTimeProgress()"></div>
+              <div class="w-full bg-gray-100 rounded-full h-1.5">
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-1.5 rounded-full transition-all" [style.width.%]="getTimeProgress()"></div>
               </div>
               <p class="text-xs text-gray-500 mt-1.5 text-center">
                 @if (getDaysLeft() > 0) {
@@ -315,96 +332,78 @@
 
             <!-- Spots -->
             @if (c.cantidadInfluencers) {
-              <div class="bg-gray-50 rounded-xl p-4">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Spots disponibles</span>
-                  <span class="text-sm font-bold" [class]="getSpotsDisponibles() > 0 ? 'text-green-600' : 'text-red-500'">
-                    {{ getSpotsDisponibles() }} / {{ c.cantidadInfluencers }}
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Spots</span>
+                  <span class="text-xs font-bold" [class]="getSpotsDisponibles() > 0 ? 'text-green-600' : 'text-red-500'">
+                    {{ getSpotsDisponibles() }} / {{ c.cantidadInfluencers }} libres
                   </span>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-2.5">
-                  <div class="h-2.5 rounded-full transition-all"
-                    [class]="getSpotsDisponibles() > 0 ? 'bg-green-500' : 'bg-red-400'"
+                <div class="w-full bg-gray-100 rounded-full h-2">
+                  <div class="h-2 rounded-full transition-all"
+                    [class]="getSpotsDisponibles() > 0 ? 'bg-gradient-to-r from-green-400 to-emerald-500' : 'bg-red-400'"
                     [style.width.%]="getSpotsPercent()"></div>
                 </div>
                 @if (getSpotsDisponibles() === 0) {
-                  <p class="text-xs text-red-500 mt-1.5 font-medium">Todos los spots están ocupados</p>
+                  <p class="text-xs text-red-500 mt-1 font-medium">Todos los spots están ocupados</p>
                 } @else if (getSpotsDisponibles() <= 2) {
-                  <p class="text-xs text-orange-500 mt-1.5 font-medium">¡Quedan pocos spots, postulate ya!</p>
+                  <p class="text-xs text-orange-500 mt-1 font-medium">¡Quedan pocos spots!</p>
                 }
               </div>
             }
 
-            <!-- Postulaciones recibidas -->
-            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-              <span class="text-sm text-gray-600">Postulaciones recibidas</span>
-              <span class="text-sm font-bold text-gray-900">{{ getPostulacionesCount() }}</span>
+            <!-- Stats: postulaciones + visibilidad -->
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-gray-50 rounded-xl p-3 text-center">
+                <p class="text-xl font-bold text-gray-900">{{ getPostulacionesCount() }}</p>
+                <p class="text-xs text-gray-500">Postulaciones</p>
+              </div>
+              <div class="rounded-xl p-3 text-center border"
+                [class]="c.campanaPublica ? 'bg-green-50 border-green-100' : 'bg-amber-50 border-amber-100'">
+                <p class="text-xl">{{ c.campanaPublica ? '🌐' : '🔒' }}</p>
+                <p class="text-xs font-semibold mt-0.5" [class]="c.campanaPublica ? 'text-green-700' : 'text-amber-700'">
+                  {{ c.campanaPublica ? 'Pública' : 'Privada' }}
+                </p>
+              </div>
             </div>
-
-            <!-- Info extra -->
-            <div class="space-y-2.5">
-              <div class="flex items-center gap-2.5 text-sm">
-                <span class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
-                  <span>{{ c.esPresencial ? '📍' : '💻' }}</span>
-                </span>
-                <span class="text-gray-700">{{ c.esPresencial ? 'Campaña presencial' : 'Campaña remota' }}</span>
-              </div>
-              <div class="flex items-center gap-2.5 text-sm">
-                <span class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
-                  <span>{{ c.campanaPublica ? '🌐' : '🔒' }}</span>
-                </span>
-                <span class="text-gray-700">{{ c.campanaPublica ? 'Campaña pública' : 'Campaña privada' }}</span>
-              </div>
-              @if (c.plataformaContenidos?.length) {
-                @for (pc of c.plataformaContenidos; track pc.idCampanaPlataformaContenido) {
-                  <div class="flex items-center gap-2.5 text-sm">
-                    <span class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">📱</span>
-                    <div>
-                      <span class="text-gray-700">{{ pc.nombrePlataforma }}</span>
-                      <span class="text-gray-400"> · {{ pc.nombreTipoContenido }}</span>
-                      @if (pc.precio) {
-                        <span class="text-indigo-600 font-semibold"> — ${{ pc.precio }}</span>
-                      }
-                    </div>
-                  </div>
-                }
-              }
-            </div>
-
-            @if (c.estadoCampana) {
-              <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-                <h3 class="text-sm font-bold text-gray-900 mb-2">Estado de la campaña</h3>
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="w-2.5 h-2.5 rounded-full" [class]="c.estadoCampana.idEstadoCampana === 1 ? 'bg-green-500' : 'bg-gray-400'"></span>
-                  <span class="font-semibold text-sm" [class]="c.estadoCampana.idEstadoCampana === 1 ? 'text-green-700' : 'text-gray-600'">{{ c.estadoCampana.nombre }}</span>
-                </div>
-                <p class="text-xs text-gray-500 leading-relaxed">{{ c.estadoCampana.descripcion }}</p>
-              </div>
-            }
-
 
             <!-- CTA Postularme -->
             @if (!hidePostular() && isCampanaActiva() && haySpotsDisponibles()) {
               <button (click)="postularme.emit(c)"
-                class="w-full py-3.5 rounded-xl font-bold text-sm transition-all bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 active:scale-[0.98] shadow-lg shadow-indigo-200">
+                class="w-full py-3 rounded-xl font-bold text-sm transition-all bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 active:scale-[0.98] shadow-lg shadow-indigo-200">
                 🚀 Postularme a esta campaña
               </button>
             } @else if (!hidePostular() && !haySpotsDisponibles()) {
-              <div class="w-full py-3.5 rounded-xl font-bold text-sm text-center bg-gray-100 text-gray-400 cursor-not-allowed">
+              <div class="w-full py-3 rounded-xl font-bold text-sm text-center bg-gray-100 text-gray-400 cursor-not-allowed">
                 Sin spots disponibles
               </div>
             } @else if (!hidePostular()) {
-              <div class="w-full py-3.5 rounded-xl font-bold text-sm text-center bg-gray-100 text-gray-400 cursor-not-allowed">
+              <div class="w-full py-3 rounded-xl font-bold text-sm text-center bg-gray-100 text-gray-400 cursor-not-allowed">
                 Campaña no disponible
               </div>
             }
 
             @if (!hidePostular()) {
-              <p class="text-xs text-gray-400 text-center">Al postularte, la marca recibirá tu perfil y mensaje</p>
+              <p class="text-xs text-gray-400 text-center">La marca recibirá tu perfil y mensaje</p>
             }
           </div>
         </div>
 
+        <!-- Estado de la campaña -->
+        @if (c.estadoCampana) {
+          <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex items-start gap-3">
+            <span class="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0"
+              [class]="c.estadoCampana.idEstadoCampana === 1 ? 'bg-green-500' : 'bg-gray-400'"></span>
+            <div class="min-w-0">
+              <p class="font-semibold text-sm" [class]="c.estadoCampana.idEstadoCampana === 1 ? 'text-green-700' : 'text-gray-600'">
+                {{ c.estadoCampana.nombre }}
+              </p>
+              @if (c.estadoCampana.descripcion) {
+                <p class="text-xs text-gray-500 leading-relaxed mt-0.5">{{ c.estadoCampana.descripcion }}</p>
+              }
+            </div>
+          </div>
+        }
 
       </div>
     </div>

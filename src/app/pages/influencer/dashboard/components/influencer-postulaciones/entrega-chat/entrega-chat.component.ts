@@ -44,6 +44,8 @@ export class EntregaChatComponent implements OnInit, OnChanges {
 
   puedeEnviarEntrega = computed(() => {
     const estado = this.estadoActual();
+    // Si el historial está vacío, es el primer envío del influencer (turno pendiente)
+    if (!estado && this.chatMensajes().length === 0 && !this.loadingChat()) return true;
     return estado === 'Pendiente' || estado === 'ConDevolucion';
   });
 
