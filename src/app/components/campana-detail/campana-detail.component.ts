@@ -23,8 +23,11 @@ export class CampanaDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.campanaService.getCampanaById(this.idCampana()).subscribe({
-      next: (data) => { this.campana.set(data); this.loading.set(false); },
+      next: (data) => { this.campana.set(data); this.loading.set(false);
+        console.log("Campaña cargada:", data);
+      },
       error: () => { this.error.set(true); this.loading.set(false); }
+
     });
   }
 

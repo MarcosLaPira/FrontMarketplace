@@ -230,6 +230,38 @@
           </div>
         }
 
+        <!-- Entregables -->
+        @if (c.entregables?.length) {
+          <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+            <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+              </svg>
+              Entregables requeridos
+            </h2>
+            <div class="space-y-3">
+              @for (ent of c.entregables; track ent.idEntregable) {
+                <div class="flex items-start gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100 group hover:border-indigo-100 hover:bg-indigo-50/30 transition-colors">
+                  <!-- Número de orden -->
+                  <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0 text-sm font-bold group-hover:bg-indigo-200 transition-colors">
+                    {{ ent.orden }}
+                  </div>
+                  <!-- Descripción y fecha -->
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-800 leading-relaxed">{{ ent.descripcion }}</p>
+                    <div class="flex items-center gap-1.5 mt-1.5">
+                      <svg class="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                      <span class="text-xs text-gray-500">Fecha límite: <span class="font-semibold text-gray-700">{{ ent.fechaLimite | date:'dd MMM yyyy' }}</span></span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
         <!-- Galería de imágenes -->
         @if (c.imagenesProducto && c.imagenesProducto.length > 1) {
           <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
@@ -260,6 +292,7 @@
             <p class="text-indigo-200 text-xs uppercase tracking-widest mb-1">Presupuesto</p>
             <p class="text-4xl font-bold text-white">${{ c.presupuesto }}</p>
           </div>
+           <!-- Estado de la campaña -->
 
           <div class="p-5 space-y-4">
             <!-- Timeline de la campaña -->
@@ -338,6 +371,18 @@
               }
             </div>
 
+            @if (c.estadoCampana) {
+              <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                <h3 class="text-sm font-bold text-gray-900 mb-2">Estado de la campaña</h3>
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="w-2.5 h-2.5 rounded-full" [class]="c.estadoCampana.idEstadoCampana === 1 ? 'bg-green-500' : 'bg-gray-400'"></span>
+                  <span class="font-semibold text-sm" [class]="c.estadoCampana.idEstadoCampana === 1 ? 'text-green-700' : 'text-gray-600'">{{ c.estadoCampana.nombre }}</span>
+                </div>
+                <p class="text-xs text-gray-500 leading-relaxed">{{ c.estadoCampana.descripcion }}</p>
+              </div>
+            }
+
+
             <!-- CTA Postularme -->
             @if (!hidePostular() && isCampanaActiva() && haySpotsDisponibles()) {
               <button (click)="postularme.emit(c)"
@@ -360,17 +405,7 @@
           </div>
         </div>
 
-        <!-- Estado de la campaña -->
-        @if (c.estadoCampana) {
-          <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-            <h3 class="text-sm font-bold text-gray-900 mb-2">Estado de la campaña</h3>
-            <div class="flex items-center gap-2 mb-2">
-              <span class="w-2.5 h-2.5 rounded-full" [class]="c.estadoCampana.idEstadoCampana === 1 ? 'bg-green-500' : 'bg-gray-400'"></span>
-              <span class="font-semibold text-sm" [class]="c.estadoCampana.idEstadoCampana === 1 ? 'text-green-700' : 'text-gray-600'">{{ c.estadoCampana.nombre }}</span>
-            </div>
-            <p class="text-xs text-gray-500 leading-relaxed">{{ c.estadoCampana.descripcion }}</p>
-          </div>
-        }
+
       </div>
     </div>
   </div>
