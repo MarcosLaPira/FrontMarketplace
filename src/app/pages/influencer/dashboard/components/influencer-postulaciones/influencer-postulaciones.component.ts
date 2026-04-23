@@ -126,6 +126,7 @@ export class InfluencerPostulacionesComponent implements OnInit {
     this.invitacionService.responderInvitacion(inv.idInvitacionCampana, idEstado).subscribe({
       next: () => {
         this.respondiendo.update(v => ({ ...v, [inv.idInvitacionCampana]: false }));
+        this.selectedInvitacion.set(null);
         this.loadInvitaciones();
         if (aceptar) {
           this.loadCampanasEnCurso();
