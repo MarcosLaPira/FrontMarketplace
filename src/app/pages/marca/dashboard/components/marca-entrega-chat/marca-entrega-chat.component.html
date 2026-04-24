@@ -1,0 +1,293 @@
+<!-- Separador de sección -->
+<div class="w-full flex items-center gap-2 mt-2 mb-4">
+  <div class="flex-1 h-px bg-indigo-200"></div>
+  <span class="text-xs font-bold uppercase tracking-widest text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+    Entregables y revisión
+  </span>
+  <div class="flex-1 h-px bg-indigo-200"></div>
+</div>
+
+@if (loadingEntregas()) {
+  <div class="flex items-center justify-center py-12">
+    <div class="w-7 h-7 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+  </div>
+
+} @else if (entregas().length === 0) {
+  <div class="flex flex-col items-center justify-center py-10 text-center gap-3">
+    <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center">
+      <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+      </svg>
+    </div>
+    <p class="text-sm font-semibold text-gray-500">No hay entregables enviados aún</p>
+    <p class="text-xs text-gray-400">Cuando el influencer envíe un entregable, aparecerá acá para revisión</p>
+  </div>
+
+} @else {
+
+  <!-- Selector de entrega si hay más de una -->
+  @if (entregas().length > 1) {
+    <div class="flex gap-2 flex-wrap mb-4">
+      @for (e of entregas(); track e.idEntregaInfluencer) {
+        <button (click)="seleccionarEntrega(e)"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition"
+          [class]="entregaActiva()?.idEntregaInfluencer === e.idEntregaInfluencer
+            ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+            : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+          {{ e.descripcionEntregable || ('Entrega #' + e.idEntregable) }}
+        </button>
+      }
+    </div>
+  }
+
+  @if (entregaActiva(); as entrega) {
+
+    <!-- Cabecera del entregable -->
+    <div class="flex items-center gap-3 mb-3 px-1">
+      <div class="flex items-center gap-2 flex-1 min-w-0">
+        <svg class="w-4 h-4 text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+        <span class="text-sm font-semibold text-gray-700 truncate">
+          {{ entrega.descripcionEntregable || ('Entregable #' + entrega.idEntregable) }}
+        </span>
+      </div>
+      <!-- Badge de estado -->
+      @switch (estadoActual()) {
+        @case ('Pendiente') {
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700 border border-yellow-200 flex-shrink-0">
+            Pendiente de envío
+          </span>
+        }
+        @case ('Enviada') {
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 border border-blue-200 flex-shrink-0 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+            Esperando revisión
+          </span>
+        }
+        @case ('Aprobada') {
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700 border border-green-200 flex-shrink-0">
+            Aprobada ✓
+          </span>
+        }
+        @case ('ConDevolucion') {
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 border border-orange-200 flex-shrink-0">
+            Con devolución
+          </span>
+        }
+        @default {
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 border border-gray-200 flex-shrink-0">
+            Sin enviar
+          </span>
+        }
+      }
+    </div>
+
+    <!-- Contenedor del chat -->
+    <div class="flex flex-col bg-gray-50 rounded-2xl border border-gray-200 shadow-md overflow-hidden"
+      style="min-height: 320px; max-height: 85vh;">
+
+      <!-- Área de mensajes -->
+      <div #mensajesContainer class="flex-1 overflow-y-auto px-4 py-4 space-y-2" style="min-height: 220px; max-height: 480px;">
+
+        @if (loadingChat()) {
+          <div class="flex items-center justify-center h-32">
+            <div class="w-6 h-6 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+          </div>
+
+        } @else if (chatMensajes().length === 0) {
+          <div class="flex flex-col items-center justify-center h-32 text-center gap-2">
+            <svg class="w-8 h-8 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            <p class="text-sm text-gray-400">El historial aparecerá aquí cuando el influencer envíe</p>
+          </div>
+
+        } @else {
+
+          @for (msg of chatMensajes(); track msg.fecha + msg.autor + msg.tipoMensaje) {
+
+            <!-- Sistema: pill centrada -->
+            @if (msg.autor === 'Sistema') {
+              <div class="flex justify-center my-2">
+                <span class="text-xs text-gray-400 bg-white border border-gray-200 px-3 py-1 rounded-full shadow-sm">
+                  {{ msg.mensaje }} · {{ msg.fecha | date:'dd/MM HH:mm' }}
+                </span>
+              </div>
+            }
+
+            <!-- Influencer: burbuja derecha (indigo) -->
+            @if (msg.autor === 'Influencer') {
+              <div class="flex justify-end mb-1">
+                <div class="max-w-[80%] space-y-0.5">
+                  <p class="text-[11px] text-gray-400 text-right pr-1 mb-0.5">Influencer</p>
+                  <div class="bg-indigo-600 text-white rounded-2xl rounded-br-sm px-4 py-3 text-sm shadow">
+                    @if (msg.mensaje) {
+                      <p class="leading-relaxed mb-1">{{ msg.mensaje }}</p>
+                    }
+                    @if (msg.archivoUrl) {
+                      @if (esImagen(msg.archivoUrl)) {
+                        <div class="rounded-xl overflow-hidden border-2 border-white/20 cursor-pointer mt-1"
+                          (click)="abrirImagen(uploadsBase + msg.archivoUrl)">
+                          <img [src]="uploadsBase + msg.archivoUrl"
+                            alt="Entregable"
+                            class="w-full max-h-52 object-cover hover:opacity-90 transition" />
+                        </div>
+                      } @else {
+                        <a [href]="uploadsBase + msg.archivoUrl" target="_blank"
+                          class="flex items-center gap-2 bg-white/15 hover:bg-white/25 rounded-xl px-3 py-2 mt-1 transition">
+                          <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                          </svg>
+                          <span class="text-xs font-medium">Ver archivo adjunto</span>
+                        </a>
+                      }
+                    }
+                  </div>
+                  <p class="text-[11px] text-gray-400 text-right pr-1">{{ msg.fecha | date:'dd/MM HH:mm' }}</p>
+                </div>
+              </div>
+            }
+
+            <!-- Marca: burbuja izquierda (verde o naranja) -->
+            @if (msg.autor === 'Marca') {
+              <div class="flex justify-start gap-2 mb-1">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm"
+                  [class]="msg.tipoMensaje === 'Aprobacion' ? 'bg-green-100' : 'bg-orange-100'">
+                  @if (msg.tipoMensaje === 'Aprobacion') {
+                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  } @else {
+                    <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                    </svg>
+                  }
+                </div>
+                <div class="max-w-[78%] space-y-0.5">
+                  <div class="rounded-2xl rounded-bl-sm px-4 py-3 text-sm shadow border"
+                    [class]="msg.tipoMensaje === 'Aprobacion'
+                      ? 'bg-green-50 border-green-200 text-green-900'
+                      : 'bg-orange-50 border-orange-200 text-orange-900'">
+                    <p class="text-[11px] font-bold uppercase tracking-wide mb-1.5"
+                      [class]="msg.tipoMensaje === 'Aprobacion' ? 'text-green-600' : 'text-orange-500'">
+                      {{ msg.tipoMensaje === 'Aprobacion' ? '✓ Aprobado' : '↩ Devolución' }}
+                    </p>
+                    <p class="leading-relaxed">{{ msg.mensaje }}</p>
+                  </div>
+                  <p class="text-[11px] text-gray-400 pl-1">Vos · {{ msg.fecha | date:'dd/MM HH:mm' }}</p>
+                </div>
+              </div>
+            }
+
+          }
+        }
+      </div>
+
+      <!-- ────── FOOTER según estado ────── -->
+      <div class="bg-white border-t border-gray-100 rounded-b-2xl flex-shrink-0 px-4 py-3">
+
+        @if (errorAccion()) {
+          <div class="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2 mb-3 text-sm text-red-600">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            {{ errorAccion() }}
+          </div>
+        }
+
+        <!-- Aprobada -->
+        @if (estadoActual() === 'Aprobada') {
+          <div class="flex items-center justify-center gap-2 text-green-600 text-sm font-semibold py-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Esta entrega fue aprobada
+          </div>
+
+        <!-- Enviada: puede aprobar o hacer devolución -->
+        } @else if (puedeCambiarEstado()) {
+
+          @if (!mostrarFormDevolucion()) {
+            <div class="flex items-center gap-3 flex-wrap">
+              <p class="text-xs text-gray-500 flex-1">El influencer envió la entrega. Revisala y tomá una acción:</p>
+              <div class="flex gap-2">
+                <button (click)="aprobar()" [disabled]="procesando()"
+                  class="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                  @if (procesando()) {
+                    <div class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  } @else {
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  }
+                  Aprobar
+                </button>
+                <button (click)="mostrarFormDevolucion.set(true)" [disabled]="procesando()"
+                  class="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-orange-600 bg-orange-50 border border-orange-200 rounded-xl hover:bg-orange-100 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                  </svg>
+                  Pedir cambios
+                </button>
+              </div>
+            </div>
+
+          } @else {
+            <!-- Formulario de devolución -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <p class="text-xs font-semibold text-orange-600">↩ Indicá qué cambios necesita:</p>
+                <button (click)="mostrarFormDevolucion.set(false); comentarioDevolucion.set('')"
+                  class="text-xs text-gray-400 hover:text-gray-600 transition">
+                  Cancelar
+                </button>
+              </div>
+              <textarea
+                [(ngModel)]="comentarioDevolucion"
+                placeholder="Describí qué debe corregir o mejorar el influencer..."
+                rows="3"
+                class="w-full resize-none text-sm px-3 py-2.5 rounded-xl border border-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-300 bg-orange-50 placeholder:text-orange-300">
+              </textarea>
+              <div class="flex justify-end">
+                <button (click)="enviarDevolucion()"
+                  [disabled]="procesando() || !comentarioDevolucion().trim()"
+                  class="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                  @if (procesando()) {
+                    <div class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  }
+                  Enviar devolución
+                </button>
+              </div>
+            </div>
+          }
+
+        <!-- Pendiente o ConDevolucion: esperando al influencer -->
+        } @else {
+          <div class="flex items-center justify-center gap-2 text-gray-400 text-sm py-2">
+            <svg class="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            @if (estadoActual() === 'ConDevolucion') {
+              <span>Esperando que el influencer reenvíe con los cambios...</span>
+            } @else {
+              <span>Esperando que el influencer envíe el entregable...</span>
+            }
+          </div>
+        }
+
+      </div>
+    </div>
+  }
+
+}
+
+<!-- Lightbox de imagen -->
+@if (imagenAmpliada()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+    (click)="imagenAmpliada.set(null)">
+    <img [src]="imagenAmpliada()!" alt="Vista ampliada"
+      class="max-w-full max-h-full object-contain rounded-xl shadow-2xl" />
+  </div>
+}

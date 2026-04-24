@@ -21,6 +21,11 @@ export class InvitarInfluencerModalComponent {
   mensaje = signal<string>('');
   enviando = signal<boolean>(false);
 
+  /** Solo campañas en estado Publicada (1) o En negociación (2) */
+  campanasDisponibles = computed(() =>
+    this.campanas().filter(c => [1, 2].includes(c.estadoCampana?.idEstadoCampana ?? 0))
+  );
+
   canConfirmar = computed(() => this.campanaSeleccionadaId() !== null);
 
   constructor() {

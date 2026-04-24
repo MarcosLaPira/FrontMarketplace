@@ -4,6 +4,11 @@ import { Observable } from 'rxjs';
 import { EntregaInfluencer, EnviarEntregaRequest } from '../models/types';
 import { API_BASE_URL } from '../shared/constants';
 
+export interface RevisarEntregaPayload {
+  aprobada: boolean;
+  comentario: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -22,6 +27,16 @@ export class EntregaService {
   }
 
   enviarEntregaFormData(formData: FormData): Observable<any> {
-  return this.http.post(`${this.apiUrl}/enviar`, formData);
-}
+    return this.http.post(`${this.apiUrl}/enviar`, formData);
+  }
+
+  // Marca obtiene todas las entregas de una campaña
+  getEntregasPorCampana(idCampana: number): Observable<EntregaInfluencer[]> {
+    return this.http.get<EntregaInfluencer[]>(`${this.apiUrl}/por-campana/${idCampana}`);
+  }
+
+  // Marca revisa una entrega (aprobar o devolver)
+  revisarEntrega(idEntregaInfluencer: number, payload: RevisarEntregaPayload): Observable<EntregaInfluencer> {
+    return this.http.patch<EntregaInfluencer>(`${this.apiUrl}/revisar/${idEntregaInfluencer}`, payload);
+  }
 }

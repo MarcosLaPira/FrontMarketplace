@@ -1,7 +1,7 @@
 import { Component, inject, input, output, signal, computed } from '@angular/core';
 import { CampanaFormComponent } from '../../../../../components/campana-form/campana-form.component';
-import { CampanaCardComponent } from '../../../../../components/campana-card/campana-card.component';
-import { PostulacionListComponent } from '../../../../../components/postulacion-list/postulacion-list.component';
+import { MarcaCampanaCardComponent } from '../../../../../components/marca-campana-card/marca-campana-card.component';
+import { CampanaDetalleGestionComponent } from '../campana-detalle-gestion/campana-detalle-gestion.component';
 import { Campana, Categoria, Plataforma, TipoContenido, CampanaCreateRequest } from '../../../../../models/types';
 import { CampanaService } from '../../../../../services/campana.service';
 import { PostulacionService } from '../../../../../services/postulacion.service';
@@ -9,7 +9,7 @@ import { PostulacionService } from '../../../../../services/postulacion.service'
 @Component({
   selector: 'app-marca-campanas',
   standalone: true,
-  imports: [CampanaFormComponent, CampanaCardComponent, PostulacionListComponent],
+  imports: [CampanaFormComponent, MarcaCampanaCardComponent, CampanaDetalleGestionComponent],
   templateUrl: './marca-campanas.component.html'
 })
 export class MarcaCampanasComponent {
@@ -25,13 +25,13 @@ export class MarcaCampanasComponent {
 
   showNewForm = signal(false);
   editingCampana = signal<Campana | null>(null);
-  subTab = signal<'publicadas' | 'enCurso' | 'pasadas'>('publicadas');
+  subTab = signal<'publicadas' | 'enCurso' | 'finalizadas'>('publicadas');
   expandedCampanaId = signal<number | null>(null);
 
   private estadosInactivos = [6, 7]; // 6 = Finalizada, 7 = Cancelada
   private estadosEnCurso = [2, 3, 4, 5];
 
-  private esInactiva(c: Campana): boolean {
+  esInactiva(c: Campana): boolean {
     return c.estadoCampana != null && this.estadosInactivos.includes(c.estadoCampana.idEstadoCampana);
   }
 
@@ -52,6 +52,26 @@ export class MarcaCampanasComponent {
     );
   });
 
+  accionesPublicadas = computed(() =>
+    this.campanasPublicadas().reduce((sum, c) =>
+      sum + (c.postulaciones?.filter(p => p.idEstadoPostulacion === 1).length ?? 0), 0)
+  );
+
+  accionesEnCurso = computed(() =>
+    this.campanasEnCurso().reduce((sum, c) =>
+      sum + (c.postulaciones?.filter(p => p.idEstadoPostulacion === 1).length ?? 0), 0)
+  );
+
+  selectedCampana = computed(() =>
+    this.campanas().find(c => c.idCampana === this.expandedCampanaId()) ?? null
+  );
+
+  isSelectedCampanaPast = computed(() => {
+    const c = this.selectedCampana();
+    if (!c) return false;
+    return new Date(c.fechaFin) < new Date() || this.esInactiva(c);
+  });
+
   crearCampana(data: { form: any; categorias: number[]; imagenesProducto: File[]; plataformaContenidos: any[]; entregables: any[]; invitaciones: any[] }): void {
     const request = this.buildRequest(data);
     this.campanaService.createCampana(request, data.imagenesProducto).subscribe({
@@ -65,6 +85,7 @@ export class MarcaCampanasComponent {
 
   startEdit(campana: Campana): void {
     this.editingCampana.set(campana);
+    this.expandedCampanaId.set(campana.idCampana);
   }
 
   guardarEdit(data: { form: any; categorias: number[]; imagenesProducto: File[]; plataformaContenidos: any[]; entregables: any[]; invitaciones: any[] }): void {
@@ -85,6 +106,16 @@ export class MarcaCampanasComponent {
     this.editingCampana.set(null);
   }
 
+  selectCampana(idCampana: number): void {
+    if (this.expandedCampanaId() === idCampana) {
+      this.expandedCampanaId.set(null);
+      this.editingCampana.set(null);
+    } else {
+      this.expandedCampanaId.set(idCampana);
+      this.editingCampana.set(null);
+    }
+  }
+
   invitarInfluencer(idCampana: number): void {
     this.invitarInfluencerClick.emit(idCampana);
   }
@@ -99,9 +130,7 @@ export class MarcaCampanasComponent {
   }
 
   togglePostulaciones(idCampana: number): void {
-    this.expandedCampanaId.set(
-      this.expandedCampanaId() === idCampana ? null : idCampana
-    );
+    this.selectCampana(idCampana);
   }
 
   aceptarPostulacion(idPostulacion: number): void {

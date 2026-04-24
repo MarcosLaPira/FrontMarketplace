@@ -91,7 +91,7 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
     requiereProductoVirtual: [false],
     envioProductoIncluido: [false],
     notasLogisticas: [''],
-    campanaPublica: [false],
+    campanaPublica: [true],
     cantidadInfluencers: ['', Validators.required],
     minimoSeguidores: [null as number | null],
     esExcluyenteMinimoSeguidores: [false]

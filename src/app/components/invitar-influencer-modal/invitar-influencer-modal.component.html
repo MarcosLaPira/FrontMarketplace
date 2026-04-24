@@ -37,9 +37,11 @@
         <p class="text-sm font-semibold text-gray-700 mb-3">Elegí una campaña</p>
         @if (campanas().length === 0) {
           <p class="text-sm text-gray-400 text-center py-4">No tenés campañas activas para invitar.</p>
+        } @else if (campanasDisponibles().length === 0) {
+          <p class="text-sm text-gray-400 text-center py-4">No tenés campañas publicadas o en negociación disponibles para invitar.</p>
         } @else {
           <div class="space-y-2">
-            @for (campana of campanas(); track campana.idCampana) {
+            @for (campana of campanasDisponibles(); track campana.idCampana) {
               <button type="button"
                       (click)="seleccionarCampana(campana.idCampana)"
                       class="w-full text-left rounded-xl border-2 px-4 py-3 transition-all"

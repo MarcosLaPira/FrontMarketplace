@@ -10,6 +10,7 @@ import { PostulacionesTabComponent } from './postulaciones-tab/postulaciones-tab
 import { InvitacionesTabComponent } from './invitaciones-tab/invitaciones-tab.component';
 import { EnCursoTabComponent } from './en-curso-tab/en-curso-tab.component';
 import { EntregaChatComponent } from './entrega-chat/entrega-chat.component';
+import { FinalizadasTabComponent } from './finalizadas-tab/finalizadas-tab.component';
 
 @Component({
   selector: 'app-influencer-postulaciones',
@@ -19,7 +20,8 @@ import { EntregaChatComponent } from './entrega-chat/entrega-chat.component';
     PostulacionesTabComponent,
     InvitacionesTabComponent,
     EnCursoTabComponent,
-    EntregaChatComponent
+    EntregaChatComponent,
+    FinalizadasTabComponent
   ],
   templateUrl: './influencer-postulaciones.component.html'
 })
@@ -31,13 +33,14 @@ export class InfluencerPostulacionesComponent implements OnInit {
 
   // ==================== Estado de navegaciÃ³n ====================
 
-  activeSubTab = signal<'postulaciones' | 'invitaciones' | 'enCurso'>('postulaciones');
+  activeSubTab = signal<'postulaciones' | 'invitaciones' | 'enCurso' | 'finalizadas'>('postulaciones');
 
   /** Determina si se estÃ¡ mostrando una vista de detalle (oculta la lista principal). */
   isDetalleVisible = computed(() =>
     (this.activeSubTab() === 'enCurso' && !!this.selectedCampanaId()) ||
     (this.activeSubTab() === 'invitaciones' && !!this.selectedInvitacion()) ||
-    (this.activeSubTab() === 'postulaciones' && !!this.selectedPostulacionCampanaId())
+    (this.activeSubTab() === 'postulaciones' && !!this.selectedPostulacionCampanaId()) ||
+    (this.activeSubTab() === 'finalizadas' && !!this.selectedFinalizadaId())
   );
 
   // ==================== Postulaciones ====================
@@ -61,12 +64,19 @@ export class InfluencerPostulacionesComponent implements OnInit {
   loadingEnCurso = signal(false);
   selectedCampanaId = signal<number | null>(null);
 
+  // ==================== Finalizadas ====================
+
+  campanasFinalizadas = signal<Campana[]>([]);
+  loadingFinalizadas = signal(false);
+  selectedFinalizadaId = signal<number | null>(null);
+  totalFinalizadas = computed(() => this.campanasFinalizadas().length);
+
   // ==================== Ciclo de vida ====================
 
   ngOnInit(): void {
     this.loadPostulaciones();
     this.loadInvitaciones();
-    this.loadCampanasEnCurso();
+    this.loadCampanasInfluencer();
   }
 
   // ==================== Carga de datos ====================
@@ -91,11 +101,21 @@ export class InfluencerPostulacionesComponent implements OnInit {
     });
   }
 
-  private loadCampanasEnCurso(): void {
+  private loadCampanasInfluencer(): void {
     this.loadingEnCurso.set(true);
+    this.loadingFinalizadas.set(true);
     this.campanaService.getCampanasEnCursoInfluencer().subscribe({
-      next: (data) => { this.campanasEnCurso.set(data); this.loadingEnCurso.set(false); },
-      error: () => this.loadingEnCurso.set(false)
+      next: (data) => {
+        const ESTADOS_FINALIZADOS = [6, 7];
+        this.campanasEnCurso.set(data.filter(c => !ESTADOS_FINALIZADOS.includes(c.estadoCampana?.idEstadoCampana ?? 0)));
+        this.campanasFinalizadas.set(data.filter(c => ESTADOS_FINALIZADOS.includes(c.estadoCampana?.idEstadoCampana ?? 0)));
+        this.loadingEnCurso.set(false);
+        this.loadingFinalizadas.set(false);
+      },
+      error: () => {
+        this.loadingEnCurso.set(false);
+        this.loadingFinalizadas.set(false);
+      }
     });
   }
 
@@ -129,7 +149,7 @@ export class InfluencerPostulacionesComponent implements OnInit {
         this.selectedInvitacion.set(null);
         this.loadInvitaciones();
         if (aceptar) {
-          this.loadCampanasEnCurso();
+          this.loadCampanasInfluencer();
         }
       },
       error: () => this.respondiendo.update(v => ({ ...v, [inv.idInvitacionCampana]: false }))
@@ -144,6 +164,16 @@ export class InfluencerPostulacionesComponent implements OnInit {
 
   volverAlListado(): void {
     this.selectedCampanaId.set(null);
+  }
+
+  // ==================== NavegaciÃ³n: Finalizadas ====================
+
+  seleccionarFinalizada(idCampana: number): void {
+    this.selectedFinalizadaId.set(idCampana);
+  }
+
+  volverDeFinalizadas(): void {
+    this.selectedFinalizadaId.set(null);
   }
 
 }

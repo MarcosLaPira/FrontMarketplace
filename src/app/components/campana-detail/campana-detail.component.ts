@@ -14,6 +14,7 @@ export class CampanaDetailComponent implements OnInit {
 
   idCampana = input.required<number>();
   hidePostular = input(false);
+  hideVolver = input(false);
   volver = output<void>();
   postularme = output<Campana>();
 
