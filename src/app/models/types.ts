@@ -207,6 +207,14 @@ export interface Campana {
   cantidadInfluencersAceptados?: number;
   minimoSeguidores?: number;
   esExcluyenteMinimoSeguidores?: boolean;
+  publicoObjetivo?: string;
+  tonoComunicacion?: 'formal' | 'informal' | 'humoristico' | 'inspiracional';
+  hashtags?: string[];
+  mencionObligatoria?: string;
+  tipoPago?: 'canje' | 'monetario' | 'mixto';
+  kpisEsperados?: string[];
+  nivelAlcanceObjetivo?: 'nano' | 'micro' | 'macro' | 'mega';
+  objetivoCampana?: 'awareness' | 'ventas' | 'lanzamiento' | 'ugc';
   categorias?: Categoria[];
   postulaciones?: Postulacion[];
   imagenesProducto?: ImagenCampana[];
@@ -284,6 +292,14 @@ export interface CampanaCreateRequest {
   cantidadInfluencers?: number;
   minimoSeguidores?: number | null;
   esExcluyenteMinimoSeguidores?: boolean;
+  publicoObjetivo?: string;
+  tonoComunicacion?: string;
+  hashtags?: string[];
+  mencionObligatoria?: string;
+  tipoPago?: string;
+  kpisEsperados?: string[];
+  nivelAlcanceObjetivo?: string;
+  objetivoCampana?: string;
   plataformaContenidos?: PlataformaContenidoInput[];
   entregables?: EntregableInput[];
   invitaciones?: InvitacionInput[];
@@ -461,4 +477,30 @@ export interface ChatMensaje {
   archivoUrl: string | null;
   fecha: string;
   estadoEntrega: EstadoEntrega;
+}
+
+// ── Wizard de creación de campaña ──────────────────────────
+
+export type ObjetivoCampana = 'awareness' | 'ventas' | 'lanzamiento' | 'ugc';
+export type NivelAlcance = 'nano' | 'micro' | 'macro' | 'mega';
+
+export interface CampanaSugerencias {
+  presupuestoMin: number;
+  presupuestoSugerido: number;
+  presupuestoMax: number;
+  minimoSeguidoresMin: number;
+  minimoSeguidoresSugerido: number;
+  minimoSeguidoresMax: number;
+  cantidadInfluencersSugerida: number;
+  descripcionAlcance: string;
+  descripcionImpacto: string;
+  kpisSugeridos: string[];
+}
+
+export interface WizardResult {
+  objetivoCampana: ObjetivoCampana;
+  nivelAlcance: NivelAlcance;
+  sugerencias: CampanaSugerencias;
+  presupuesto?: number;
+  cantidadInfluencers?: number;
 }

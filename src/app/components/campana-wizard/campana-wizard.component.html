@@ -1,0 +1,202 @@
+﻿<div class="space-y-6">
+
+  <!-- Barra de progreso -->
+  <div class="space-y-2">
+    <div class="flex items-center justify-between text-xs text-gray-500">
+      <span class="font-medium">{{ paso() === 1 ? 'Paso 1 de 2 — Objetivo' : 'Paso 2 de 2 — Alcance' }}</span>
+      <button type="button" (click)="omitir()"
+        class="text-gray-400 hover:text-gray-600 transition underline underline-offset-2">
+        Omitir y completar manualmente
+      </button>
+    </div>
+    <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+      <div class="h-full bg-indigo-500 rounded-full transition-all duration-500"
+        [style.width]="paso() === 1 ? '50%' : '100%'"></div>
+    </div>
+  </div>
+
+  <!-- PASO 1: Objetivo -->
+  @if (paso() === 1) {
+    <div class="space-y-4">
+      <div>
+        <h2 class="text-lg font-bold text-gray-900">¿Qué querés lograr con esta campaña?</h2>
+        <p class="text-sm text-gray-500 mt-0.5">Elegí el objetivo principal para que te sugiramos el mejor punto de partida.</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        @for (obj of objetivos; track obj.id) {
+          <button type="button" (click)="seleccionarObjetivo(obj.id)"
+            class="group flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all duration-200 hover:shadow-md"
+            [class]="objetivoSeleccionado() === obj.id
+              ? obj.colorBg + ' ' + obj.colorBorder
+              : 'bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50'">
+            <div class="text-3xl leading-none mt-0.5 flex-shrink-0">{{ obj.icono }}</div>
+            <div class="min-w-0">
+              <p class="text-sm font-semibold text-gray-900">{{ obj.titulo }}</p>
+              <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">{{ obj.descripcion }}</p>
+            </div>
+            <svg class="w-5 h-5 flex-shrink-0 mt-0.5 ml-auto"
+              [class]="objetivoSeleccionado() === obj.id ? obj.colorIcono : 'text-gray-300'"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- PASO 2: Alcance + personalización -->
+  @if (paso() === 2) {
+    <div class="space-y-5">
+
+      <div class="flex items-center gap-3">
+        <button type="button" (click)="volver()"
+          class="w-7 h-7 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <div>
+          <h2 class="text-lg font-bold text-gray-900">¿Con qué nivel de alcance querés llegar?</h2>
+          <p class="text-xs text-gray-500 mt-0.5">Objetivo: <span class="font-semibold text-indigo-600">{{ getObjetivoLabel(objetivoSeleccionado()) }}</span></p>
+        </div>
+      </div>
+
+      <!-- Cards de nivel -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        @for (nivel of niveles; track nivel.id) {
+          @if (objetivoSeleccionado()) {
+            <button type="button" (click)="seleccionarNivel(nivel.id)"
+              class="group flex flex-col gap-3 p-4 rounded-xl border-2 text-left transition-all duration-200 hover:shadow-md"
+              [class]="nivelSeleccionado() === nivel.id
+                ? nivel.colorBg + ' ' + nivel.colorBorder
+                : 'bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50'">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">{{ nivel.icono }}</span>
+                <span class="text-xs font-medium px-2 py-0.5 rounded-full" [class]="nivel.colorBadge">
+                  {{ nivel.rangoSeguidores }}
+                </span>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-gray-900">{{ nivel.titulo }}</p>
+                <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">{{ nivel.descripcion }}</p>
+              </div>
+              <div class="pt-2 border-t border-gray-100 space-y-1">
+                <p class="text-[10px] text-gray-400 uppercase tracking-wide font-semibold">Precio por influencer</p>
+                <p class="text-xs font-semibold" [class]="nivel.colorText">
+                  ${{ nivel.precioPorInfluencerMin | number:'1.0-0' }}
+                  @if (nivel.precioPorInfluencerMax) {
+                    &ndash; ${{ nivel.precioPorInfluencerMax | number:'1.0-0' }}
+                  } @else {
+                    +
+                  }
+                </p>
+              </div>
+            </button>
+          }
+        }
+      </div>
+
+      <!-- Panel de personalización -->
+      @if (nivelSeleccionado() && sugerenciasActivas()) {
+        <div class="border-t border-gray-100 pt-5 space-y-5">
+
+          <!-- Plantillas: grilla plana, todas iguales, toggle -->
+          <div class="space-y-2">
+            <div class="flex items-baseline justify-between">
+              <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Punto de partida</p>
+              @if (templateSeleccionado()) {
+                <button type="button" (click)="templateSeleccionado.set(null)"
+                  class="text-[11px] text-gray-400 hover:text-gray-600 underline underline-offset-2 transition">
+                  Sin plantilla
+                </button>
+              }
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              @for (t of templates; track t.id) {
+                <button type="button" (click)="aplicarTemplateWizard(t)"
+                  class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border-2 text-left transition-all duration-150 hover:shadow-sm"
+                  [class]="templateSeleccionado()?.id === t.id
+                    ? t.colorClase + ' shadow-sm'
+                    : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'">
+                  <span class="text-lg leading-none flex-shrink-0">{{ t.icono }}</span>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs font-semibold truncate">{{ t.nombre }}</p>
+                    <p class="text-[10px] opacity-60 mt-0.5 leading-tight line-clamp-1">{{ t.descripcion }}</p>
+                  </div>
+                  @if (templateSeleccionado()?.id === t.id) {
+                    <svg class="w-3.5 h-3.5 flex-shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  }
+                </button>
+              }
+            </div>
+            @if (!templateSeleccionado()) {
+              <p class="text-[11px] text-gray-400">Sin plantilla &mdash; ajustá los valores a tu criterio.</p>
+            }
+          </div>
+
+          <!-- Ajuste de valores -->
+          <div class="space-y-3">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Ajustá los valores</p>
+            <div class="grid grid-cols-2 gap-3">
+              <!-- Presupuesto -->
+              <div>
+                <label class="text-xs text-gray-600 mb-1.5 block">Presupuesto total</label>
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">$</span>
+                  <input type="number" min="0"
+                    [value]="presupuestoTweak()"
+                    (input)="presupuestoTweak.set(+$any($event.target).value || null)"
+                    class="w-full pl-7 pr-3 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white transition" />
+                </div>
+                @if (presupuestoRefRango(); as ref) {
+                  <p class="mt-1 text-[11px] text-gray-400">
+                    Ref: ${{ ref.min | number:'1.0-0' }}{{ ref.max !== null ? ' – $' + (ref.max | number:'1.0-0') : '+' }}
+                  </p>
+                }
+              </div>
+              <!-- Cantidad -->
+              <div>
+                <label class="text-xs text-gray-600 mb-1.5 block">Cantidad de influencers</label>
+                <input type="number" min="1"
+                  [value]="cantidadInfluencersTweak() ?? cantidadInfluencersEfectiva()"
+                  (input)="cantidadInfluencersTweak.set(+$any($event.target).value || null)"
+                  class="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white transition" />
+                @if (presupuestoTweak() && (cantidadInfluencersTweak() ?? cantidadInfluencersEfectiva())) {
+                  <p class="mt-1 text-[11px] font-medium text-indigo-600">
+                    ${{ (presupuestoTweak()! / (cantidadInfluencersTweak() ?? cantidadInfluencersEfectiva())!) | number:'1.0-0' }} por influencer
+                  </p>
+                }
+              </div>
+            </div>
+            <!-- Advertencia de rango -->
+            @if (advertenciaRango(); as aviso) {
+              <div class="flex items-start gap-2 px-3 py-2 rounded-lg text-xs"
+                [class]="aviso.tipo === 'bajo' ? 'bg-amber-50 border border-amber-200 text-amber-700' : 'bg-blue-50 border border-blue-200 text-blue-700'">
+                <span class="flex-shrink-0 mt-0.5">{{ aviso.tipo === 'bajo' ? '⚠️' : 'ℹ️' }}</span>
+                <span>{{ aviso.mensaje }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Live preview -->
+          <app-campana-alcance-preview
+            [presupuesto]="presupuestoTweak()"
+            [cantidadInfluencers]="cantidadInfluencersTweak() ?? cantidadInfluencersEfectiva()"
+            [minimoSeguidores]="minimoSeguidoresPreview()" />
+
+          <!-- CTA -->
+          <div class="flex justify-end">
+            <button type="button" (click)="confirmarYContinuar()"
+              class="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 transition shadow-sm">
+              Crear campaña
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+            </button>
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+</div>

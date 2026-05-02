@@ -1,7 +1,8 @@
-import { Component, inject, input, output, signal, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, input, output, signal, OnDestroy, OnInit, computed } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { CategorySelectorComponent } from '../category-selector/category-selector.component';
+import { CampanaAlcancePreviewComponent } from '../campana-alcance-preview/campana-alcance-preview.component';
 import {
   Categoria,
   Plataforma,
@@ -13,9 +14,13 @@ import {
   InvitacionInput,
   CampanaPlataformaContenido,
   CampanaEntregable,
-  InvitacionCampana
+  InvitacionCampana,
+  CampanaSugerencias,
+  ObjetivoCampana,
+  NivelAlcance
 } from '../../models/types';
 import { InfluencerService } from '../../services/influencer.service';
+import { WIZARD_SUGERENCIAS, Advertencia, KPI_OPTIONS, KPI_LABELS } from '../../shared/campana-benchmarks';
 
 interface InvitacionDisplay {
   idInfluencer: number;
@@ -26,7 +31,7 @@ interface InvitacionDisplay {
 @Component({
   selector: 'app-campana-form',
   standalone: true,
-  imports: [ReactiveFormsModule, CategorySelectorComponent, DecimalPipe, DatePipe],
+  imports: [ReactiveFormsModule, CategorySelectorComponent, DecimalPipe, DatePipe, CampanaAlcancePreviewComponent],
   templateUrl: './campana-form.component.html'
 })
 export class CampanaFormComponent implements OnInit, OnDestroy {
@@ -39,6 +44,11 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
   plataformas = input.required<Plataforma[]>();
   tiposContenido = input.required<TipoContenido[]>();
   campana = input<Campana | null>(null);
+  sugerencias = input<CampanaSugerencias | null>(null);
+  objetivoCampanaWizard = input<ObjetivoCampana | null>(null);
+  nivelAlcanceWizard = input<NivelAlcance | null>(null);
+  presupuestoInicial = input<number | null>(null);
+  cantidadInfluencersInicial = input<number | null>(null);
 
   saved = output<{
     form: any;
@@ -47,6 +57,8 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
     plataformaContenidos: PlataformaContenidoInput[];
     entregables: EntregableInput[];
     invitaciones: InvitacionInput[];
+    hashtags: string[];
+    kpisEsperados: string[];
   }>();
   cancelled = output<void>();
 
@@ -76,6 +88,23 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
   invBuscando = signal<boolean>(false);
   invError = signal<string>('');
 
+  // ── Nuevos campos ──
+  kpisSeleccionados = signal<string[]>([]);
+  hashtagsSeleccionados = signal<string[]>([]);
+  nuevaHashtag = signal<string>('');
+
+  // ── Secciones colapsables ──
+  seccionSeguidoresOpen = signal(false);
+  seccionContenidoOpen = signal(false);
+  seccionBriefingOpen = signal(false);
+  seccionProductoOpen = signal(false);
+  seccionEntregablesOpen = signal(false);
+  seccionInvitacionesOpen = signal(false);
+
+  // ── Constantes expuestas al template ──
+  readonly kpiOptions = KPI_OPTIONS;
+  readonly kpiLabels = KPI_LABELS;
+
   form = this.fb.nonNullable.group({
     titulo: ['', Validators.required],
     descripcion: ['', Validators.required],
@@ -94,7 +123,47 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
     campanaPublica: [true],
     cantidadInfluencers: ['', Validators.required],
     minimoSeguidores: [null as number | null],
-    esExcluyenteMinimoSeguidores: [false]
+    esExcluyenteMinimoSeguidores: [false],
+    // Nuevos campos
+    publicoObjetivo: [''],
+    tonoComunicacion: [null as string | null],
+    tipoPago: ['monetario'],
+    mencionObligatoria: ['']
+  });
+
+  // ── Computed: advertencias semáforo ──
+  advertencias = computed<Advertencia[]>(() => {
+    const warns: Advertencia[] = [];
+    const presupuesto = Number(this.form.get('presupuesto')?.value ?? 0);
+    const minSeg = Number(this.form.get('minimoSeguidores')?.value ?? 0);
+    const cantidad = Number(this.form.get('cantidadInfluencers')?.value ?? 0);
+    const fechaInicio = this.form.get('fechaInicio')?.value;
+    const fechaFin = this.form.get('fechaFin')?.value;
+    const entregables = this.entregables();
+    const pcs = this.plataformaContenidos();
+
+    if (presupuesto > 0 && minSeg > 100000 && presupuesto < 200000) {
+      warns.push({ tipo: 'warning', mensaje: 'Con este presupuesto y ese mínimo de seguidores, pocos influencers podrían postularse.' });
+    }
+    if (fechaInicio && fechaFin && entregables.length > 0) {
+      const dias = (new Date(fechaFin).getTime() - new Date(fechaInicio).getTime()) / 86400000;
+      if (dias < 7 && entregables.length > 2) {
+        warns.push({ tipo: 'warning', mensaje: `${entregables.length} entregables en menos de 7 días es muy ajustado para los influencers.` });
+      }
+    }
+    if (this.form.get('campanaPublica')?.value && pcs.length === 0) {
+      warns.push({ tipo: 'info', mensaje: 'Agregar precios por tipo de contenido aumenta la tasa de postulación.' });
+    }
+    if (pcs.length > 0 && presupuesto > 0 && cantidad > 0) {
+      const precioPromedio = pcs.reduce((sum, p) => sum + p.precio, 0) / pcs.length;
+      if (precioPromedio * cantidad > presupuesto * 1.5) {
+        warns.push({ tipo: 'warning', mensaje: 'El precio por contenido multiplicado por la cantidad de influencers supera ampliamente el presupuesto total.' });
+      }
+    }
+    if (minSeg > 300000 && cantidad > 3) {
+      warns.push({ tipo: 'info', mensaje: 'Para influencers grandes, trabajar con 1–3 suele dar mejores resultados y más control creativo.' });
+    }
+    return warns;
   });
 
   get isEditMode(): boolean {
@@ -125,6 +194,14 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
     return this.form.get('minimoSeguidores')?.value ?? null;
   }
 
+  // ── Getters para live preview (zone-based CD) ──
+  get presupuestoVal(): number { return Number(this.form.get('presupuesto')?.value ?? 0); }
+  get cantidadInfluencersVal(): number { return Number(this.form.get('cantidadInfluencers')?.value ?? 0); }
+  get minimoSeguidoresVal(): number | null {
+    const v = this.form.get('minimoSeguidores')?.value;
+    return v ? Number(v) : null;
+  }
+
   get canAgregarPC(): boolean {
     const pc = this.nuevaPC();
     return !!pc.idPlataforma && !!pc.idTipoContenido && !!pc.precio && Number(pc.precio) > 0;
@@ -133,6 +210,10 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
   get canAgregarEntregable(): boolean {
     const e = this.nuevoEntregable();
     return !!e.descripcion.trim() && !!e.fechaLimite;
+  }
+
+  get presupuestoActual(): number {
+    return Number(this.form.get('presupuesto')?.value ?? 0);
   }
 
   ngOnInit(): void {
@@ -156,9 +237,15 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
         campanaPublica: c.campanaPublica ?? false,
         cantidadInfluencers: String(c.cantidadInfluencers ?? ''),
         minimoSeguidores: c.minimoSeguidores ?? null,
-        esExcluyenteMinimoSeguidores: c.esExcluyenteMinimoSeguidores ?? false
+        esExcluyenteMinimoSeguidores: c.esExcluyenteMinimoSeguidores ?? false,
+        publicoObjetivo: c.publicoObjetivo ?? '',
+        tonoComunicacion: c.tonoComunicacion ?? null,
+        tipoPago: c.tipoPago ?? 'monetario',
+        mencionObligatoria: c.mencionObligatoria ?? ''
       });
       this.selectedCategorias.set(c.categorias?.map(cat => cat.idCategoria) || []);
+      if (c.kpisEsperados?.length) this.kpisSeleccionados.set(c.kpisEsperados);
+      if (c.hashtags?.length) this.hashtagsSeleccionados.set(c.hashtags);
 
       // Pre-cargar plataformaContenidos
       if (c.plataformaContenidos?.length) {
@@ -192,6 +279,34 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
           }))
         );
       }
+    }
+
+    // Aplicar sugerencias del wizard (solo en modo creación)
+    if (!c) {
+      const sug = this.sugerencias();
+      if (sug) {
+        this.form.patchValue({
+          presupuesto: String(sug.presupuestoSugerido),
+          cantidadInfluencers: String(sug.cantidadInfluencersSugerida),
+          minimoSeguidores: sug.minimoSeguidoresSugerido
+        });
+        this.kpisSeleccionados.set([...sug.kpisSugeridos]);
+      }
+      // Valores tweakeados en wizard tienen prioridad
+      const presInicial = this.presupuestoInicial();
+      const cantInicial = this.cantidadInfluencersInicial();
+      if (presInicial != null) this.form.patchValue({ presupuesto: String(presInicial) });
+      if (cantInicial != null) this.form.patchValue({ cantidadInfluencers: String(cantInicial) });
+    }
+
+    // En edición, abrir secciones que tienen datos
+    if (c) {
+      if (c.minimoSeguidores) this.seccionSeguidoresOpen.set(true);
+      if (c.plataformaContenidos?.length) this.seccionContenidoOpen.set(true);
+      if (c.publicoObjetivo || c.tonoComunicacion || c.hashtags?.length) this.seccionBriefingOpen.set(true);
+      if (c.esPresencial || c.requiereProductoFisico || c.requiereProductoVirtual) this.seccionProductoOpen.set(true);
+      if (c.entregables?.length) this.seccionEntregablesOpen.set(true);
+      if (c.invitacionesCampana?.length) this.seccionInvitacionesOpen.set(true);
     }
 
     this.updateNotasLogisticasState();
@@ -438,6 +553,38 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
     this.invitaciones.update(list => list.filter((_, i) => i !== idx));
   }
 
+  // ── KPIs ──
+  toggleKpi(kpi: string): void {
+    const current = this.kpisSeleccionados();
+    if (current.includes(kpi)) {
+      this.kpisSeleccionados.set(current.filter(k => k !== kpi));
+    } else {
+      this.kpisSeleccionados.set([...current, kpi]);
+    }
+  }
+
+  // ── Hashtags ──
+  agregarHashtag(): void {
+    let tag = this.nuevaHashtag().trim();
+    if (!tag) return;
+    if (!tag.startsWith('#')) tag = '#' + tag;
+    const current = this.hashtagsSeleccionados();
+    if (current.includes(tag)) return;
+    this.hashtagsSeleccionados.update(list => [...list, tag]);
+    this.nuevaHashtag.set('');
+  }
+
+  eliminarHashtag(tag: string): void {
+    this.hashtagsSeleccionados.update(list => list.filter(h => h !== tag));
+  }
+
+  onHashtagKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.agregarHashtag();
+    }
+  }
+
   // ── Submit ──
 
   onSubmit(): void {
@@ -463,7 +610,11 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
     }
 
     this.saved.emit({
-      form: formValue,
+      form: {
+        ...formValue,
+        objetivoCampana: this.objetivoCampanaWizard(),
+        nivelAlcanceObjetivo: this.nivelAlcanceWizard()
+      },
       categorias: this.selectedCategorias(),
       imagenesProducto: this.imagenesProducto(),
       plataformaContenidos: this.plataformaContenidos(),
@@ -471,7 +622,9 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
       invitaciones: this.invitaciones().map(i => ({
         idInfluencer: i.idInfluencer,
         mensaje: i.mensaje || null
-      }))
+      })),
+      hashtags: this.hashtagsSeleccionados(),
+      kpisEsperados: this.kpisSeleccionados()
     });
   }
 

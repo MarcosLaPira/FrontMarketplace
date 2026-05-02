@@ -1,0 +1,297 @@
+import { Component, output, signal, computed } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
+import { ObjetivoCampana, NivelAlcance, WizardResult } from '../../models/types';
+import { WIZARD_SUGERENCIAS } from '../../shared/campana-benchmarks';
+import { CAMPAIGN_TEMPLATES, CampanaTemplate } from '../../shared/campana-templates';
+import { CampanaAlcancePreviewComponent } from '../campana-alcance-preview/campana-alcance-preview.component';
+
+interface ObjetivoCard {
+  id: ObjetivoCampana;
+  titulo: string;
+  descripcion: string;
+  icono: string;
+  colorIcono: string;
+  colorBg: string;
+  colorBorder: string;
+  colorText: string;
+}
+
+interface NivelCard {
+  id: NivelAlcance;
+  titulo: string;
+  descripcion: string;
+  icono: string;
+  rangoSeguidores: string;
+  precioPorInfluencerMin: number; // 30% × seguidores mínimos del tier
+  precioPorInfluencerMax: number | null; // null = sin techo (Mega)
+  colorBg: string;
+  colorBorder: string;
+  colorText: string;
+  colorBadge: string;
+}
+
+@Component({
+  selector: 'app-campana-wizard',
+  standalone: true,
+  imports: [DecimalPipe, CampanaAlcancePreviewComponent],
+  templateUrl: './campana-wizard.component.html'
+})
+export class CampanaWizardComponent {
+  completado = output<WizardResult>();
+  omitido = output<void>();
+
+  paso = signal<1 | 2>(1);
+  objetivoSeleccionado = signal<ObjetivoCampana | null>(null);
+  nivelSeleccionado = signal<NivelAlcance | null>(null);
+  presupuestoTweak = signal<number | null>(null);
+  cantidadInfluencersTweak = signal<number | null>(null);
+  templateSeleccionado = signal<CampanaTemplate | null>(null);
+
+  readonly templates = CAMPAIGN_TEMPLATES;
+
+  // Mapa objetivo → id de la plantilla que le corresponde por defecto
+  private readonly OBJETIVO_TEMPLATE_MAP: Record<ObjetivoCampana, string> = {
+    lanzamiento: 'lanzamiento',
+    awareness:   'awareness',
+    ugc:         'review',
+    ventas:      'estacional'
+  };
+
+  // Plantilla que corresponde al objetivo seleccionado (auto-aplicada)
+  templateDeObjetivo = computed<CampanaTemplate | null>(() => {
+    const obj = this.objetivoSeleccionado();
+    if (!obj) return null;
+    const id = this.OBJETIVO_TEMPLATE_MAP[obj];
+    return this.templates.find(t => t.id === id) ?? null;
+  });
+
+  // Plantillas alternativas (las que no corresponden al objetivo actual)
+  templatesAlternativos = computed<CampanaTemplate[]>(() => {
+    const obj = this.objetivoSeleccionado();
+    if (!obj) return this.templates;
+    const idActual = this.OBJETIVO_TEMPLATE_MAP[obj];
+    return this.templates.filter(t => t.id !== idActual);
+  });
+
+  sugerenciasActivas = computed(() => {
+    const obj = this.objetivoSeleccionado();
+    const nivel = this.nivelSeleccionado();
+    if (!obj || !nivel) return null;
+    return WIZARD_SUGERENCIAS[obj][nivel];
+  });
+
+  minimoSeguidoresPreview = computed(() => this.sugerenciasActivas()?.minimoSeguidoresSugerido ?? null);
+
+  // Card del objetivo seleccionado (para reusar su título/descripción/ícono en paso 2)
+  objetivoCard = computed(() => {
+    const obj = this.objetivoSeleccionado();
+    return obj ? (this.objetivos.find(o => o.id === obj) ?? null) : null;
+  });
+
+  // Card del nivel seleccionado
+  nivelCard = computed(() => {
+    const n = this.nivelSeleccionado();
+    return n ? (this.niveles.find(c => c.id === n) ?? null) : null;
+  });
+
+  // Advertencia cuando el presupuesto/influencer se sale del rango del tier elegido
+  advertenciaRango = computed<{ tipo: 'bajo' | 'alto'; mensaje: string } | null>(() => {
+    const card  = this.nivelCard();
+    const pres  = this.presupuestoTweak();
+    const cant  = this.cantidadInfluencersTweak() ?? this.cantidadInfluencersEfectiva();
+    if (!card || !pres || !cant) return null;
+    const ppi = pres / cant;
+    if (ppi < card.precioPorInfluencerMin) {
+      const falta = Math.ceil((card.precioPorInfluencerMin * cant) - pres);
+      return { tipo: 'bajo', mensaje: `$${Math.round(ppi).toLocaleString('es-AR')} por influencer está por debajo del rango ${card.titulo} ($${card.precioPorInfluencerMin.toLocaleString('es-AR')}+). Faltan ~$${falta.toLocaleString('es-AR')} para alcanzar el mínimo.` };
+    }
+    if (card.precioPorInfluencerMax !== null && ppi > card.precioPorInfluencerMax) {
+      return { tipo: 'alto', mensaje: `$${Math.round(ppi).toLocaleString('es-AR')} por influencer supera el rango ${card.titulo}. Con ese presupuesto podés apuntar al tier siguiente.` };
+    }
+    return null;
+  });
+
+  // Rango de presupuesto de referencia: tier × cantidad de influencers efectiva
+  presupuestoRefRango = computed<{ min: number; max: number | null } | null>(() => {
+    const card = this.nivelCard();
+    const cant = this.cantidadInfluencersTweak() ?? this.cantidadInfluencersEfectiva();
+    if (!card || !cant) return null;
+    return {
+      min: card.precioPorInfluencerMin * cant,
+      max: card.precioPorInfluencerMax !== null ? card.precioPorInfluencerMax * cant : null
+    };
+  });
+
+  // Cantidad de influencers efectiva: viene del template seleccionado o de las sugerencias
+  cantidadInfluencersEfectiva = computed(() => {
+    const tpl = this.templateSeleccionado();
+    if (tpl?.valores.cantidadInfluencers) return tpl.valores.cantidadInfluencers;
+    return this.sugerenciasActivas()?.cantidadInfluencersSugerida ?? null;
+  });
+
+  readonly objetivos: ObjetivoCard[] = [
+    {
+      id: 'awareness',
+      titulo: 'Notoriedad de marca',
+      descripcion: 'Que más gente te conozca y recuerde',
+      icono: '📢',
+      colorIcono: 'text-purple-600',
+      colorBg: 'bg-purple-50',
+      colorBorder: 'border-purple-300',
+      colorText: 'text-purple-700'
+    },
+    {
+      id: 'ventas',
+      titulo: 'Generar ventas',
+      descripcion: 'Convertir seguidores en compradores',
+      icono: '🛒',
+      colorIcono: 'text-green-600',
+      colorBg: 'bg-green-50',
+      colorBorder: 'border-green-300',
+      colorText: 'text-green-700'
+    },
+    {
+      id: 'lanzamiento',
+      titulo: 'Lanzar un producto',
+      descripcion: 'Presentar algo nuevo al mercado',
+      icono: '🚀',
+      colorIcono: 'text-indigo-600',
+      colorBg: 'bg-indigo-50',
+      colorBorder: 'border-indigo-300',
+      colorText: 'text-indigo-700'
+    },
+    {
+      id: 'ugc',
+      titulo: 'Contenido UGC',
+      descripcion: 'Obtener fotos y videos auténticos de tu producto',
+      icono: '📸',
+      colorIcono: 'text-amber-600',
+      colorBg: 'bg-amber-50',
+      colorBorder: 'border-amber-300',
+      colorText: 'text-amber-700'
+    }
+  ];
+
+  readonly niveles: NivelCard[] = [
+    {
+      id: 'nano',
+      titulo: 'Nano',
+      descripcion: 'Comunidades pequeñas y súper comprometidas. El mejor engagement del mercado.',
+      icono: '🎯',
+      rangoSeguidores: '1k – 10k seguidores',
+      precioPorInfluencerMin: 300,
+      precioPorInfluencerMax: 3000,
+      colorBg: 'bg-emerald-50',
+      colorBorder: 'border-emerald-300',
+      colorText: 'text-emerald-700',
+      colorBadge: 'bg-emerald-100 text-emerald-800'
+    },
+    {
+      id: 'micro',
+      titulo: 'Micro',
+      descripcion: 'Autoridad en su nicho, alta credibilidad. El mejor ROI del mercado.',
+      icono: '⚡',
+      rangoSeguidores: '10k – 100k seguidores',
+      precioPorInfluencerMin: 3000,
+      precioPorInfluencerMax: 30000,
+      colorBg: 'bg-blue-50',
+      colorBorder: 'border-blue-300',
+      colorText: 'text-blue-700',
+      colorBadge: 'bg-blue-100 text-blue-800'
+    },
+    {
+      id: 'macro',
+      titulo: 'Macro',
+      descripcion: 'Gran alcance y reconocimiento. Ideal para awareness y lanzamientos.',
+      icono: '📊',
+      rangoSeguidores: '100k – 500k seguidores',
+      precioPorInfluencerMin: 30000,
+      precioPorInfluencerMax: 150000,
+      colorBg: 'bg-violet-50',
+      colorBorder: 'border-violet-300',
+      colorText: 'text-violet-700',
+      colorBadge: 'bg-violet-100 text-violet-800'
+    },
+    {
+      id: 'mega',
+      titulo: 'Mega',
+      descripcion: 'Celebridades e influencers de élite. Impacto masivo e inmediato.',
+      icono: '🌐',
+      rangoSeguidores: '500k+ seguidores',
+      precioPorInfluencerMin: 150000,
+      precioPorInfluencerMax: null,
+      colorBg: 'bg-amber-50',
+      colorBorder: 'border-amber-300',
+      colorText: 'text-amber-700',
+      colorBadge: 'bg-amber-100 text-amber-800'
+    }
+  ];
+
+  seleccionarObjetivo(id: ObjetivoCampana): void {
+    this.objetivoSeleccionado.set(id);
+    this.paso.set(2);
+  }
+
+  seleccionarNivel(id: NivelAlcance): void {
+    this.nivelSeleccionado.set(id);
+    const objetivo = this.objetivoSeleccionado();
+    if (!objetivo) return;
+    const sug = WIZARD_SUGERENCIAS[objetivo][id];
+    // Auto-aplicar la plantilla del objetivo (si no había una alternativa seleccionada)
+    const templateAuto = this.templateDeObjetivo();
+    if (templateAuto && !this.templateSeleccionado()) {
+      this.templateSeleccionado.set(templateAuto);
+    }
+    // Presupuesto: usar el de la plantilla auto si existe, sino el de sugerencias
+    const tpl = this.templateSeleccionado();
+    this.presupuestoTweak.set(tpl?.valores.presupuesto ?? sug.presupuestoSugerido);
+    this.cantidadInfluencersTweak.set(tpl?.valores.cantidadInfluencers ?? sug.cantidadInfluencersSugerida);
+  }
+
+  aplicarTemplateWizard(template: CampanaTemplate): void {
+    if (this.templateSeleccionado()?.id === template.id) {
+      this.templateSeleccionado.set(null);
+      const sug = this.sugerenciasActivas();
+      if (sug) {
+        this.presupuestoTweak.set(sug.presupuestoSugerido);
+        this.cantidadInfluencersTweak.set(sug.cantidadInfluencersSugerida);
+      }
+      return;
+    }
+    this.templateSeleccionado.set(template);
+    if (template.valores.presupuesto) this.presupuestoTweak.set(template.valores.presupuesto);
+    if (template.valores.cantidadInfluencers) this.cantidadInfluencersTweak.set(template.valores.cantidadInfluencers);
+  }
+
+  confirmarYContinuar(): void {
+    const objetivo = this.objetivoSeleccionado();
+    const nivel = this.nivelSeleccionado();
+    if (!objetivo || !nivel) return;
+    const sugerencias = WIZARD_SUGERENCIAS[objetivo][nivel];
+    this.completado.emit({
+      objetivoCampana: objetivo,
+      nivelAlcance: nivel,
+      sugerencias,
+      presupuesto: this.presupuestoTweak() ?? sugerencias.presupuestoSugerido,
+      cantidadInfluencers: this.cantidadInfluencersEfectiva() ?? sugerencias.cantidadInfluencersSugerida
+    });
+  }
+
+  volver(): void {
+    this.paso.set(1);
+    this.nivelSeleccionado.set(null);
+    this.templateSeleccionado.set(null);
+  }
+
+  omitir(): void {
+    this.omitido.emit();
+  }
+
+  getObjetivoLabel(id: ObjetivoCampana | null): string {
+    return this.objetivos.find(o => o.id === id)?.titulo ?? '';
+  }
+
+  getSugerenciasParaNivel(objetivo: ObjetivoCampana, nivel: NivelAlcance) {
+    return WIZARD_SUGERENCIAS[objetivo][nivel];
+  }
+}

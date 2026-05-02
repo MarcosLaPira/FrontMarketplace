@@ -1,15 +1,16 @@
 import { Component, inject, input, output, signal, computed } from '@angular/core';
 import { CampanaFormComponent } from '../../../../../components/campana-form/campana-form.component';
+import { CampanaWizardComponent } from '../../../../../components/campana-wizard/campana-wizard.component';
 import { MarcaCampanaCardComponent } from '../../../../../components/marca-campana-card/marca-campana-card.component';
 import { CampanaDetalleGestionComponent } from '../campana-detalle-gestion/campana-detalle-gestion.component';
-import { Campana, Categoria, Plataforma, TipoContenido, CampanaCreateRequest } from '../../../../../models/types';
+import { Campana, Categoria, Plataforma, TipoContenido, CampanaCreateRequest, WizardResult, CampanaSugerencias, ObjetivoCampana, NivelAlcance } from '../../../../../models/types';
 import { CampanaService } from '../../../../../services/campana.service';
 import { PostulacionService } from '../../../../../services/postulacion.service';
 
 @Component({
   selector: 'app-marca-campanas',
   standalone: true,
-  imports: [CampanaFormComponent, MarcaCampanaCardComponent, CampanaDetalleGestionComponent],
+  imports: [CampanaFormComponent, CampanaWizardComponent, MarcaCampanaCardComponent, CampanaDetalleGestionComponent],
   templateUrl: './marca-campanas.component.html'
 })
 export class MarcaCampanasComponent {
@@ -23,7 +24,11 @@ export class MarcaCampanasComponent {
   tiposContenido = input.required<TipoContenido[]>();
   campanas = input.required<Campana[]>();
 
-  showNewForm = signal(false);
+  // Estado de creación: idle → wizard → form
+  creationStep = signal<'idle' | 'wizard' | 'form'>('idle');
+  wizardResult = signal<WizardResult | null>(null);
+
+  get showNewForm(): boolean { return this.creationStep() === 'form'; }
   editingCampana = signal<Campana | null>(null);
   subTab = signal<'publicadas' | 'enCurso' | 'finalizadas'>('publicadas');
   expandedCampanaId = signal<number | null>(null);
@@ -72,11 +77,34 @@ export class MarcaCampanasComponent {
     return new Date(c.fechaFin) < new Date() || this.esInactiva(c);
   });
 
-  crearCampana(data: { form: any; categorias: number[]; imagenesProducto: File[]; plataformaContenidos: any[]; entregables: any[]; invitaciones: any[] }): void {
+  abrirWizard(): void {
+    this.creationStep.set('wizard');
+    this.wizardResult.set(null);
+    this.expandedCampanaId.set(null);
+    this.editingCampana.set(null);
+  }
+
+  cancelarCreacion(): void {
+    this.creationStep.set('idle');
+    this.wizardResult.set(null);
+  }
+
+  onWizardCompletado(result: WizardResult): void {
+    this.wizardResult.set(result);
+    this.creationStep.set('form');
+  }
+
+  onWizardOmitido(): void {
+    this.wizardResult.set(null);
+    this.creationStep.set('form');
+  }
+
+  crearCampana(data: { form: any; categorias: number[]; imagenesProducto: File[]; plataformaContenidos: any[]; entregables: any[]; invitaciones: any[]; hashtags?: string[]; kpisEsperados?: string[] }): void {
     const request = this.buildRequest(data);
     this.campanaService.createCampana(request, data.imagenesProducto).subscribe({
       next: () => {
-        this.showNewForm.set(false);
+        this.creationStep.set('idle');
+        this.wizardResult.set(null);
         this.reloadCampanas();
       },
       error: (err: any) => console.error('Error creating campaign:', err)
@@ -88,7 +116,7 @@ export class MarcaCampanasComponent {
     this.expandedCampanaId.set(campana.idCampana);
   }
 
-  guardarEdit(data: { form: any; categorias: number[]; imagenesProducto: File[]; plataformaContenidos: any[]; entregables: any[]; invitaciones: any[] }): void {
+  guardarEdit(data: { form: any; categorias: number[]; imagenesProducto: File[]; plataformaContenidos: any[]; entregables: any[]; invitaciones: any[]; hashtags?: string[]; kpisEsperados?: string[] }): void {
     const campana = this.editingCampana();
     if (!campana) return;
 
@@ -147,7 +175,7 @@ export class MarcaCampanasComponent {
     });
   }
 
-  private buildRequest(data: { form: any; categorias: number[]; imagenesProducto: File[]; plataformaContenidos: any[]; entregables: any[]; invitaciones: any[] }): CampanaCreateRequest {
+  private buildRequest(data: { form: any; categorias: number[]; imagenesProducto: File[]; plataformaContenidos: any[]; entregables: any[]; invitaciones: any[]; hashtags?: string[]; kpisEsperados?: string[] }): CampanaCreateRequest {
     const val = data.form;
     return {
       titulo: val.titulo,
@@ -169,6 +197,14 @@ export class MarcaCampanasComponent {
       cantidadInfluencers: Number(val.cantidadInfluencers),
       minimoSeguidores: val.minimoSeguidores ? Number(val.minimoSeguidores) : undefined,
       esExcluyenteMinimoSeguidores: val.esExcluyenteMinimoSeguidores ?? false,
+      publicoObjetivo: val.publicoObjetivo || undefined,
+      tonoComunicacion: val.tonoComunicacion || undefined,
+      tipoPago: val.tipoPago || undefined,
+      mencionObligatoria: val.mencionObligatoria || undefined,
+      hashtags: data.hashtags?.length ? data.hashtags : undefined,
+      kpisEsperados: data.kpisEsperados?.length ? data.kpisEsperados : undefined,
+      objetivoCampana: val.objetivoCampana || undefined,
+      nivelAlcanceObjetivo: val.nivelAlcanceObjetivo || undefined,
       plataformaContenidos: data.plataformaContenidos.length > 0 ? data.plataformaContenidos : undefined,
       entregables: data.entregables.length > 0 ? data.entregables : undefined,
       invitaciones: data.invitaciones.length > 0 ? data.invitaciones : undefined

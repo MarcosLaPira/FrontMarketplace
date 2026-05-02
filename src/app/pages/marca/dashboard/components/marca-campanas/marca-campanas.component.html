@@ -7,12 +7,12 @@
         <h2 class="text-2xl md:text-3xl font-bold mb-1">Mis Campañas</h2>
         <p class="text-indigo-100 text-sm">Gestioná tus campañas y revisá las postulaciones de influencers</p>
       </div>
-      <button (click)="showNewForm.set(!showNewForm())"
+      <button (click)="creationStep() !== 'idle' ? cancelarCreacion() : abrirWizard()"
         class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition self-start"
-        [class]="showNewForm()
+        [class]="creationStep() !== 'idle'
           ? 'bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white/30'
           : 'bg-white text-indigo-700 hover:bg-indigo-50 shadow-lg shadow-indigo-900/20'">
-        @if (showNewForm()) {
+        @if (creationStep() !== 'idle') {
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
           Cancelar
         } @else {
@@ -45,16 +45,42 @@
     </div>
   </div>
 
+  <!-- Wizard de nueva campaña -->
+  @if (creationStep() === 'wizard') {
+    <div class="bg-white border-2 border-indigo-200 rounded-2xl p-5 shadow-xl ring-1 ring-indigo-100">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wide">Nueva Campaña</h3>
+        <button type="button" (click)="cancelarCreacion()"
+          class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <app-campana-wizard
+        (completado)="onWizardCompletado($event)"
+        (omitido)="onWizardOmitido()" />
+    </div>
+  }
+
   <!-- Formulario nueva campaña -->
-  @if (showNewForm()) {
-    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-      <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Nueva Campaña</h3>
+  @if (creationStep() === 'form') {
+    <div class="bg-white border-2 border-indigo-200 rounded-2xl p-5 shadow-xl ring-1 ring-indigo-100">
+      @if (wizardResult()) {
+        <div class="flex items-center gap-3 mb-5 px-3 py-2.5 rounded-lg bg-indigo-50 border border-indigo-100">
+          <svg class="w-4 h-4 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <p class="text-xs text-indigo-700">Formulario pre-completado según tu objetivo. Podés ajustar todos los valores.</p>
+        </div>
+      }
       <app-campana-form
         [categorias]="categorias()"
         [plataformas]="plataformas()"
         [tiposContenido]="tiposContenido()"
+        [sugerencias]="wizardResult()?.sugerencias ?? null"
+        [objetivoCampanaWizard]="wizardResult()?.objetivoCampana ?? null"
+        [nivelAlcanceWizard]="wizardResult()?.nivelAlcance ?? null"
+        [presupuestoInicial]="wizardResult()?.presupuesto ?? null"
+        [cantidadInfluencersInicial]="wizardResult()?.cantidadInfluencers ?? null"
         (saved)="crearCampana($event)"
-        (cancelled)="showNewForm.set(false)" />
+        (cancelled)="cancelarCreacion()" />
     </div>
   }
 
@@ -152,7 +178,7 @@
           </div>
           <h3 class="text-lg font-bold text-gray-800 mb-2">No tenés campañas publicadas</h3>
           <p class="text-gray-500 text-sm max-w-sm mb-5">Creá tu primera campaña para empezar a recibir postulaciones de influencers</p>
-          <button (click)="showNewForm.set(true)"
+          <button (click)="abrirWizard()"
             class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 transition flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Crear Campaña
