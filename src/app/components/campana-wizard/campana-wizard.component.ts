@@ -57,6 +57,14 @@ export class CampanaWizardComponent {
     ventas:      'estacional'
   };
 
+  // Mapa inverso: template.id → objetivo (para calcular sugerencias al cambiar plantilla)
+  private readonly TEMPLATE_OBJETIVO_MAP: Record<string, ObjetivoCampana> = {
+    lanzamiento: 'lanzamiento',
+    awareness:   'awareness',
+    review:      'ugc',
+    estacional:  'ventas'
+  };
+
   // Plantilla que corresponde al objetivo seleccionado (auto-aplicada)
   templateDeObjetivo = computed<CampanaTemplate | null>(() => {
     const obj = this.objetivoSeleccionado();
@@ -122,11 +130,9 @@ export class CampanaWizardComponent {
     };
   });
 
-  // Cantidad de influencers efectiva: viene del template seleccionado o de las sugerencias
+  // Cantidad de influencers efectiva: el tweak manual tiene prioridad; fallback a sugerencias del tier activo
   cantidadInfluencersEfectiva = computed(() => {
-    const tpl = this.templateSeleccionado();
-    if (tpl?.valores.cantidadInfluencers) return tpl.valores.cantidadInfluencers;
-    return this.sugerenciasActivas()?.cantidadInfluencersSugerida ?? null;
+    return this.cantidadInfluencersTweak() ?? this.sugerenciasActivas()?.cantidadInfluencersSugerida ?? null;
   });
 
   readonly objetivos: ObjetivoCard[] = [
@@ -236,19 +242,23 @@ export class CampanaWizardComponent {
     this.nivelSeleccionado.set(id);
     const objetivo = this.objetivoSeleccionado();
     if (!objetivo) return;
-    const sug = WIZARD_SUGERENCIAS[objetivo][id];
-    // Auto-aplicar la plantilla del objetivo (si no había una alternativa seleccionada)
+    // Auto-aplicar la plantilla del objetivo si no había ninguna seleccionada
     const templateAuto = this.templateDeObjetivo();
     if (templateAuto && !this.templateSeleccionado()) {
       this.templateSeleccionado.set(templateAuto);
     }
-    // Presupuesto: usar el de la plantilla auto si existe, sino el de sugerencias
-    const tpl = this.templateSeleccionado();
-    this.presupuestoTweak.set(tpl?.valores.presupuesto ?? sug.presupuestoSugerido);
-    this.cantidadInfluencersTweak.set(tpl?.valores.cantidadInfluencers ?? sug.cantidadInfluencersSugerida);
+    // Siempre calcular sugerencias desde la combinación tier × objetivo del template activo
+    const tplActiva = this.templateSeleccionado();
+    const objetivoEfectivo = tplActiva
+      ? (this.TEMPLATE_OBJETIVO_MAP[tplActiva.id] ?? objetivo)
+      : objetivo;
+    const sug = WIZARD_SUGERENCIAS[objetivoEfectivo][id];
+    this.presupuestoTweak.set(sug.presupuestoSugerido);
+    this.cantidadInfluencersTweak.set(sug.cantidadInfluencersSugerida);
   }
 
   aplicarTemplateWizard(template: CampanaTemplate): void {
+    // Toggle: deseleccionar si ya está activa
     if (this.templateSeleccionado()?.id === template.id) {
       this.templateSeleccionado.set(null);
       const sug = this.sugerenciasActivas();
@@ -259,8 +269,14 @@ export class CampanaWizardComponent {
       return;
     }
     this.templateSeleccionado.set(template);
-    if (template.valores.presupuesto) this.presupuestoTweak.set(template.valores.presupuesto);
-    if (template.valores.cantidadInfluencers) this.cantidadInfluencersTweak.set(template.valores.cantidadInfluencers);
+    // Usar sugerencias de la combinación tier actual × objetivo del template seleccionado
+    const nivel = this.nivelSeleccionado();
+    const objetivoTemplate = this.TEMPLATE_OBJETIVO_MAP[template.id];
+    if (nivel && objetivoTemplate) {
+      const sug = WIZARD_SUGERENCIAS[objetivoTemplate][nivel];
+      this.presupuestoTweak.set(sug.presupuestoSugerido);
+      this.cantidadInfluencersTweak.set(sug.cantidadInfluencersSugerida);
+    }
   }
 
   confirmarYContinuar(): void {

@@ -5,7 +5,7 @@ export const WIZARD_SUGERENCIAS: Record<ObjetivoCampana, Record<NivelAlcance, Ca
     nano: {
       presupuestoMin: 10000, presupuestoSugerido: 25000, presupuestoMax: 60000,
       minimoSeguidoresMin: 1000, minimoSeguidoresSugerido: 5000, minimoSeguidoresMax: 10000,
-      cantidadInfluencersSugerida: 8,
+      cantidadInfluencersSugerida: 10,
       descripcionAlcance: 'Nano (1k-10k seg.)',
       descripcionImpacto: 'Comunidades muy activas, altisimo engagement',
       kpisSugeridos: ['engagement', 'contenido_ugc']
@@ -21,7 +21,7 @@ export const WIZARD_SUGERENCIAS: Record<ObjetivoCampana, Record<NivelAlcance, Ca
     macro: {
       presupuestoMin: 150000, presupuestoSugerido: 400000, presupuestoMax: 900000,
       minimoSeguidoresMin: 100000, minimoSeguidoresSugerido: 300000, minimoSeguidoresMax: 1000000,
-      cantidadInfluencersSugerida: 2,
+      cantidadInfluencersSugerida: 3,
       descripcionAlcance: 'Macro (100k-1M seg.)',
       descripcionImpacto: 'Alcance masivo, reconocimiento de marca',
       kpisSugeridos: ['alcance', 'engagement']
@@ -55,7 +55,7 @@ export const WIZARD_SUGERENCIAS: Record<ObjetivoCampana, Record<NivelAlcance, Ca
     macro: {
       presupuestoMin: 120000, presupuestoSugerido: 350000, presupuestoMax: 800000,
       minimoSeguidoresMin: 100000, minimoSeguidoresSugerido: 250000, minimoSeguidoresMax: 1000000,
-      cantidadInfluencersSugerida: 2,
+      cantidadInfluencersSugerida: 3,
       descripcionAlcance: 'Macro (100k-1M seg.)',
       descripcionImpacto: 'Volumen de ventas a escala',
       kpisSugeridos: ['ventas', 'alcance']
@@ -73,7 +73,7 @@ export const WIZARD_SUGERENCIAS: Record<ObjetivoCampana, Record<NivelAlcance, Ca
     nano: {
       presupuestoMin: 15000, presupuestoSugerido: 35000, presupuestoMax: 80000,
       minimoSeguidoresMin: 2000, minimoSeguidoresSugerido: 6000, minimoSeguidoresMax: 10000,
-      cantidadInfluencersSugerida: 8,
+      cantidadInfluencersSugerida: 12,
       descripcionAlcance: 'Nano (1k-10k seg.)',
       descripcionImpacto: 'Lanzamiento autentico y organico, word-of-mouth',
       kpisSugeridos: ['engagement', 'contenido_ugc']
@@ -89,7 +89,7 @@ export const WIZARD_SUGERENCIAS: Record<ObjetivoCampana, Record<NivelAlcance, Ca
     macro: {
       presupuestoMin: 200000, presupuestoSugerido: 500000, presupuestoMax: 1200000,
       minimoSeguidoresMin: 100000, minimoSeguidoresSugerido: 300000, minimoSeguidoresMax: 1000000,
-      cantidadInfluencersSugerida: 2,
+      cantidadInfluencersSugerida: 4,
       descripcionAlcance: 'Macro (100k-1M seg.)',
       descripcionImpacto: 'Lanzamiento con cobertura masiva',
       kpisSugeridos: ['alcance', 'ventas', 'engagement']
