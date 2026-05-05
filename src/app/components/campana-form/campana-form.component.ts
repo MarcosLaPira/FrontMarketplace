@@ -85,9 +85,7 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
   // ── Secciones colapsables ──
   seccionSeguidoresOpen = signal(false);
   seccionContenidoOpen = signal(false);
-  seccionBriefingOpen = signal(false);
   seccionProductoOpen = signal(false);
-  seccionEntregablesOpen = signal(false);
   seccionInvitacionesOpen = signal(false);
 
   // ── Constantes expuestas al template ──
@@ -286,10 +284,8 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
     // En edición, abrir secciones que tienen datos
     if (c) {
       if (c.minimoSeguidores) this.seccionSeguidoresOpen.set(true);
-      if (c.plataformaContenidos?.length) this.seccionContenidoOpen.set(true);
-      if (c.publicoObjetivo || c.tonoComunicacion || c.hashtags?.length) this.seccionBriefingOpen.set(true);
+      if (c.plataformaContenidos?.length || c.entregables?.length) this.seccionContenidoOpen.set(true);
       if (c.esPresencial || c.requiereProductoFisico || c.requiereProductoVirtual) this.seccionProductoOpen.set(true);
-      if (c.entregables?.length) this.seccionEntregablesOpen.set(true);
       if (c.invitacionesCampana?.length) this.seccionInvitacionesOpen.set(true);
     }
 

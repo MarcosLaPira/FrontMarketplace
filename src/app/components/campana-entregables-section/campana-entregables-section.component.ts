@@ -21,17 +21,20 @@ export class CampanaEntregablesSectionComponent {
     return !!e.descripcion.trim() && !!e.fechaLimite;
   }
 
+  get hasEntregable(): boolean {
+    return this.items().length > 0;
+  }
+
   setField(field: 'descripcion' | 'fechaLimite', value: string): void {
     this.nuevoEntregable.update(e => ({ ...e, [field]: value }));
   }
 
   agregar(): void {
     if (!this.canAgregar) return;
+    if (this.hasEntregable) return;
     const e = this.nuevoEntregable();
-    const orden = this.items().length + 1;
     this.itemsChange.emit([
-      ...this.items(),
-      { descripcion: e.descripcion.trim(), fechaLimite: e.fechaLimite, orden }
+      { descripcion: e.descripcion.trim(), fechaLimite: e.fechaLimite, orden: 1 }
     ]);
     this.nuevoEntregable.set({ descripcion: '', fechaLimite: '' });
   }
