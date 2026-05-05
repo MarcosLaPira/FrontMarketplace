@@ -503,4 +503,5 @@ export interface WizardResult {
   sugerencias: CampanaSugerencias;
   presupuesto?: number;
   cantidadInfluencers?: number;
+  minimoSeguidores?: number | null;
 }

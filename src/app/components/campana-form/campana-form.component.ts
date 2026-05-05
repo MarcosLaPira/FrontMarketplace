@@ -1,14 +1,16 @@
 import { Component, inject, input, output, signal, OnDestroy, OnInit, computed } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { DecimalPipe, DatePipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { CategorySelectorComponent } from '../category-selector/category-selector.component';
 import { CampanaAlcancePreviewComponent } from '../campana-alcance-preview/campana-alcance-preview.component';
+import { CampanaPlataformasSectionComponent } from '../campana-plataformas-section/campana-plataformas-section.component';
+import { CampanaEntregablesSectionComponent } from '../campana-entregables-section/campana-entregables-section.component';
+import { CampanaInvitacionesSectionComponent } from '../campana-invitaciones-section/campana-invitaciones-section.component';
 import {
   Categoria,
   Plataforma,
   TipoContenido,
   Campana,
-  Influencer,
   PlataformaContenidoInput,
   EntregableInput,
   InvitacionInput,
@@ -19,7 +21,6 @@ import {
   ObjetivoCampana,
   NivelAlcance
 } from '../../models/types';
-import { InfluencerService } from '../../services/influencer.service';
 import { WIZARD_SUGERENCIAS, Advertencia, KPI_OPTIONS, KPI_LABELS } from '../../shared/campana-benchmarks';
 
 interface InvitacionDisplay {
@@ -31,12 +32,11 @@ interface InvitacionDisplay {
 @Component({
   selector: 'app-campana-form',
   standalone: true,
-  imports: [ReactiveFormsModule, CategorySelectorComponent, DecimalPipe, DatePipe, CampanaAlcancePreviewComponent],
+  imports: [ReactiveFormsModule, CategorySelectorComponent, DecimalPipe, CampanaAlcancePreviewComponent, CampanaPlataformasSectionComponent, CampanaEntregablesSectionComponent, CampanaInvitacionesSectionComponent],
   templateUrl: './campana-form.component.html'
 })
 export class CampanaFormComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
-  private influencerService = inject(InfluencerService);
   private readonly allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
   private readonly maxImageSizeBytes = 5 * 1024 * 1024;
 
@@ -49,6 +49,7 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
   nivelAlcanceWizard = input<NivelAlcance | null>(null);
   presupuestoInicial = input<number | null>(null);
   cantidadInfluencersInicial = input<number | null>(null);
+  minimoSeguidoresInicial = input<number | null>(null);
 
   saved = output<{
     form: any;
@@ -69,24 +70,12 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
 
   // ── Plataforma + Tipo Contenido ──
   plataformaContenidos = signal<PlataformaContenidoInput[]>([]);
-  nuevaPC = signal<{ idPlataforma: string; idTipoContenido: string; precio: string }>({
-    idPlataforma: '', idTipoContenido: '', precio: ''
-  });
 
   // ── Entregables ──
   entregables = signal<EntregableInput[]>([]);
-  nuevoEntregable = signal<{ descripcion: string; fechaLimite: string }>({
-    descripcion: '', fechaLimite: ''
-  });
 
   // ── Invitaciones ──
   invitaciones = signal<InvitacionDisplay[]>([]);
-  invBuscarNombre = signal<string>('');
-  invResultados = signal<Array<{ idInfluencer: number; nombreSocial: string }>>([]);
-  invInfluencerSeleccionado = signal<{ idInfluencer: number; nombreSocial: string } | null>(null);
-  invMensaje = signal<string>('');
-  invBuscando = signal<boolean>(false);
-  invError = signal<string>('');
 
   // ── Nuevos campos ──
   kpisSeleccionados = signal<string[]>([]);
@@ -202,16 +191,6 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
     return v ? Number(v) : null;
   }
 
-  get canAgregarPC(): boolean {
-    const pc = this.nuevaPC();
-    return !!pc.idPlataforma && !!pc.idTipoContenido && !!pc.precio && Number(pc.precio) > 0;
-  }
-
-  get canAgregarEntregable(): boolean {
-    const e = this.nuevoEntregable();
-    return !!e.descripcion.trim() && !!e.fechaLimite;
-  }
-
   get presupuestoActual(): number {
     return Number(this.form.get('presupuesto')?.value ?? 0);
   }
@@ -297,6 +276,11 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
       const cantInicial = this.cantidadInfluencersInicial();
       if (presInicial != null) this.form.patchValue({ presupuesto: String(presInicial) });
       if (cantInicial != null) this.form.patchValue({ cantidadInfluencers: String(cantInicial) });
+      const minSegInicial = this.minimoSeguidoresInicial();
+      if (minSegInicial != null) {
+        this.form.patchValue({ minimoSeguidores: minSegInicial });
+        this.seccionSeguidoresOpen.set(true);
+      }
     }
 
     // En edición, abrir secciones que tienen datos
@@ -438,120 +422,7 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ── Plataforma + Tipo Contenido ──
-
-  setNuevaPC(field: 'idPlataforma' | 'idTipoContenido' | 'precio', value: string): void {
-    this.nuevaPC.update(pc => ({ ...pc, [field]: value }));
-  }
-
-  agregarPlataformaContenido(): void {
-    if (!this.canAgregarPC) return;
-    const pc = this.nuevaPC();
-    const existing = this.plataformaContenidos();
-    const isDuplicate = existing.some(
-      e => e.idPlataforma === Number(pc.idPlataforma) && e.idTipoContenido === Number(pc.idTipoContenido)
-    );
-    if (isDuplicate) return;
-
-    this.plataformaContenidos.update(list => [
-      ...list,
-      { idPlataforma: Number(pc.idPlataforma), idTipoContenido: Number(pc.idTipoContenido), precio: Number(pc.precio) }
-    ]);
-    this.nuevaPC.set({ idPlataforma: '', idTipoContenido: '', precio: '' });
-  }
-
-  eliminarPlataformaContenido(idx: number): void {
-    this.plataformaContenidos.update(list => list.filter((_, i) => i !== idx));
-  }
-
-  getNombrePlataforma(id: number): string {
-    return this.plataformas().find(p => p.idPlataforma === id)?.nombrePlataforma ?? '';
-  }
-
-  getNombreTipoContenido(id: number): string {
-    return this.tiposContenido().find(t => t.idTipoContenido === id)?.nombre ?? '';
-  }
-
-  // ── Entregables ──
-
-  setNuevoEntregable(field: 'descripcion' | 'fechaLimite', value: string): void {
-    this.nuevoEntregable.update(e => ({ ...e, [field]: value }));
-  }
-
-  agregarEntregable(): void {
-    if (!this.canAgregarEntregable) return;
-    const e = this.nuevoEntregable();
-    const orden = this.entregables().length + 1;
-    this.entregables.update(list => [
-      ...list,
-      { descripcion: e.descripcion.trim(), fechaLimite: e.fechaLimite, orden }
-    ]);
-    this.nuevoEntregable.set({ descripcion: '', fechaLimite: '' });
-  }
-
-  eliminarEntregable(idx: number): void {
-    this.entregables.update(list =>
-      list.filter((_, i) => i !== idx).map((e, i) => ({ ...e, orden: i + 1 }))
-    );
-  }
-
   // ── Invitaciones ──
-
-  buscarInfluencer(): void {
-    const nombre = this.invBuscarNombre().trim();
-    if (!nombre) return;
-
-    this.invBuscando.set(true);
-    this.invError.set('');
-    this.invResultados.set([]);
-    this.invInfluencerSeleccionado.set(null);
-
-    this.influencerService.getInfluencers({ search: nombre }).subscribe({
-      next: (res) => {
-        const filtrados = (res.items || [])
-          .filter((i: Influencer) => !this.invitaciones().some(inv => inv.idInfluencer === i.idInfluencer))
-          .map((i: Influencer) => ({ idInfluencer: i.idInfluencer, nombreSocial: i.nombreSocial }));
-        this.invResultados.set(filtrados);
-        if (filtrados.length === 0) {
-          this.invError.set('No se encontraron influencers con ese nombre.');
-        }
-        this.invBuscando.set(false);
-      },
-      error: () => {
-        this.invError.set('Error al buscar influencers.');
-        this.invBuscando.set(false);
-      }
-    });
-  }
-
-  seleccionarInfluencer(inf: { idInfluencer: number; nombreSocial: string }): void {
-    this.invInfluencerSeleccionado.set(inf);
-    this.invResultados.set([]);
-    this.invError.set('');
-  }
-
-  agregarInvitacion(): void {
-    const inf = this.invInfluencerSeleccionado();
-    if (!inf) return;
-
-    const alreadyAdded = this.invitaciones().some(i => i.idInfluencer === inf.idInfluencer);
-    if (alreadyAdded) return;
-
-    this.invitaciones.update(list => [
-      ...list,
-      { idInfluencer: inf.idInfluencer, nombreSocial: inf.nombreSocial, mensaje: this.invMensaje() }
-    ]);
-
-    this.invBuscarNombre.set('');
-    this.invInfluencerSeleccionado.set(null);
-    this.invResultados.set([]);
-    this.invMensaje.set('');
-    this.invError.set('');
-  }
-
-  eliminarInvitacion(idx: number): void {
-    this.invitaciones.update(list => list.filter((_, i) => i !== idx));
-  }
 
   // ── KPIs ──
   toggleKpi(kpi: string): void {

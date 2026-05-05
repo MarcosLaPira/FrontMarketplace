@@ -22,6 +22,8 @@ interface NivelCard {
   descripcion: string;
   icono: string;
   rangoSeguidores: string;
+  seguidoresMin: number;
+  seguidoresMax: number | null; // null = sin techo (Mega)
   precioPorInfluencerMin: number; // 30% × seguidores mínimos del tier
   precioPorInfluencerMax: number | null; // null = sin techo (Mega)
   colorBg: string;
@@ -89,6 +91,59 @@ export class CampanaWizardComponent {
   });
 
   minimoSeguidoresPreview = computed(() => this.sugerenciasActivas()?.minimoSeguidoresSugerido ?? null);
+
+  minimoSeguidoresTweak = signal<number | null>(null);
+  minimoSeguidoresEfectivo = computed(() => this.minimoSeguidoresTweak() ?? this.minimoSeguidoresPreview());
+
+  // Chips de seguidores adaptados al tier activo
+  chipsSeguidoresTier = computed<{ label: string; val: number; color: string }[]>(() => {
+    const card = this.nivelCard();
+    if (!card) return [];
+    const fmtK = (n: number) => n >= 1000000 ? (n / 1000000) + 'M' : (n / 1000) + 'k';
+    const chip = (val: number, color: string) => ({ label: fmtK(val), val, color });
+    if (card.id === 'nano') return [
+      chip(1000,  'bg-emerald-50 text-emerald-600 border-emerald-200'),
+      chip(5000,  'bg-emerald-50 text-emerald-600 border-emerald-200'),
+      chip(10000, 'bg-emerald-50 text-emerald-600 border-emerald-200')
+    ];
+    if (card.id === 'micro') return [
+      chip(10000, 'bg-blue-50 text-blue-600 border-blue-200'),
+      chip(25000, 'bg-blue-50 text-blue-600 border-blue-200'),
+      chip(50000, 'bg-blue-50 text-blue-600 border-blue-200')
+    ];
+    if (card.id === 'macro') return [
+      chip(100000, 'bg-violet-50 text-violet-600 border-violet-200'),
+      chip(250000, 'bg-violet-50 text-violet-600 border-violet-200'),
+      chip(500000, 'bg-violet-50 text-violet-600 border-violet-200')
+    ];
+    // mega
+    return [
+      chip(500000,  'bg-amber-50 text-amber-600 border-amber-200'),
+      chip(1000000, 'bg-amber-50 text-amber-600 border-amber-200'),
+      chip(2000000, 'bg-amber-50 text-amber-600 border-amber-200')
+    ];
+  });
+
+  // Advertencia cuando el mínimo de seguidores está fuera del rango del tier seleccionado
+  advertenciaMinimoSeguidores = computed<string | null>(() => {
+    const card = this.nivelCard();
+    const minSeg = this.minimoSeguidoresEfectivo();
+    if (!card || !minSeg || minSeg <= 0) return null;
+    if (minSeg < card.seguidoresMin) {
+      return `${(minSeg / 1000).toFixed(0)}k seguidores está por debajo del mínimo del tier ${card.titulo} (${card.rangoSeguidores}). Ajustá el filtro o cambiá el nivel de alcance.`;
+    }
+    if (card.seguidoresMax !== null && minSeg > card.seguidoresMax) {
+      return `${minSeg >= 1000000 ? (minSeg/1000000)+'M' : (minSeg/1000)+'k'} seguidores supera el rango ${card.titulo} (${card.rangoSeguidores}). Ajustá el filtro o cambiá el nivel de alcance.`;
+    }
+    return null;
+  });
+
+  // true = el usuario puede avanzar; false = hay errores bloqueantes
+  puedeAvanzar = computed<boolean>(() => {
+    if (this.advertenciaMinimoSeguidores() !== null) return false;
+    if (this.advertenciaRango()?.tipo === 'bajo') return false;
+    return true;
+  });
 
   // Card del objetivo seleccionado (para reusar su título/descripción/ícono en paso 2)
   objetivoCard = computed(() => {
@@ -185,6 +240,8 @@ export class CampanaWizardComponent {
       descripcion: 'Comunidades pequeñas y súper comprometidas. El mejor engagement del mercado.',
       icono: '🎯',
       rangoSeguidores: '1k – 10k seguidores',
+      seguidoresMin: 1000,
+      seguidoresMax: 10000,
       precioPorInfluencerMin: 300,
       precioPorInfluencerMax: 3000,
       colorBg: 'bg-emerald-50',
@@ -198,6 +255,8 @@ export class CampanaWizardComponent {
       descripcion: 'Autoridad en su nicho, alta credibilidad. El mejor ROI del mercado.',
       icono: '⚡',
       rangoSeguidores: '10k – 100k seguidores',
+      seguidoresMin: 10000,
+      seguidoresMax: 100000,
       precioPorInfluencerMin: 3000,
       precioPorInfluencerMax: 30000,
       colorBg: 'bg-blue-50',
@@ -211,6 +270,8 @@ export class CampanaWizardComponent {
       descripcion: 'Gran alcance y reconocimiento. Ideal para awareness y lanzamientos.',
       icono: '📊',
       rangoSeguidores: '100k – 500k seguidores',
+      seguidoresMin: 100000,
+      seguidoresMax: 500000,
       precioPorInfluencerMin: 30000,
       precioPorInfluencerMax: 150000,
       colorBg: 'bg-violet-50',
@@ -224,6 +285,8 @@ export class CampanaWizardComponent {
       descripcion: 'Celebridades e influencers de élite. Impacto masivo e inmediato.',
       icono: '🌐',
       rangoSeguidores: '500k+ seguidores',
+      seguidoresMin: 500000,
+      seguidoresMax: null,
       precioPorInfluencerMin: 150000,
       precioPorInfluencerMax: null,
       colorBg: 'bg-amber-50',
@@ -255,6 +318,7 @@ export class CampanaWizardComponent {
     const sug = WIZARD_SUGERENCIAS[objetivoEfectivo][id];
     this.presupuestoTweak.set(sug.presupuestoSugerido);
     this.cantidadInfluencersTweak.set(sug.cantidadInfluencersSugerida);
+    this.minimoSeguidoresTweak.set(sug.minimoSeguidoresSugerido ?? null);
   }
 
   aplicarTemplateWizard(template: CampanaTemplate): void {
@@ -265,6 +329,7 @@ export class CampanaWizardComponent {
       if (sug) {
         this.presupuestoTweak.set(sug.presupuestoSugerido);
         this.cantidadInfluencersTweak.set(sug.cantidadInfluencersSugerida);
+        this.minimoSeguidoresTweak.set(sug.minimoSeguidoresSugerido ?? null);
       }
       return;
     }
@@ -276,6 +341,7 @@ export class CampanaWizardComponent {
       const sug = WIZARD_SUGERENCIAS[objetivoTemplate][nivel];
       this.presupuestoTweak.set(sug.presupuestoSugerido);
       this.cantidadInfluencersTweak.set(sug.cantidadInfluencersSugerida);
+      this.minimoSeguidoresTweak.set(sug.minimoSeguidoresSugerido ?? null);
     }
   }
 
@@ -289,7 +355,8 @@ export class CampanaWizardComponent {
       nivelAlcance: nivel,
       sugerencias,
       presupuesto: this.presupuestoTweak() ?? sugerencias.presupuestoSugerido,
-      cantidadInfluencers: this.cantidadInfluencersEfectiva() ?? sugerencias.cantidadInfluencersSugerida
+      cantidadInfluencers: this.cantidadInfluencersEfectiva() ?? sugerencias.cantidadInfluencersSugerida,
+      minimoSeguidores: this.minimoSeguidoresEfectivo()
     });
   }
 
