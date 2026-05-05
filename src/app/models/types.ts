@@ -261,6 +261,7 @@ export interface CampanaEntregable {
   descripcion: string;
   fechaLimite: string;
   orden: number;
+  entregasPorInfluencer?: EntregaInfluencer[];
 }
 
 export interface InvitacionCampana {
@@ -447,16 +448,24 @@ export interface RevisionEntrega {
 
 export interface EntregaInfluencer {
   idEntregaInfluencer: number;
-  idCampana: number;
+  idCampana?: number;
   idInfluencer: number;
   idEntregable: number;
-  descripcionEntregable: string;
-  fechaLimiteEntregable: string;
-  orden: number;
-  estado: number; // Pendiente | Enviada | Aprobada | ConDevolucion
+  descripcionEntregable?: string;
+  fechaLimiteEntregable?: string;
+  orden?: number;
+  estado?: number; // Pendiente | Enviada | Aprobada | ConDevolucion
+  idEstadoEntrega?: number;
+  estadoEntrega?: EstadoEntrega;
+  nombreSocialInfluencer?: string;
+  fotoPerfil?: string;
   urlEntregable?: string;
+  archivoUrl?: string;
   comentarioInfluencer?: string;
+  comentario?: string;
   fechaEnvio?: string;
+  fechaEntrega?: string;
+  fechaCreacion?: string;
   revisiones?: RevisionEntrega[];
 }
 

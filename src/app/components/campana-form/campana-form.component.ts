@@ -518,7 +518,7 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
   }
 
   private updateImagenesProductoState(): void {
-    if (!this.requiereProductoFisico || this.esPresencial) {
+    if ((!this.requiereProductoFisico && !this.requiereProductoVirtual) || this.esPresencial) {
       this.imagenesProducto.set([]);
       this.imagenesProductoErrors.set([]);
       this.clearImagenesProductoPreview();
