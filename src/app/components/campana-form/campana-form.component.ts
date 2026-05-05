@@ -141,13 +141,7 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
       }
     }
     if (this.form.get('campanaPublica')?.value && pcs.length === 0) {
-      warns.push({ tipo: 'info', mensaje: 'Agregar precios por tipo de contenido aumenta la tasa de postulación.' });
-    }
-    if (pcs.length > 0 && presupuesto > 0 && cantidad > 0) {
-      const precioPromedio = pcs.reduce((sum, p) => sum + p.precio, 0) / pcs.length;
-      if (precioPromedio * cantidad > presupuesto * 1.5) {
-        warns.push({ tipo: 'warning', mensaje: 'El precio por contenido multiplicado por la cantidad de influencers supera ampliamente el presupuesto total.' });
-      }
+      warns.push({ tipo: 'info', mensaje: 'Definir plataforma y tipo de contenido mejora la tasa de postulación.' });
     }
     if (minSeg > 300000 && cantidad > 3) {
       warns.push({ tipo: 'info', mensaje: 'Para influencers grandes, trabajar con 1–3 suele dar mejores resultados y más control creativo.' });
@@ -190,6 +184,11 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
     const v = this.form.get('minimoSeguidores')?.value;
     return v ? Number(v) : null;
   }
+  get presupuestoPorInfluencerVal(): number | null {
+    const p = this.presupuestoVal;
+    const c = this.cantidadInfluencersVal;
+    return p > 0 && c > 0 ? Math.round(p / c) : null;
+  }
 
   get presupuestoActual(): number {
     return Number(this.form.get('presupuesto')?.value ?? 0);
@@ -226,15 +225,16 @@ export class CampanaFormComponent implements OnInit, OnDestroy {
       if (c.kpisEsperados?.length) this.kpisSeleccionados.set(c.kpisEsperados);
       if (c.hashtags?.length) this.hashtagsSeleccionados.set(c.hashtags);
 
-      // Pre-cargar plataformaContenidos
+      // Pre-cargar plataformaContenidos (selección única)
       if (c.plataformaContenidos?.length) {
-        this.plataformaContenidos.set(
-          c.plataformaContenidos.map((pc: CampanaPlataformaContenido) => ({
+        const pc = c.plataformaContenidos[0] as CampanaPlataformaContenido;
+        this.plataformaContenidos.set([
+          {
             idPlataforma: pc.idPlataforma,
             idTipoContenido: pc.idTipoContenido,
             precio: pc.precio
-          }))
-        );
+          }
+        ]);
       }
 
       // Pre-cargar entregables

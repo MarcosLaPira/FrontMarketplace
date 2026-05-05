@@ -197,18 +197,18 @@
     </div>
   }
 
-  <!-- 2. Contenido y precios -->
+  <!-- 2. Contenido -->
   <div class="border border-gray-200 rounded-xl overflow-hidden">
     <button type="button" (click)="seccionContenidoOpen.set(!seccionContenidoOpen())"
       class="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors"
       [class]="seccionContenidoOpen() ? 'bg-indigo-50' : 'bg-gray-50 hover:bg-gray-100'">
       <span class="text-base flex-shrink-0">📱</span>
       <div class="flex-1 min-w-0">
-        <span class="text-sm font-semibold text-gray-700">Contenido y precios</span>
+        <span class="text-sm font-semibold text-gray-700">Contenido</span>
         @if (plataformaContenidos().length > 0) {
-          <span class="ml-2 text-xs text-indigo-600 font-medium">{{ plataformaContenidos().length }} combinación{{ plataformaContenidos().length > 1 ? 'es' : '' }}</span>
+          <span class="ml-2 text-xs text-indigo-600 font-medium">{{ plataformaContenidos().length }} selección</span>
         } @else {
-          <span class="ml-2 text-xs text-gray-400">Plataformas, tipos de contenido y precios</span>
+          <span class="ml-2 text-xs text-gray-400">Plataforma y tipo de contenido</span>
         }
       </div>
       <svg class="w-4 h-4 text-gray-400 transition-transform flex-shrink-0"
@@ -219,10 +219,9 @@
       <app-campana-plataformas-section
         [plataformas]="plataformas()"
         [tiposContenido]="tiposContenido()"
-        [tipoPago]="form.get('tipoPago')?.value || 'monetario'"
+        [precioSugerido]="presupuestoPorInfluencerVal"
         [items]="plataformaContenidos()"
-        (itemsChange)="plataformaContenidos.set($event)"
-        (tipoPagoChange)="form.get('tipoPago')?.setValue($event)" />
+        (itemsChange)="plataformaContenidos.set($event)" />
     }
   </div>
 
@@ -498,6 +497,10 @@
     @if (seccionInvitacionesOpen()) {
       <app-campana-invitaciones-section
         [items]="invitaciones()"
+        [idsCategorias]="selectedCategorias()"
+        [minimoSeguidores]="minimoSeguidoresVal"
+        [presupuestoPorInfluencer]="presupuestoPorInfluencerVal"
+        [cantidadInfluencers]="cantidadInfluencersVal"
         (itemsChange)="invitaciones.set($event)" />
     }
   </div>

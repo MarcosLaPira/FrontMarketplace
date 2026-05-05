@@ -1,53 +1,57 @@
-import { Component, input, output, signal } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
+import { Component, OnInit, input, output, signal } from '@angular/core';
 import { Plataforma, TipoContenido, PlataformaContenidoInput } from '../../models/types';
 
 @Component({
   selector: 'app-campana-plataformas-section',
   standalone: true,
-  imports: [DecimalPipe],
+  imports: [],
   templateUrl: './campana-plataformas-section.component.html'
 })
-export class CampanaPlataformasSectionComponent {
+export class CampanaPlataformasSectionComponent implements OnInit {
   plataformas = input.required<Plataforma[]>();
   tiposContenido = input.required<TipoContenido[]>();
-  tipoPago = input<string>('monetario');
+  precioSugerido = input<number | null>(null);
   items = input<PlataformaContenidoInput[]>([]);
 
   itemsChange = output<PlataformaContenidoInput[]>();
-  tipoPagoChange = output<string>();
 
-  nuevaPC = signal<{ idPlataforma: string; idTipoContenido: string; precio: string }>({
-    idPlataforma: '', idTipoContenido: '', precio: ''
+  seleccion = signal<{ idPlataforma: string; idTipoContenido: string }>({
+    idPlataforma: '', idTipoContenido: ''
   });
 
-  get canAgregar(): boolean {
-    const pc = this.nuevaPC();
-    return !!pc.idPlataforma && !!pc.idTipoContenido && !!pc.precio && Number(pc.precio) > 0;
+  ngOnInit(): void {
+    const first = this.items()[0];
+    if (!first) return;
+    this.seleccion.set({
+      idPlataforma: String(first.idPlataforma),
+      idTipoContenido: String(first.idTipoContenido)
+    });
   }
 
-  setField(field: 'idPlataforma' | 'idTipoContenido' | 'precio', value: string): void {
-    this.nuevaPC.update(pc => ({ ...pc, [field]: value }));
+  setField(field: 'idPlataforma' | 'idTipoContenido', value: string): void {
+    this.seleccion.update(sel => ({ ...sel, [field]: value }));
+    this.emitSeleccion();
   }
 
-  agregar(): void {
-    if (!this.canAgregar) return;
-    const pc = this.nuevaPC();
-    const existing = this.items();
-    const isDuplicate = existing.some(
-      e => e.idPlataforma === Number(pc.idPlataforma) && e.idTipoContenido === Number(pc.idTipoContenido)
-    );
-    if (isDuplicate) return;
+  limpiar(): void {
+    this.seleccion.set({ idPlataforma: '', idTipoContenido: '' });
+    this.itemsChange.emit([]);
+  }
+
+  private emitSeleccion(): void {
+    const sel = this.seleccion();
+    if (!sel.idPlataforma || !sel.idTipoContenido) {
+      this.itemsChange.emit([]);
+      return;
+    }
 
     this.itemsChange.emit([
-      ...existing,
-      { idPlataforma: Number(pc.idPlataforma), idTipoContenido: Number(pc.idTipoContenido), precio: Number(pc.precio) }
+      {
+        idPlataforma: Number(sel.idPlataforma),
+        idTipoContenido: Number(sel.idTipoContenido),
+        precio: this.precioSugerido() ?? 0
+      }
     ]);
-    this.nuevaPC.set({ idPlataforma: '', idTipoContenido: '', precio: '' });
-  }
-
-  eliminar(idx: number): void {
-    this.itemsChange.emit(this.items().filter((_, i) => i !== idx));
   }
 
   getNombrePlataforma(id: number): string {
